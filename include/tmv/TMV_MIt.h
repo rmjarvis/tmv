@@ -22,7 +22,7 @@
 
 //-----------------------------------------------------------------------------
 //
-// This file defines the iterator classes for matrices to allow the 
+// This file defines the iterator classes for matrices to allow the
 // m << 1,2,3
 //      4,5,6
 // kind of assignment to work regardless of the StorageType of the matrix.
@@ -33,7 +33,7 @@
 
 namespace tmv {
 
-    template <class M> 
+    template <class M>
     class RMIt
     {
     public :
@@ -41,12 +41,12 @@ namespace tmv {
         RMIt() : m(0), i(0), j(0) {}
         RMIt(M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         RMIt(const RMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
-        RMIt<M>& operator=(const RMIt<M>& rhs) 
-        { 
+        RMIt<M>& operator=(const RMIt<M>& rhs)
+        {
             TMVAssert(m == rhs.m);
             i = rhs.i;
             j = rhs.j;
-            return *this; 
+            return *this;
         }
         ~RMIt() {}
 
@@ -54,24 +54,24 @@ namespace tmv {
         ptrdiff_t getI() const { return i; }
         ptrdiff_t getJ() const { return j; }
 
-        inline bool operator==(const RMIt<M>& rhs) const 
+        inline bool operator==(const RMIt<M>& rhs) const
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
-        inline bool operator!=(const RMIt<M>& rhs) const 
+        inline bool operator!=(const RMIt<M>& rhs) const
         { return !operator==(rhs); }
 
         inline typename M::reference operator*() const
-        { 
+        {
             TMVAssert(m);
-            return m->ref(i,j); 
+            return m->ref(i,j);
         }
 
-        inline RMIt<M>& operator++() 
+        inline RMIt<M>& operator++()
         {
             ++j;
             if (j == m->rowend(i)) { ++i; j = m->rowstart(i); }
             return *this;
         }
-        inline RMIt<M> operator++(int) 
+        inline RMIt<M> operator++(int)
         { RMIt<M> p2 = *this; operator++(); return p2; }
 
         typedef std::forward_iterator_tag       iterator_category;
@@ -88,7 +88,7 @@ namespace tmv {
 
     };
 
-    template <class M> 
+    template <class M>
     class CRMIt
     {
     public :
@@ -96,12 +96,12 @@ namespace tmv {
         CRMIt() : m(0), i(0), j(0) {}
         CRMIt(const M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         CRMIt(const CRMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
-        CRMIt<M>& operator=(const CRMIt<M>& rhs) 
-        { 
+        CRMIt<M>& operator=(const CRMIt<M>& rhs)
+        {
             TMVAssert(m == rhs.m);
             i = rhs.i;
             j = rhs.j;
-            return *this; 
+            return *this;
         }
         ~CRMIt() {}
 
@@ -109,24 +109,24 @@ namespace tmv {
         ptrdiff_t getI() const { return i; }
         ptrdiff_t getJ() const { return j; }
 
-        inline bool operator==(const CRMIt<M>& rhs) const 
+        inline bool operator==(const CRMIt<M>& rhs) const
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
-        inline bool operator!=(const CRMIt<M>& rhs) const 
+        inline bool operator!=(const CRMIt<M>& rhs) const
         { return !operator==(rhs); }
 
         inline typename M::value_type operator*() const
-        { 
+        {
             TMVAssert(m);
-            return m->cref(i,j); 
+            return m->cref(i,j);
         }
 
-        inline CRMIt<M>& operator++() 
+        inline CRMIt<M>& operator++()
         {
             ++j;
             if (j == m->rowend(i)) { ++i; j = m->rowstart(i); }
             return *this;
         }
-        inline CRMIt<M> operator++(int) 
+        inline CRMIt<M> operator++(int)
         { CRMIt<M> p2 = *this; operator++(); return p2; }
 
         typedef std::forward_iterator_tag       iterator_category;
@@ -143,7 +143,7 @@ namespace tmv {
 
     };
 
-    template <class M> 
+    template <class M>
     class CMIt
     {
     public :
@@ -151,12 +151,12 @@ namespace tmv {
         CMIt() : m(0), i(0), j(0) {}
         CMIt(M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         CMIt(const CMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
-        CMIt<M>& operator=(const CMIt<M>& rhs) 
-        { 
+        CMIt<M>& operator=(const CMIt<M>& rhs)
+        {
             TMVAssert(m == rhs.m);
             i = rhs.i;
             j = rhs.j;
-            return *this; 
+            return *this;
         }
         ~CMIt() {}
 
@@ -164,24 +164,24 @@ namespace tmv {
         ptrdiff_t getI() const { return i; }
         ptrdiff_t getJ() const { return j; }
 
-        inline bool operator==(const CMIt<M>& rhs) const 
+        inline bool operator==(const CMIt<M>& rhs) const
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
-        inline bool operator!=(const CMIt<M>& rhs) const 
+        inline bool operator!=(const CMIt<M>& rhs) const
         { return !operator==(rhs); }
 
         inline typename M::reference operator*() const
-        { 
+        {
             TMVAssert(m);
-            return m->ref(i,j); 
+            return m->ref(i,j);
         }
 
-        inline CMIt<M>& operator++() 
+        inline CMIt<M>& operator++()
         {
             ++i;
             if (i == m->colend(j)) { ++j; i = m->colstart(j); }
             return *this;
         }
-        inline CMIt<M> operator++(int) 
+        inline CMIt<M> operator++(int)
         { CMIt<M> p2 = *this; operator++(); return p2; }
 
         typedef std::forward_iterator_tag       iterator_category;
@@ -198,7 +198,7 @@ namespace tmv {
 
     };
 
-    template <class M> 
+    template <class M>
     class CCMIt
     {
     public :
@@ -206,12 +206,12 @@ namespace tmv {
         CCMIt() : m(0), i(0), j(0) {}
         CCMIt(const M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         CCMIt(const CCMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
-        CCMIt<M>& operator=(const CCMIt<M>& rhs) 
-        { 
+        CCMIt<M>& operator=(const CCMIt<M>& rhs)
+        {
             TMVAssert(m == rhs.m);
             i = rhs.i;
             j = rhs.j;
-            return *this; 
+            return *this;
         }
         ~CCMIt() {}
 
@@ -219,24 +219,24 @@ namespace tmv {
         ptrdiff_t getI() const { return i; }
         ptrdiff_t getJ() const { return j; }
 
-        inline bool operator==(const CCMIt<M>& rhs) const 
+        inline bool operator==(const CCMIt<M>& rhs) const
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
-        inline bool operator!=(const CCMIt<M>& rhs) const 
+        inline bool operator!=(const CCMIt<M>& rhs) const
         { return !operator==(rhs); }
 
         inline typename M::value_type operator*() const
-        { 
+        {
             TMVAssert(m);
-            return m->cref(i,j); 
+            return m->cref(i,j);
         }
 
-        inline CCMIt<M>& operator++() 
+        inline CCMIt<M>& operator++()
         {
             ++i;
             if (i == m->colend(j)) { ++j; i = m->colstart(j); }
             return *this;
         }
-        inline CCMIt<M> operator++(int) 
+        inline CCMIt<M> operator++(int)
         { CCMIt<M> p2 = *this; operator++(); return p2; }
 
         typedef std::forward_iterator_tag       iterator_category;
@@ -253,7 +253,7 @@ namespace tmv {
 
     };
 
-    template <class M> 
+    template <class M>
     class DMIt
     {
     public :
@@ -261,12 +261,12 @@ namespace tmv {
         DMIt() : m(0), i(0), j(0) {}
         DMIt(M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         DMIt(const DMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
-        DMIt<M>& operator=(const DMIt<M>& rhs) 
-        { 
+        DMIt<M>& operator=(const DMIt<M>& rhs)
+        {
             TMVAssert(m == rhs.m);
             i = rhs.i;
             j = rhs.j;
-            return *this; 
+            return *this;
         }
         ~DMIt() {}
 
@@ -274,18 +274,18 @@ namespace tmv {
         ptrdiff_t getI() const { return i; }
         ptrdiff_t getJ() const { return j; }
 
-        inline bool operator==(const DMIt<M>& rhs) const 
+        inline bool operator==(const DMIt<M>& rhs) const
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
-        inline bool operator!=(const DMIt<M>& rhs) const 
+        inline bool operator!=(const DMIt<M>& rhs) const
         { return !operator==(rhs); }
 
         inline typename M::reference operator*() const
-        { 
+        {
             TMVAssert(m);
-            return m->ref(i,j); 
+            return m->ref(i,j);
         }
 
-        inline DMIt<M>& operator++() 
+        inline DMIt<M>& operator++()
         {
             ++i; ++j;
             if (i == m->colsize() || j == m->rowsize()) {
@@ -294,7 +294,7 @@ namespace tmv {
             }
             return *this;
         }
-        inline DMIt<M> operator++(int) 
+        inline DMIt<M> operator++(int)
         { DMIt<M> p2 = *this; operator++(); return p2; }
 
         typedef std::forward_iterator_tag       iterator_category;
@@ -311,7 +311,7 @@ namespace tmv {
 
     };
 
-    template <class M> 
+    template <class M>
     class CDMIt
     {
     public :
@@ -319,12 +319,12 @@ namespace tmv {
         CDMIt() : m(0), i(0), j(0) {}
         CDMIt(const M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         CDMIt(const CDMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
-        CDMIt<M>& operator=(const CDMIt<M>& rhs) 
-        { 
+        CDMIt<M>& operator=(const CDMIt<M>& rhs)
+        {
             TMVAssert(m == rhs.m);
             i = rhs.i;
             j = rhs.j;
-            return *this; 
+            return *this;
         }
         ~CDMIt() {}
 
@@ -332,18 +332,18 @@ namespace tmv {
         ptrdiff_t getI() const { return i; }
         ptrdiff_t getJ() const { return j; }
 
-        inline bool operator==(const CDMIt<M>& rhs) const 
+        inline bool operator==(const CDMIt<M>& rhs) const
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
-        inline bool operator!=(const CDMIt<M>& rhs) const 
+        inline bool operator!=(const CDMIt<M>& rhs) const
         { return !operator==(rhs); }
 
         inline typename M::value_type operator*() const
-        { 
+        {
             TMVAssert(m);
-            return m->cref(i,j); 
+            return m->cref(i,j);
         }
 
-        inline CDMIt<M>& operator++() 
+        inline CDMIt<M>& operator++()
         {
             ++i; ++j;
             if (i == m->colsize() || j == m->rowsize()) {
@@ -352,7 +352,7 @@ namespace tmv {
             }
             return *this;
         }
-        inline CDMIt<M> operator++(int) 
+        inline CDMIt<M> operator++(int)
         { CDMIt<M> p2 = *this; operator++(); return p2; }
 
         typedef std::forward_iterator_tag       iterator_category;
@@ -369,27 +369,27 @@ namespace tmv {
 
     };
 
-    template <class M> 
+    template <class M>
     inline std::string TMV_Text(const RMIt<M>& it)
     { return std::string("RMIt<") + TMV_Text(*it.getM()) + ">"; }
 
-    template <class M> 
+    template <class M>
     inline std::string TMV_Text(const CRMIt<M>& it)
     { return std::string("CRMIt<") + TMV_Text(*it.getM()) + ">"; }
 
-    template <class M> 
+    template <class M>
     inline std::string TMV_Text(const CMIt<M>& it)
     { return std::string("CMIt<") + TMV_Text(*it.getM()) + ">"; }
 
-    template <class M> 
+    template <class M>
     inline std::string TMV_Text(const CCMIt<M>& it)
     { return std::string("CCMIt<") + TMV_Text(*it.getM()) + ">"; }
 
-    template <class M> 
+    template <class M>
     inline std::string TMV_Text(const DMIt<M>& it)
     { return std::string("DMIt<") + TMV_Text(*it.getM()) + ">"; }
 
-    template <class M> 
+    template <class M>
     inline std::string TMV_Text(const CDMIt<M>& it)
     { return std::string("CDMIt<") + TMV_Text(*it.getM()) + ">"; }
 

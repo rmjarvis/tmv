@@ -33,14 +33,14 @@
 // #define PRODXM2 ProdXM
 // #define QUOTXM QuotXM
 
-template <class T, class T1, class T2>
+template <typename T, typename T1, typename T2>
 class TQUOTMM;
-template <class T, class T1, class T2>
+template <typename T, typename T1, typename T2>
 class TRQUOTMM;
 
 // m/m
 
-template <class T>
+template <typename T>
 inline TQUOTMM<T,T,T> operator/(
     const GENMATRIX1<T>& m1, const GENMATRIX2<T>& m2)
 {
@@ -49,7 +49,7 @@ inline TQUOTMM<T,T,T> operator/(
                           m2);
 }
 
-template <class T>
+template <typename T>
 inline TQUOTMM<CT,CT,T> operator/(
     const GENMATRIX1<CT>& m1, const GENMATRIX2<T>& m2)
 {
@@ -58,7 +58,7 @@ inline TQUOTMM<CT,CT,T> operator/(
                             m2);
 }
 
-template <class T>
+template <typename T>
 inline TQUOTMM<CT,T,CT> operator/(
     const GENMATRIX1<T>& m1, const GENMATRIX2<CT>& m2)
 {
@@ -69,7 +69,7 @@ inline TQUOTMM<CT,T,CT> operator/(
 
 // m%m
 
-template <class T>
+template <typename T>
 inline TRQUOTMM<T,T,T> operator%(
     const GENMATRIX1<T>& m1, const GENMATRIX2<T>& m2)
 {
@@ -78,7 +78,7 @@ inline TRQUOTMM<T,T,T> operator%(
                            m2);
 }
 
-template <class T>
+template <typename T>
 inline TRQUOTMM<CT,CT,T> operator%(
     const GENMATRIX1<CT>& m1, const GENMATRIX2<T>& m2)
 {
@@ -87,7 +87,7 @@ inline TRQUOTMM<CT,CT,T> operator%(
                              m2);
 }
 
-template <class T>
+template <typename T>
 inline TRQUOTMM<CT,T,CT> operator%(
     const GENMATRIX1<T>& m1, const GENMATRIX2<CT>& m2)
 {
@@ -98,7 +98,7 @@ inline TRQUOTMM<CT,T,CT> operator%(
 
 // (x*m)/m
 
-template <class T, class T1>
+template <typename T, typename T1>
 inline TQUOTMM<T,T1,T> operator/(
     const PRODXM1<T,T1>& pxm, const GENMATRIX2<T>& m)
 {
@@ -107,7 +107,7 @@ inline TQUOTMM<T,T1,T> operator/(
                            m);
 }
 
-template <class T>
+template <typename T>
 inline TQUOTMM<CT,T,CT> operator/(
     const PRODXM1<T,T>& pxm, const GENMATRIX2<CT>& m)
 {
@@ -116,7 +116,7 @@ inline TQUOTMM<CT,T,CT> operator/(
                             m);
 }
 
-template <class T, class T1>
+template <typename T, typename T1>
 inline TQUOTMM<CT,T1,T> operator/(
     const PRODXM1<CT,T1>& pxm, const GENMATRIX2<T>& m)
 {
@@ -127,7 +127,7 @@ inline TQUOTMM<CT,T1,T> operator/(
 
 // (x*m)%m
 
-template <class T, class T1>
+template <typename T, typename T1>
 inline TRQUOTMM<T,T1,T> operator%(
     const PRODXM1<T,T1>& pxm, const GENMATRIX2<T>& m)
 {
@@ -136,7 +136,7 @@ inline TRQUOTMM<T,T1,T> operator%(
                             m);
 }
 
-template <class T>
+template <typename T>
 inline TRQUOTMM<CT,T,CT> operator%(
     const PRODXM1<T,T>& pxm, const GENMATRIX2<CT>& m)
 {
@@ -145,7 +145,7 @@ inline TRQUOTMM<CT,T,CT> operator%(
                              m);
 }
 
-template <class T, class T1>
+template <typename T, typename T1>
 inline TRQUOTMM<CT,T1,T> operator%(
     const PRODXM1<CT,T1>& pxm, const GENMATRIX2<T>& m)
 {
@@ -156,7 +156,7 @@ inline TRQUOTMM<CT,T1,T> operator%(
 
 // m/(x*m)
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TQUOTMM<T,T,T2> operator/(
     const GENMATRIX1<T>& m, const PRODXM2<T,T2>& pxm)
 {
@@ -165,7 +165,7 @@ inline TQUOTMM<T,T,T2> operator/(
                            pxm.getM());
 }
 
-template <class T>
+template <typename T>
 inline TQUOTMM<CT,CT,T> operator/(
     const GENMATRIX1<CT>& m, const PRODXM2<T,T>& pxm)
 {
@@ -174,7 +174,7 @@ inline TQUOTMM<CT,CT,T> operator/(
                             pxm.getM());
 }
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TQUOTMM<CT,T,T2> operator/(
     const GENMATRIX1<T>& m, const PRODXM2<CT,T2>& pxm)
 {
@@ -185,7 +185,7 @@ inline TQUOTMM<CT,T,T2> operator/(
 
 // m%(x*m)
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TRQUOTMM<T,T,T2> operator%(
     const GENMATRIX1<T>& m, const PRODXM2<T,T2>& pxm)
 {
@@ -194,7 +194,7 @@ inline TRQUOTMM<T,T,T2> operator%(
                             pxm.getM());
 }
 
-template <class T>
+template <typename T>
 inline TRQUOTMM<CT,CT,T> operator%(
     const GENMATRIX1<CT>& m, const PRODXM2<T,T>& pxm)
 {
@@ -203,7 +203,7 @@ inline TRQUOTMM<CT,CT,T> operator%(
                              pxm.getM());
 }
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TRQUOTMM<CT,T,T2> operator%(
     const GENMATRIX1<T>& m, const PRODXM2<CT,T2>& pxm)
 {
@@ -214,7 +214,7 @@ inline TRQUOTMM<CT,T,T2> operator%(
 
 // (x*m)/(x*m)
 
-template <class T, class T1, class T2>
+template <typename T, typename T1, typename T2>
 inline TQUOTMM<T,T1,T2> operator/(
     const PRODXM1<T,T1>& pxm1, const PRODXM2<T,T2>& pxm2)
 {
@@ -223,7 +223,7 @@ inline TQUOTMM<T,T1,T2> operator/(
                             pxm2.getM());
 }
 
-template <class T, class T1>
+template <typename T, typename T1>
 inline TQUOTMM<CT,T1,T> operator/(
     const PRODXM1<CT,T1>& pxm1, const PRODXM2<T,T>& pxm2)
 {
@@ -232,7 +232,7 @@ inline TQUOTMM<CT,T1,T> operator/(
                             pxm2.getM());
 }
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TQUOTMM<CT,T,T2> operator/(
     const PRODXM1<T,T>& pxm1, const PRODXM2<CT,T2>& pxm2)
 {
@@ -243,7 +243,7 @@ inline TQUOTMM<CT,T,T2> operator/(
 
 // (x*m)%(x*m)
 
-template <class T, class T1, class T2>
+template <typename T, typename T1, typename T2>
 inline TRQUOTMM<T,T1,T2> operator%(
     const PRODXM1<T,T1>& pxm1, const PRODXM2<T,T2>& pxm2)
 {
@@ -252,7 +252,7 @@ inline TRQUOTMM<T,T1,T2> operator%(
                              pxm2.getM());
 }
 
-template <class T, class T1>
+template <typename T, typename T1>
 inline TRQUOTMM<CT,T1,T> operator%(
     const PRODXM1<CT,T1>& pxm1, const PRODXM2<T,T>& pxm2)
 {
@@ -261,7 +261,7 @@ inline TRQUOTMM<CT,T1,T> operator%(
                              pxm2.getM());
 }
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TRQUOTMM<CT,T,T2> operator%(
     const PRODXM1<T,T>& pxm1, const PRODXM2<CT,T2>& pxm2)
 {
@@ -272,7 +272,7 @@ inline TRQUOTMM<CT,T,T2> operator%(
 
 // (x/m)*m
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TQUOTMM<T,T,T2> operator*(
     const QUOTXM<T,T2>& qxm, const GENMATRIX1<T>& m)
 {
@@ -281,7 +281,7 @@ inline TQUOTMM<T,T,T2> operator*(
                            qxm.getM());
 }
 
-template <class T>
+template <typename T>
 inline TQUOTMM<CT,CT,T> operator*(
     const QUOTXM<T,T>& qxm, const GENMATRIX1<CT>& m)
 {
@@ -290,7 +290,7 @@ inline TQUOTMM<CT,CT,T> operator*(
                             qxm.getM());
 }
 
-template <class T, class T1>
+template <typename T, typename T1>
 inline TQUOTMM<CT,T,T1> operator*(
     const QUOTXM<CT,T1>& qxm, const GENMATRIX1<T>& m)
 {
@@ -301,7 +301,7 @@ inline TQUOTMM<CT,T,T1> operator*(
 
 // m*(x/m)
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TRQUOTMM<T,T,T2> operator*(
     const GENMATRIX1<T>& m, const QUOTXM<T,T2>& qxm)
 {
@@ -310,7 +310,7 @@ inline TRQUOTMM<T,T,T2> operator*(
                             qxm.getM());
 }
 
-template <class T>
+template <typename T>
 inline TRQUOTMM<CT,CT,T> operator*(
     const GENMATRIX1<CT>& m, const QUOTXM<T,T>& qxm)
 {
@@ -319,7 +319,7 @@ inline TRQUOTMM<CT,CT,T> operator*(
                              qxm.getM());
 }
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TRQUOTMM<CT,T,T2> operator*(
     const GENMATRIX1<T>& m, const QUOTXM<CT,T2>& qxm)
 {
@@ -330,7 +330,7 @@ inline TRQUOTMM<CT,T,T2> operator*(
 
 // (x/m)*(x*m)
 
-template <class T, class T1, class T2>
+template <typename T, typename T1, typename T2>
 inline TQUOTMM<T,T1,T2> operator*(
     const QUOTXM<T,T2>& qxm, const PRODXM1<T,T1>& pxm)
 {
@@ -339,7 +339,7 @@ inline TQUOTMM<T,T1,T2> operator*(
                             qxm.getM());
 }
 
-template <class T, class T1>
+template <typename T, typename T1>
 inline TQUOTMM<CT,T1,T> operator*(
     const QUOTXM<T,T>& qxm, const PRODXM1<CT,T1>& pxm)
 {
@@ -348,7 +348,7 @@ inline TQUOTMM<CT,T1,T> operator*(
                             qxm.getM());
 }
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TQUOTMM<CT,T,T2> operator*(
     const QUOTXM<CT,T2>& qxm, const PRODXM1<T,T>& pxm)
 {
@@ -359,7 +359,7 @@ inline TQUOTMM<CT,T,T2> operator*(
 
 // (x*m)*(x/m)
 
-template <class T, class T1, class T2>
+template <typename T, typename T1, typename T2>
 inline TRQUOTMM<T,T1,T2> operator*(
     const PRODXM1<T,T1>& pxm, const QUOTXM<T,T2>& qxm)
 {
@@ -368,7 +368,7 @@ inline TRQUOTMM<T,T1,T2> operator*(
                              qxm.getM());
 }
 
-template <class T, class T1>
+template <typename T, typename T1>
 inline TRQUOTMM<CT,T1,T> operator*(
     const PRODXM1<CT,T1>& pxm, const QUOTXM<T,T>& qxm)
 {
@@ -377,7 +377,7 @@ inline TRQUOTMM<CT,T1,T> operator*(
                              qxm.getM());
 }
 
-template <class T, class T2>
+template <typename T, typename T2>
 inline TRQUOTMM<CT,T,T2> operator*(
     const PRODXM1<T,T>& pxm, const QUOTXM<CT,T2>& qxm)
 {

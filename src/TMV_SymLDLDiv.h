@@ -27,26 +27,26 @@
 namespace tmv {
 
     // These are in TMV_SymLDLDiv.cpp:
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void LDL_LDivEq(
         const GenSymMatrix<T1>& L, const GenVector<T1>& xD,
         const ptrdiff_t* P, MatrixView<T> m);
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void LDL_RDivEq(
         const GenSymMatrix<T1>& L, const GenVector<T1>& xD,
         const ptrdiff_t* P, MatrixView<T> m);
 
     // This is in TMV_SymLDLInverse.cpp:
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void LDL_Inverse(
         const GenSymMatrix<T>& L, const GenVector<T>& xD,
         const ptrdiff_t* P, SymMatrixView<T1> sinv);
 
     // A quick helper class
-    template <bool herm, class T>
+    template <bool herm, typename T>
     struct Sym2x2_Helper;
 
-    template <class T>
+    template <typename T>
     struct Sym2x2_Helper<true,T>
     {
         typedef typename Traits<T>::real_type d_type;
@@ -54,7 +54,7 @@ namespace tmv {
         { return TMV_REAL(a)*TMV_REAL(b) - TMV_NORM(c); }
     };
 
-    template <class T>
+    template <typename T>
     struct Sym2x2_Helper<false,T>
     {
         typedef T d_type;
@@ -63,14 +63,14 @@ namespace tmv {
     };
 
     // These are in TMV_SymLDLPseudo.cpp:
-    template <bool herm, class T> 
+    template <bool herm, typename T> 
     typename Sym2x2_Helper<herm,T>::d_type SymInvert_2x2(T& a, T& b, T& c);
 
-    template <bool herm, class T, class T1> 
+    template <bool herm, typename T, typename T1> 
     void PseudoDiag_LDivEq(
         const GenVector<T1>& D, const GenVector<T1>& xD, 
         MatrixView<T> m);
-    template <bool herm, class T, class T1> 
+    template <bool herm, typename T, typename T1> 
     void PseudoDiag_LMultEq(
         const GenVector<T1>& D, const GenVector<T1>& xD, 
         MatrixView<T> m);
@@ -78,28 +78,28 @@ namespace tmv {
     // Specialize disallowed complex combinations:
 #define CT std::complex<T>
 
-    template <class T>
+    template <typename T>
     inline void LDL_LDivEq(
         const GenSymMatrix<CT>& , const GenVector<CT>& ,
         const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void LDL_RDivEq(
         const GenSymMatrix<CT>& , const GenVector<CT>& ,
         const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void LDL_Inverse(
         const GenSymMatrix<CT>& , const GenVector<CT>& ,
         const ptrdiff_t* , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <bool herm, class T>
+    template <bool herm, typename T>
     inline void PseudoDiag_LDivEq(
         const GenVector<CT>& , const GenVector<CT>& , 
         MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <bool herm, class T>
+    template <bool herm, typename T>
     inline void PseudoDiag_LMultEq(
         const GenVector<CT>& , const GenVector<CT>& , 
         MatrixView<T> )

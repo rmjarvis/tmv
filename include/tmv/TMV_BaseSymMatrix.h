@@ -27,40 +27,40 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T>
     class GenSymMatrix;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class ConstSymMatrixView;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class SymMatrixView;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class SymMatrix;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class HermMatrix;
 
-    template <class T> 
+    template <typename T>
     class SymDivider;
 
-    template <class T> 
+    template <typename T>
     class SymLDLDiv;
 
-    template <class T> 
+    template <typename T>
     class HermCHDiv;
 
-    template <class T> 
+    template <typename T>
     class HermSVDiv;
 
-    template <class T> 
+    template <typename T>
     class SymSVDiv;
 
-    template <class T, class Tm> 
+    template <typename T, typename Tm>
     class QuotXS;
 
-    template <class T> 
+    template <typename T>
     struct AssignableToSymMatrix :
         virtual public AssignableToMatrix<T>
     {
@@ -69,41 +69,41 @@ namespace tmv {
         virtual ptrdiff_t size() const = 0;
         virtual SymType sym() const = 0;
         inline bool issym() const { return isReal(T()) || (sym() == Sym); }
-        inline bool isherm() const 
+        inline bool isherm() const
         { return isReal(T()) || (sym() == Herm); }
         virtual void assignToS(SymMatrixView<RT> m) const = 0;
         virtual void assignToS(SymMatrixView<CT> m) const = 0;
         virtual inline ~AssignableToSymMatrix() {}
     };
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const SymMatrix<T,A>& )
     {
         return std::string("SymMatrix<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const HermMatrix<T,A>& )
     {
         return std::string("HermMatrix<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T> 
+    template <typename T>
     inline std::string TMV_Text(const GenSymMatrix<T>& )
     {
         return std::string("GenSymMatrix<") + TMV_Text(T()) + ">";
     }
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const ConstSymMatrixView<T,A>& )
     {
         return std::string("ConstSymMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const SymMatrixView<T,A>& )
     {
         return std::string("SymMatrixView<") +

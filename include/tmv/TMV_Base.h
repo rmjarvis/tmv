@@ -23,38 +23,38 @@
 //-----------------------------------------------------------------------------
 //
 // This file defines some basic helper functions used by the TMV Matrix
-// and Vector classes.  
+// and Vector classes.
 //
 // Probably the only thing someone might care about here is the
 // class tmv::tmv_exception which gets thrown on run-time errors,
 // so you could catch it if you don't want the program to crash.
 //
-// Also, it is a good idea to compile any code that uses TMV with 
+// Also, it is a good idea to compile any code that uses TMV with
 // TMV_DEBUG defined.  (defined below in this file)
 //
-// This will turn on some basic debugging in the code and will help 
+// This will turn on some basic debugging in the code and will help
 // you catch programming mistakes.
-// For example, if you have two vectors: 
+// For example, if you have two vectors:
 // v1 of length 5 and v2  of lengths 10,
-// then v1 = v2 will only produce a runtime error if TMV_DEBUG is 
-// turned on.  Otherwise some random data will be overwritten and 
+// then v1 = v2 will only produce a runtime error if TMV_DEBUG is
+// turned on.  Otherwise some random data will be overwritten and
 // who knows what will happen then.
 //
 // Once you know your code is working properly, you can recompile without
 // the TMV_DEBUG flag to speed up the code.
 // (And actually, the slow down isn't much, so it is probably
-// a good idea to just leave it on to help diagnose any bug that 
+// a good idea to just leave it on to help diagnose any bug that
 // might turn up.)
 //
 // A comment here about the letters used to identify each type of Matrix.
 // The writeCompact routines for sparse Matrix types have an identifying
-// letter(s) before the output.  The same letter (or combination) is 
+// letter(s) before the output.  The same letter (or combination) is
 // used in the names of the composite arithmetic types like SumDD, etc.
 // Here is the list of letters used for reference:
 //
 // (* indicates that the type is not yet implemented.)
 //
-//  X   Scalar 
+//  X   Scalar
 //  V   Vector
 //  M   Matrix
 //  D   DiagMatrix
@@ -65,18 +65,18 @@
 //  H   HermMatrix
 //  v   SmallVector
 //  m   SmallMatrix
-// sB   SymBandMatrix 
-// hB   HermBandMatrix  
+// sB   SymBandMatrix
+// hB   HermBandMatrix
 // *kD  BlockDiagMatrix
-// *skD SymBlockDiagMatrix 
-// *hkD HermBlockDiagMatrix 
+// *skD SymBlockDiagMatrix
+// *hkD HermBlockDiagMatrix
 // *W   SparseVector
 // *Q   SparseMatrix
 // *sQ  SymSparseMatrix
 // *hQ  HermSparseMatrix
-// *kQ  BlockSparseMatrix 
-// *skQ SymBlockSparseMatrix 
-// *hkQ HermBlockSparseMatrix 
+// *kQ  BlockSparseMatrix
+// *skQ SymBlockSparseMatrix
+// *hkQ HermBlockSparseMatrix
 //
 // TODO  BlockDiagMatrix and Sym varieties
 // TODO  SparseMatrix and Sym, Block varieties
@@ -142,7 +142,7 @@ namespace tmv {
     // Attributes are stored as a binary field, so they can be |'ed
     // together to calculate the full set of attributes.
     //
-    // For each object we have a default set of attributes that is 
+    // For each object we have a default set of attributes that is
     // implied by A=0.  This way we can write, for example:
     // UpperTriMatrix<T,UnitDiag> U;
     // and this will imply (UnitDiag | ColMajor | CStyle).
@@ -206,13 +206,13 @@ namespace tmv {
 
 #define TMV_UTransOf(U) (U==int(Upper) ? Lower : Upper)
 
-    enum DivType { 
+    enum DivType {
         XX=0, LU=1, CH=2, QR=4, QRP=8, SV=16,
         // We store the divtype in a binary field integer.
-        // In addition to the above, we also use the same object to 
+        // In addition to the above, we also use the same object to
         // store the following other flags related to division.
         // So these values must not clash with the above DivType values.
-        // These aren't technically DivType's but since they are 
+        // These aren't technically DivType's but since they are
         // stored together, I think this adds to type-safety.
         DivInPlaceFlag = 32,
         SaveDivFlag = 64,
@@ -237,84 +237,84 @@ namespace tmv {
     { return static_cast<DivType>(~static_cast<int>(a)); }
 
 #ifdef NOALIASCHECK
-    template <class M1, class M2> 
+    template <class M1, class M2>
     inline bool SameStorage(const M1& , const M2& )
     { return false; }
 #else
-    template <class M1, class M2> 
+    template <class M1, class M2>
     inline bool SameStorage(const M1& m1, const M2& m2)
     {
-        return 
-            static_cast<const void*>(m1.realPart().cptr()) == 
-            static_cast<const void*>(m2.realPart().cptr()); 
+        return
+            static_cast<const void*>(m1.realPart().cptr()) ==
+            static_cast<const void*>(m2.realPart().cptr());
     }
 #endif
 
-    template <class T> 
-    inline T TMV_SQR(T x) 
+    template <typename T>
+    inline T TMV_SQR(T x)
     { return x*x; }
 
-    template <class T> 
-    inline T TMV_SQRT(T x) 
+    template <typename T>
+    inline T TMV_SQRT(T x)
     { return T(std::sqrt(x)); }
 
-    template <class T> 
-    inline T TMV_EXP(T x) 
+    template <typename T>
+    inline T TMV_EXP(T x)
     { return T(std::exp(x)); }
 
-    template <class T> 
-    inline T TMV_LOG(T x) 
+    template <typename T>
+    inline T TMV_LOG(T x)
     { return T(std::log(x)); }
 
-    template <class T> 
-    inline T TMV_NORM(T x) 
+    template <typename T>
+    inline T TMV_NORM(T x)
     { return x*x; }
 
-    template <class T> 
-    inline T TMV_NORM(std::complex<T> x) 
+    template <typename T>
+    inline T TMV_NORM(std::complex<T> x)
     { return std::norm(x); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_CONJ(T x)
     { return x; }
 
-    template <class T> 
+    template <typename T>
     inline std::complex<T> TMV_CONJ(std::complex<T> x)
     { return std::conj(x); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_REAL(T x)
     { return x; }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_REAL(std::complex<T> x)
     { return std::real(x); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_IMAG(T )
     { return T(0); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_IMAG(std::complex<T> x)
     { return std::imag(x); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_ARG(T x)
     { return x >= T(0) ? T(1) : T(-1); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_ARG(std::complex<T> x)
     { return arg(x); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_ABS(T x)
     { return std::abs(x); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_ABS(std::complex<T> x)
     {
         // This is the same as the usual std::abs algorithm.
-        // However, I have come across implementations that don't 
+        // However, I have come across implementations that don't
         // protext against overflow, so I just duplicate it here.
 
         T xr = x.real();
@@ -326,27 +326,27 @@ namespace tmv {
         return s * std::sqrt(xr*xr + xi*xi);
     }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_ABS2(T x)
     { return std::abs(x); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_ABS2(std::complex<T> x)
     { return std::abs(std::real(x)) + std::abs(std::imag(x)); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_MIN(T x, T y)
     { return x > y ? y : x; }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_MAX(T x, T y)
     { return x > y ? x : y; }
 
-    template <class T> 
+    template <typename T>
     inline void TMV_SWAP(T& x, T& y)
     { T z = x; x = y; y = z; }
 
-    template <class T>
+    template <typename T>
     struct Traits
     {
         enum { isreal = true };
@@ -358,7 +358,7 @@ namespace tmv {
         typedef std::complex<T> complex_type;
     };
 
-    template <class T>
+    template <typename T>
     struct Traits<std::complex<T> >
     {
         enum { isreal = false };
@@ -370,63 +370,63 @@ namespace tmv {
         typedef std::complex<T> complex_type;
     };
 
-    template <class T>
+    template <typename T>
     struct Traits<T&> : public Traits<T> {};
-    template <class T>
+    template <typename T>
     struct Traits<const T> : public Traits<T> {};
-    template <class T>
+    template <typename T>
     struct Traits<const T&> : public Traits<T> {};
 
-    template <class T1, class T2>
+    template <typename T1, typename T2>
     struct Traits2
-    { 
+    {
         enum { sametype = false };
         enum { samebase = false };
-        typedef T1 type; 
+        typedef T1 type;
     };
-    template <class T1, class T2>
+    template <typename T1, typename T2>
     struct Traits2<T1,std::complex<T2> >
     {
         enum { sametype = false };
         enum { samebase = false };
         typedef std::complex<typename Traits2<T1,T2>::type> type;
     };
-    template <class T1, class T2>
+    template <typename T1, typename T2>
     struct Traits2<std::complex<T1>,T2>
-    { 
+    {
         enum { sametype = false };
         enum { samebase = false };
-        typedef std::complex<typename Traits2<T1,T2>::type> type; 
+        typedef std::complex<typename Traits2<T1,T2>::type> type;
     };
-    template <class T1, class T2>
+    template <typename T1, typename T2>
     struct Traits2<std::complex<T1>,std::complex<T2> >
     {
         enum { sametype = false };
         enum { samebase = false };
-        typedef std::complex<typename Traits2<T1,T2>::type> type; 
+        typedef std::complex<typename Traits2<T1,T2>::type> type;
     };
-    template <class T>
+    template <typename T>
     struct Traits2<T,T>
     {
         enum { sametype = true };
         enum { samebase = true };
-        typedef T type; 
+        typedef T type;
     };
-    template <class T>
+    template <typename T>
     struct Traits2<std::complex<T>,T>
     {
         enum { sametype = false };
         enum { samebase = true };
         typedef std::complex<T> type;
     };
-    template <class T>
+    template <typename T>
     struct Traits2<T,std::complex<T> >
     {
         enum { sametype = false };
         enum { samebase = true };
         typedef std::complex<T> type;
     };
-    template <class T>
+    template <typename T>
     struct Traits2<std::complex<T>,std::complex<T> >
     {
         enum { sametype = true };
@@ -440,28 +440,28 @@ namespace tmv {
     {
         enum { sametype = false };
         enum { samebase = false };
-        typedef float type; 
+        typedef float type;
     };
     template <>
     struct Traits2<int,double>
     {
         enum { sametype = false };
         enum { samebase = false };
-        typedef double type; 
+        typedef double type;
     };
     template <>
     struct Traits2<int,long double>
     {
         enum { sametype = false };
         enum { samebase = false };
-        typedef long double type; 
+        typedef long double type;
     };
     template <>
     struct Traits2<float,double>
     {
         enum { sametype = false };
         enum { samebase = false };
-        typedef double type; 
+        typedef double type;
     };
     template <>
     struct Traits2<float,long double>
@@ -482,20 +482,20 @@ namespace tmv {
 #define TMV_RealType(T) typename tmv::Traits<T>::real_type
 #define TMV_ComplexType(T) typename tmv::Traits<T>::complex_type
 
-    template <class T> 
-    inline bool isReal(T) 
+    template <typename T>
+    inline bool isReal(T)
     { return true; }
-    template <class T> 
-    inline bool isReal(std::complex<T>) 
+    template <typename T>
+    inline bool isReal(std::complex<T>)
     { return false; }
-    template <class T> 
-    inline bool isComplex(T x) 
+    template <typename T>
+    inline bool isComplex(T x)
     { return !isReal(x); }
-    template <class T1, class T2> 
-    inline bool isSameType(T1,T2) 
+    template <typename T1, typename T2>
+    inline bool isSameType(T1,T2)
     { return false; }
-    template <class T> 
-    inline bool isSameType(T,T) 
+    template <typename T>
+    inline bool isSameType(T,T)
     { return true; }
 
 #ifndef NOTHROW
@@ -521,14 +521,14 @@ namespace tmv {
         unsigned long line;
         std::string file;
 
-        inline FailedAssert(std::string s, unsigned long l, 
+        inline FailedAssert(std::string s, unsigned long l,
                             std::string f) throw() :
             Error("Failed Assert statement "+s),
             failed_assert(s), line(l), file(f) {}
         virtual inline ~FailedAssert() throw() {}
         virtual inline void write(std::ostream& os) const throw()
         {
-            os<<"TMV Failed Assert: "<<failed_assert<<std::endl<< 
+            os<<"TMV Failed Assert: "<<failed_assert<<std::endl<<
                 "on line "<<line<<" in file "<<file<<std::endl;
         }
     };
@@ -564,7 +564,7 @@ namespace tmv {
 #endif
 
     // Use DEBUGPARAM(x) for parameters that are only used in TMVAssert
-    // statements.  So then they don't give warnings when compiled with 
+    // statements.  So then they don't give warnings when compiled with
     // -DNDEBUG
 #ifdef TMV_DEBUG
 #define TMV_DEBUG_PARAM(x) x
@@ -637,7 +637,7 @@ namespace tmv {
     {
         std::ostream* temp = TMV_WarnSingleton::inst();
         TMV_WarnSingleton::inst() = newos;
-        return temp; 
+        return temp;
     }
 
     inline void NoWarnings()
@@ -653,7 +653,7 @@ namespace tmv {
     // We use for this value the maximally negative int.
     // In binary, this is a 1 followed by all zeros.
     // Note: can't use numeric_limits<int>::min, since it is a function,
-    // not a compile-time constant.  
+    // not a compile-time constant.
     // And we need Unknown as a compile-time constant.
     const int Unknown = 1<<(sizeof(int)*8-1);
 
@@ -684,42 +684,42 @@ namespace tmv {
         ~CheckedInt() {}
     };
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) TMV_Epsilon()
     { return std::numeric_limits<typename Traits<T>::real_type>::epsilon(); }
 
-    template <class T>
+    template <typename T>
     inline bool TMV_Underflow(T x)
     {
         return tmv::Traits<T>::isinteger ? false :
             TMV_ABS2(x) < std::numeric_limits<T>::min();
     }
 
-    template <class T>
+    template <typename T>
     inline bool TMV_Underflow(std::complex<T> x)
     {
         return tmv::Traits<T>::isinteger ? false :
             TMV_ABS2(x) < T(2) * std::numeric_limits<T>::min();
     }
 
-    template <class T>
+    template <typename T>
     inline T TMV_Divide(T x, T y)
     { return x / y; }
 
-    template <class T>
+    template <typename T>
     inline std::complex<T> TMV_Divide(std::complex<T> x, T y)
     {
         // return x / y;
-        // Amazingly, some implementations get even this one wrong!  
+        // Amazingly, some implementations get even this one wrong!
         // So I need to do each component explicitly.
-        return std::complex<T>(x.real()/y,x.imag()/y); 
+        return std::complex<T>(x.real()/y,x.imag()/y);
     }
 
-    template <class T>
+    template <typename T>
     inline T TMV_InverseOf(T x)
     { return T(1) / x; }
 
-    template <class T>
+    template <typename T>
     inline std::complex<T> TMV_InverseOf(std::complex<T> x)
     {
         // The standard library's implemenation of complex division
@@ -744,24 +744,24 @@ namespace tmv {
     }
 
 
-    template <class T>
+    template <typename T>
     inline std::complex<T> TMV_Divide(T x, std::complex<T> y)
     { return x * TMV_InverseOf(y); }
 
-    template <class T>
+    template <typename T>
     inline std::complex<T> TMV_Divide(std::complex<T> x, std::complex<T> y)
     { return x * TMV_InverseOf(y); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_SIGN(T x, T )
     { return x > 0 ? T(1) : T(-1); }
 
-    template <class T> 
+    template <typename T>
     inline std::complex<T> TMV_SIGN(std::complex<T> x, T absx)
     { return absx > 0 ? TMV_Divide(x,absx) : std::complex<T>(1); }
 
 
-    extern bool TMV_FALSE; 
+    extern bool TMV_FALSE;
     // = false (in TMV_Vector.cpp), but without the unreachable returns
 
     inline int TMV_ABS(const std::complex<int>& x)
@@ -770,17 +770,17 @@ namespace tmv {
     inline int TMV_ARG(const std::complex<int>& x)
     { return int(TMV_ARG(std::complex<double>(std::real(x),std::imag(x)))); }
 
-    inline int TMV_SQRT(int x) 
+    inline int TMV_SQRT(int x)
     { return int(TMV_SQRT(double(x))); }
 
     inline std::complex<int> TMV_SQRT(const std::complex<int>& x)
     {
-        std::complex<double> temp = 
-            TMV_SQRT(std::complex<double>(std::real(x),std::imag(x))); 
+        std::complex<double> temp =
+            TMV_SQRT(std::complex<double>(std::real(x),std::imag(x)));
         return std::complex<int>(int(real(temp)),int(imag(temp)));
     }
 
-    inline int TMV_EXP(int x) 
+    inline int TMV_EXP(int x)
     { return int(TMV_EXP(double(x))); }
 
     inline std::complex<int> TMV_EXP(const std::complex<int>& x)
@@ -790,20 +790,20 @@ namespace tmv {
         return std::complex<int>(int(real(temp)),int(imag(temp)));
     }
 
-    inline int TMV_LOG(int x) 
+    inline int TMV_LOG(int x)
     { return int(TMV_LOG(double(x))); }
 
     inline std::complex<int> TMV_LOG(const std::complex<int>& x)
-    { 
+    {
         std::complex<double> temp =
-            TMV_LOG(std::complex<double>(std::real(x),std::imag(x))); 
+            TMV_LOG(std::complex<double>(std::real(x),std::imag(x)));
         return std::complex<int>(int(real(temp)),int(imag(temp)));
     }
 
     inline bool TMV_Underflow(int )
     { return false; }
 
-    template <class T> 
+    template <typename T>
     inline std::string TMV_Text(const T&)
     { return std::string("Unknown (") + typeid(T).name() + ")"; }
 
@@ -819,7 +819,7 @@ namespace tmv {
     inline std::string TMV_Text(const long double&)
     { return "long double"; }
 
-    template <class T> 
+    template <typename T>
     inline std::string TMV_Text(std::complex<T>)
     { return std::string("complex<") + TMV_Text(T()) + ">"; }
 
@@ -834,7 +834,7 @@ namespace tmv {
 
     inline std::string TMV_Text(StorageType s)
     {
-        return 
+        return
             s==ColMajor ? "ColMajor" :
             s==RowMajor ? "RowMajor" : "DiagMajor";
     }
@@ -849,8 +849,8 @@ namespace tmv {
     { return s == Sym ? "Sym" : "Herm"; }
 
     inline std::string TMV_Text(DivType d)
-    { 
-        return 
+    {
+        return
             d==XX ? "XX" :
             d==LU ? "LU" :
             d==CH ? "CH" :
@@ -881,7 +881,7 @@ namespace tmv {
 #define TMV_ConjOf(T,C) ((isReal(T()) || C==Conj) ? NonConj : Conj)
 
     // Use DEBUGPARAM(x) for parameters that are only used in TMVAssert
-    // statements.  So then they don't give warnings when compiled with 
+    // statements.  So then they don't give warnings when compiled with
     // -DNDEBUG
 #ifdef TMV_DEBUG
 #define TMV_DEBUGPARAM(x) x

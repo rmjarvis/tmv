@@ -34,29 +34,29 @@
 
 namespace tmv {
 
-    template <class T, class Tv> 
+    template <typename T, typename Tv>
     class ProdXV;
 
-    template <class T, class Tv> 
+    template <typename T, typename Tv>
     class ProdXM;
 
-    template <class T, int A, class Tx> 
+    template <typename T, int A, typename Tx>
     inline DiagMatrix<T,A>& operator+=(DiagMatrix<T,A>& m, const Tx& x)
     { m.view() += x; return m; }
 
-    template <class T, int A, class Tx> 
+    template <typename T, int A, typename Tx>
     inline DiagMatrix<T,A>& operator-=(DiagMatrix<T,A>& m, const Tx& x)
     { m.view() -= x; return m; }
 
-    template <class T, int A, class Tx> 
+    template <typename T, int A, typename Tx>
     inline DiagMatrix<T,A>& operator*=(DiagMatrix<T,A>& m, const Tx& x)
     { m.view() *= x; return m; }
 
-    template <class T, int A, class Tx> 
+    template <typename T, int A, typename Tx>
     inline DiagMatrix<T,A>& operator/=(DiagMatrix<T,A>& m, const Tx& x)
     { m.view() /= x; return m; }
 
-    template <class T, int A, class Tx> 
+    template <typename T, int A, typename Tx>
     inline DiagMatrix<T,A>& operator%=(DiagMatrix<T,A>& m, const Tx& x)
     { m.view() %= x; return m; }
 
@@ -65,8 +65,8 @@ namespace tmv {
     // Scalar * DiagMatrix
     //
 
-    template <class T, class T2> 
-    class ProdXD : public DiagMatrixComposite<T> 
+    template <typename T, typename T2>
+    class ProdXD : public DiagMatrixComposite<T>
     {
     public:
         typedef typename Traits<T>::real_type real_type;
@@ -92,36 +92,36 @@ namespace tmv {
         const GenDiagMatrix<T2>& m;
     };
 
-    template <class T> 
-    inline DiagMatrixView<T> operator*=(DiagMatrixView<T> m, T x) 
+    template <typename T>
+    inline DiagMatrixView<T> operator*=(DiagMatrixView<T> m, T x)
     { MultXV(x,m.diag()); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator*=(DiagMatrixView<CT> m, T x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator*=(DiagMatrixView<CT> m, T x)
     { MultXV(x,m.diag()); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator*=(DiagMatrixView<CT> m, CCT x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator*=(DiagMatrixView<CT> m, CCT x)
     { MultXV(CT(x),m.diag()); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator*=(DiagMatrixView<CT> m, VCT x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator*=(DiagMatrixView<CT> m, VCT x)
     { MultXV(CT(x),m.diag()); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<T> operator/=(DiagMatrixView<T> m, T x) 
+    template <typename T>
+    inline DiagMatrixView<T> operator/=(DiagMatrixView<T> m, T x)
     { MultXV(TMV_InverseOf(x),m.diag()); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator/=(DiagMatrixView<CT> m, T x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator/=(DiagMatrixView<CT> m, T x)
     { MultXV(TMV_InverseOf(x),m.diag()); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator/=(DiagMatrixView<CT> m, CCT x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator/=(DiagMatrixView<CT> m, CCT x)
     { MultXV(TMV_InverseOf(CT(x)),m.diag()); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator/=(DiagMatrixView<CT> m, VCT x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator/=(DiagMatrixView<CT> m, VCT x)
     { MultXV(TMV_InverseOf(CT(x)),m.diag()); return m; }
 
 #define GENMATRIX GenDiagMatrix
@@ -135,7 +135,7 @@ namespace tmv {
     // DiagMatrix + Scalar
     //
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     class SumDX : public DiagMatrixComposite<T>
     {
     public:
@@ -149,14 +149,14 @@ namespace tmv {
         inline const GenDiagMatrix<T2>& getM() const { return m; }
         inline T getX2() const { return x2; }
         inline void assignToD(DiagMatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             MultXV(x1,m.diag(),m0.diag());
             m0.diag().addToAll(TMV_REAL(x2));
         }
         inline void assignToD(DiagMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.size() == size());
             MultXV(x1,m.diag(),m0.diag());
             m0.diag().addToAll(complex_type(x2));
@@ -167,36 +167,36 @@ namespace tmv {
         const T x2;
     };
 
-    template <class T> 
-    inline DiagMatrixView<T> operator+=(DiagMatrixView<T> m, T x) 
+    template <typename T>
+    inline DiagMatrixView<T> operator+=(DiagMatrixView<T> m, T x)
     { m.diag().addToAll(x); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator+=(DiagMatrixView<CT> m, T x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator+=(DiagMatrixView<CT> m, T x)
     { m.diag().addToAll(CT(x)); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator+=(DiagMatrixView<CT> m, CCT x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator+=(DiagMatrixView<CT> m, CCT x)
     { m.diag().addToAll(CT(x)); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator+=(DiagMatrixView<CT> m, VCT x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator+=(DiagMatrixView<CT> m, VCT x)
     { m.diag().addToAll(CT(x)); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<T> operator-=(DiagMatrixView<T> m, T x) 
+    template <typename T>
+    inline DiagMatrixView<T> operator-=(DiagMatrixView<T> m, T x)
     { m.diag().addToAll(-x); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator-=(DiagMatrixView<CT> m, T x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator-=(DiagMatrixView<CT> m, T x)
     { m.diag().addToAll(CT(-x)); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator-=(DiagMatrixView<CT> m, CCT x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator-=(DiagMatrixView<CT> m, CCT x)
     { m.diag().addToAll(-CT(x)); return m; }
 
-    template <class T> 
-    inline DiagMatrixView<CT> operator-=(DiagMatrixView<CT> m, VCT x) 
+    template <typename T>
+    inline DiagMatrixView<CT> operator-=(DiagMatrixView<CT> m, VCT x)
     { m.diag().addToAll(-CT(x)); return m; }
 
 #define SUMMX SumDX
@@ -212,15 +212,15 @@ namespace tmv {
     // DiagMatrix + DiagMatrix
     //
 
-    template <class T, class T1, class T2> 
-    class SumDD : public DiagMatrixComposite<T> 
+    template <typename T, typename T1, typename T2>
+    class SumDD : public DiagMatrixComposite<T>
     {
     public:
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
         inline SumDD(
-            T _x1, const GenDiagMatrix<T1>& _m1, 
+            T _x1, const GenDiagMatrix<T1>& _m1,
             T _x2, const GenDiagMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
@@ -230,13 +230,13 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
         inline void assignToD(DiagMatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             AddVV(x1,m1.diag(),x2,m2.diag(),m0.diag());
         }
         inline void assignToD(DiagMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.size() == size());
             AddVV(x1,m1.diag(),x2,m2.diag(),m0.diag());
         }
@@ -247,43 +247,43 @@ namespace tmv {
         const GenDiagMatrix<T2>& m2;
     };
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<T> operator+=(
-        DiagMatrixView<T> m1, const GenDiagMatrix<T>& m2) 
-    { 
+        DiagMatrixView<T> m1, const GenDiagMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         AddVV(T(1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator+=(
-        DiagMatrixView<CT> m1, const GenDiagMatrix<T>& m2) 
+        DiagMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
     {
         TMVAssert(m1.size() == m2.size());
         AddVV(T(1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<T> operator-=(
-        DiagMatrixView<T> m1, const GenDiagMatrix<T>& m2) 
-    { 
-        TMVAssert(m1.size() == m2.size());
-        AddVV(T(-1),m2.diag(),m1.diag());
-        return m1; 
-    }
-
-    template <class T> 
-    inline DiagMatrixView<CT> operator-=(
-        DiagMatrixView<CT> m1, const GenDiagMatrix<T>& m2) 
+        DiagMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     {
         TMVAssert(m1.size() == m2.size());
         AddVV(T(-1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T, class T2> 
+    template <typename T>
+    inline DiagMatrixView<CT> operator-=(
+        DiagMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
+    {
+        TMVAssert(m1.size() == m2.size());
+        AddVV(T(-1),m2.diag(),m1.diag());
+        return m1;
+    }
+
+    template <typename T, typename T2>
     inline DiagMatrixView<T> operator+=(
         DiagMatrixView<T> m, const ProdXD<T,T2>& pxm)
     {
@@ -292,7 +292,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator+=(
         DiagMatrixView<CT> m, const ProdXD<T,T>& pxm)
     {
@@ -301,7 +301,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline DiagMatrixView<T> operator-=(
         DiagMatrixView<T> m, const ProdXD<T,T2>& pxm)
     {
@@ -310,7 +310,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator-=(
         DiagMatrixView<CT> m, const ProdXD<T,T>& pxm)
     {
@@ -336,7 +336,7 @@ namespace tmv {
     // DiagMatrix * DiagMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdDD : public DiagMatrixComposite<T>
     {
     public:
@@ -368,77 +368,77 @@ namespace tmv {
         const GenDiagMatrix<T2>& m2;
     };
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<T> operator*=(
         DiagMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     {
         TMVAssert(m1.size() == m2.size());
-        MultMM<false>(T(1),m1,m2,m1); 
-        return m1; 
+        MultMM<false>(T(1),m1,m2,m1);
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator*=(
         DiagMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
     {
         TMVAssert(m1.size() == m2.size());
-        MultMM<false>(T(1),m1,m2,m1); 
-        return m1; 
+        MultMM<false>(T(1),m1,m2,m1);
+        return m1;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline DiagMatrixView<T> operator*=(
         DiagMatrixView<T> m, const ProdXD<T,T2>& pxm)
-    { 
+    {
         TMVAssert(m.size()==pxm.size());
-        MultMM<false>(pxm.getX(),m,pxm.getM(),m); 
-        return m; 
+        MultMM<false>(pxm.getX(),m,pxm.getM(),m);
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator*=(
         DiagMatrixView<CT> m, const ProdXD<T,T>& pxm)
-    { 
+    {
         TMVAssert(m.size()==pxm.size());
-        MultMM<false>(pxm.getX(),m,pxm.getM(),m); 
-        return m; 
+        MultMM<false>(pxm.getX(),m,pxm.getM(),m);
+        return m;
     }
 
-    template <class T, class T2, class T3> 
+    template <typename T, typename T2, typename T3>
     inline DiagMatrixView<T> operator+=(
         DiagMatrixView<T> m, const ProdDD<T,T2,T3>& pmm)
-    { 
+    {
         TMVAssert(m.size() == pmm.size());
-        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator+=(
         DiagMatrixView<CT> m, const ProdDD<T,T,T>& pmm)
-    { 
+    {
         TMVAssert(m.size() == pmm.size());
-        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
-    template <class T, class T2, class T3> 
+    template <typename T, typename T2, typename T3>
     inline DiagMatrixView<T> operator-=(
         DiagMatrixView<T> m, const ProdDD<T,T2,T3>& pmm)
-    { 
+    {
         TMVAssert(m.size() == pmm.size());
-        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator-=(
         DiagMatrixView<CT> m, const ProdDD<T,T,T>& pmm)
-    { 
+    {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
-        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
 #define PRODMM ProdDD
@@ -461,15 +461,15 @@ namespace tmv {
     // Element Product DiagMatrix * DiagMatrix
     //
 
-    template <class T, class T1, class T2> 
-    class ElemProdDD : public DiagMatrixComposite<T> 
+    template <typename T, typename T1, typename T2>
+    class ElemProdDD : public DiagMatrixComposite<T>
     {
     public:
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
         inline ElemProdDD(
-            T _x, const GenDiagMatrix<T1>& _m1, const GenDiagMatrix<T2>& _m2) : 
+            T _x, const GenDiagMatrix<T1>& _m1, const GenDiagMatrix<T2>& _m2) :
             x(_x),m1(_m1),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline ptrdiff_t size() const { return m1.size(); }
@@ -477,13 +477,13 @@ namespace tmv {
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
         inline void assignToD(DiagMatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             ElemMultMM<false>(x,m1,m2,m0);
         }
         inline void assignToD(DiagMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.size() == size());
             ElemMultMM<false>(x,m1,m2,m0);
         }
@@ -493,44 +493,44 @@ namespace tmv {
         const GenDiagMatrix<T2>& m2;
     };
 
-    template <class T, class T2, class T3> 
+    template <typename T, typename T2, typename T3>
     inline DiagMatrixView<T> operator+=(
         DiagMatrixView<T> m, const ElemProdDD<T,T2,T3>& pmm)
-    { 
+    {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
-        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator+=(
         DiagMatrixView<CT> m, const ElemProdDD<T,T,T>& pmm)
-    { 
+    {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
-        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
-    template <class T, class T2, class T3> 
+    template <typename T, typename T2, typename T3>
     inline DiagMatrixView<T> operator-=(
         DiagMatrixView<T> m, const ElemProdDD<T,T2,T3>& pmm)
-    { 
+    {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
-        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator-=(
         DiagMatrixView<CT> m, const ElemProdDD<T,T,T>& pmm)
     {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
-        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
 
@@ -554,7 +554,7 @@ namespace tmv {
     // Scalar / DiagMatrix
     //
 
-    template <class T, class Tm> 
+    template <typename T, typename Tm>
     class QuotXD : public DiagMatrixComposite<T>
     {
     public:
@@ -597,7 +597,7 @@ namespace tmv {
     // DiagMatrix / % DiagMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class QuotDD : public DiagMatrixComposite<T>
     {
     public:
@@ -631,7 +631,7 @@ namespace tmv {
         const GenDiagMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class RQuotDD : public QuotDD<T,T1,T2>
     {
     public:
@@ -640,22 +640,22 @@ namespace tmv {
             const GenDiagMatrix<T2>& _m2) : QuotDD<T,T1,T2>(_x,_m1,_m2) {}
     };
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<T> operator/=(
         DiagMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     { m2.DivEq(m1); return m1; }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator/=(
         DiagMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
     { m2.DivEq(m1); return m1; }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<T> operator%=(
         DiagMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     { m2.DivEq(m1); return m1; }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator%=(
         DiagMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
     { m2.DivEq(m1); return m1; }
@@ -679,7 +679,7 @@ namespace tmv {
 
 
 
-    // Now use some helper files for the combinations which 
+    // Now use some helper files for the combinations which
     // return a MatrixComposite or VectorComposite
 
     // First the VectorComposites:

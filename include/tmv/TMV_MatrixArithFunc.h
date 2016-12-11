@@ -31,43 +31,43 @@
 namespace tmv {
 
     // y (+)= alpha * A * x
-    template <bool add, class T, class Ta, class Tx> 
+    template <bool add, typename T, typename Ta, typename Tx>
     void MultMV(
         const T alpha, const GenMatrix<Ta>& A, const GenVector<Tx>& x,
         VectorView<T> y);
 
     // A *= alpha
-    template <class T> 
+    template <typename T>
     void MultXM(const T alpha, MatrixView<T> A);
 
     // B += alpha * A
-    template <class T, class Ta> 
+    template <typename T, typename Ta>
     void AddMM(const T alpha, const GenMatrix<Ta>& A, MatrixView<T> B);
 
     // C = alpha * A + beta * B
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     void AddMM(
         const T alpha, const GenMatrix<Ta>& A,
         const T beta, const GenMatrix<Tb>& B, MatrixView<T> C);
 
     // C (+)= alpha * A * B
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     void MultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
         MatrixView<T> C);
 
     // A (+)= alpha * x * yT
-    template <bool add, class T, class Tx, class Ty> 
+    template <bool add, typename T, typename Tx, typename Ty>
     void Rank1Update(
-        const T alpha, const GenVector<Tx>& x, const GenVector<Ty>& y, 
+        const T alpha, const GenVector<Tx>& x, const GenVector<Ty>& y,
         MatrixView<T> A);
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     void ElemMultMM(
         const T alpha, const GenMatrix<Ta>& A,
         const GenMatrix<Tb>& B, MatrixView<T> C);
 
-    template <class T> 
+    template <typename T>
     class MatrixComposite : public GenMatrix<T>
     {
     public:
@@ -87,84 +87,84 @@ namespace tmv {
     };
 
     // Specialize allowed complex combinations:
-    template <bool add, class T, class Ta, class Tx> 
+    template <bool add, typename T, typename Ta, typename Tx>
     inline void MultMV(
         const T alpha, const GenMatrix<Ta>& A,
         const GenVector<Tx>& x, VectorView<CT> y)
     { MultMV<add>(CT(alpha),A,x,y); }
 
-    template <class T> 
+    template <typename T>
     inline void MultXM(const T alpha, MatrixView<CT> A)
     { MultXM(CT(alpha),A); }
 
-    template <class T, class Ta> 
+    template <typename T, typename Ta>
     inline void AddMM(
         const T alpha, const GenMatrix<Ta>& A, MatrixView<CT> B)
     { AddMM(CT(alpha),A,B); }
 
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     inline void AddMM(
         const T alpha, const GenMatrix<Ta>& A,
         const T beta, const GenMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
-    template <class T> 
+    template <typename T>
     inline void AddMM(
         const CT alpha, const GenMatrix<CT>& A,
         const CT beta, const GenMatrix<T>& B, MatrixView<CT> C)
     { AddMM(beta,B,alpha,A,C); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMM(
         const T alpha, const GenMatrix<Ta>& A,
         const GenMatrix<Tb>& B, MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
 
-    template <bool add, class T, class Tx, class Ty> 
+    template <bool add, typename T, typename Tx, typename Ty>
     inline void Rank1Update(
         const T alpha, const GenVector<Tx>& x,
         const GenVector<Ty>& y, MatrixView<CT> A)
     { Rank1Update<add>(CT(alpha),x,y,A); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void ElemMultMM(
         const T alpha, const GenMatrix<Ta>& A,
         const GenMatrix<Tb>& B, MatrixView<CT> C)
     { ElemMultMM<add>(CT(alpha),A,B,C); }
 
     // Specialize disallowed complex combinations:
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMV(
         const CT , const GenMatrix<Ta>& ,
         const GenVector<Tb>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T> 
+    template <typename T>
     inline void MultXM(const CT , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T, class Ta> 
+    template <typename T, typename Ta>
     inline void AddMM(const CT , const GenMatrix<Ta>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     inline void AddMM(
         const CT , const GenMatrix<Ta>& ,
         const CT , const GenMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMM(
         const CT , const GenMatrix<Ta>& , const GenMatrix<Tb>& ,
         MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void ElemMultMM(
         const CT , const GenMatrix<Ta>& , const GenMatrix<Tb>& ,
         MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void Rank1Update(
         const CT , const GenVector<Ta>& ,
         const GenVector<Tb>& , MatrixView<T> )

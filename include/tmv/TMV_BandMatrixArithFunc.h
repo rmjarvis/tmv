@@ -31,59 +31,59 @@
 namespace tmv {
 
     // y (+)= alpha * A * x
-    template <bool add, class T, class Ta, class Tx> 
+    template <bool add, typename T, typename Ta, typename Tx>
     void MultMV(
         const T alpha, const GenBandMatrix<Ta>& A,
         const GenVector<Tx>& x, VectorView<T> y);
 
     // A *= alpha
-    template <class T> 
+    template <typename T>
     void MultXM(const T alpha, BandMatrixView<T> A);
 
     // B += alpha * A
-    template <class T, class Ta> 
+    template <typename T, typename Ta>
     void AddMM(
         const T alpha, const GenBandMatrix<Ta>& A, BandMatrixView<T> B);
-    template <class T, class Ta> 
+    template <typename T, typename Ta>
     inline void AddMM(
         const T alpha, const GenBandMatrix<Ta>& A, MatrixView<T> B)
     { AddMM(alpha,A,BandMatrixView<T>(B,A.nlo(),A.nhi())); }
     // C = alpha * A + beta * B
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     void AddMM(
         const T alpha, const GenBandMatrix<Ta>& A,
         const T beta, const GenBandMatrix<Tb>& B, BandMatrixView<T> C);
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     void AddMM(
         const T alpha, const GenBandMatrix<Ta>& A,
         const T beta, const GenMatrix<Tb>& B, MatrixView<T> C);
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     inline void AddMM(
         const T alpha, const GenMatrix<Ta>& A,
         const T beta, const GenBandMatrix<Tb>& B, MatrixView<T> C)
     { AddMM(beta,B,alpha,A,C); }
 
     // C (+)= alpha * A * B
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     void MultMM(
         const T alpha, const GenBandMatrix<Ta>& A,
         const GenMatrix<Tb>& B, MatrixView<T> C);
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     void MultMM(
         const T alpha, const GenBandMatrix<Ta>& A,
         const GenBandMatrix<Tb>& B, BandMatrixView<T> C);
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMM(
         const T alpha, const GenMatrix<Ta>& A,
         const GenBandMatrix<Tb>& B, MatrixView<T> C)
     { MultMM<add>(alpha,B.transpose(),A.transpose(),C.transpose()); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     void ElemMultMM(
         const T alpha, const GenBandMatrix<Ta>& A,
         const GenBandMatrix<Tb>& B, BandMatrixView<T> C);
 
-    template <class T> 
+    template <typename T>
     class BandMatrixComposite : public GenBandMatrix<T>
     {
     public:
@@ -114,121 +114,121 @@ namespace tmv {
     };
 
     // Specialize allowed complex combinations:
-    template <bool add, class T, class Ta, class Tx> 
+    template <bool add, typename T, typename Ta, typename Tx>
     inline void MultMV(
-        const T alpha, const GenBandMatrix<Ta>& A, const GenVector<Tx>& x, 
+        const T alpha, const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
         VectorView<CT> y)
     { MultMV<add>(CT(alpha),A,x,y); }
 
-    template <class T> 
+    template <typename T>
     inline void MultXM(
         const T x, BandMatrixView<CT> m)
     { MultXM(CT(x),m); }
 
-    template <class T, class Ta> 
+    template <typename T, typename Ta>
     inline void AddMM(
         const T alpha, const GenBandMatrix<Ta>& A, BandMatrixView<CT> B)
     { AddMM(CT(alpha),A,B); }
-    template <class T, class Ta> 
+    template <typename T, typename Ta>
     inline void AddMM(
         const T alpha, const GenBandMatrix<Ta>& A, MatrixView<CT> B)
     { AddMM(CT(alpha),A,B); }
 
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     inline void AddMM(
         const T alpha, const GenBandMatrix<Ta>& A, const T beta,
         const GenBandMatrix<Tb>& B, BandMatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     inline void AddMM(
         const T alpha, const GenBandMatrix<Ta>& A, const T beta,
         const GenMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     inline void AddMM(
         const T alpha, const GenMatrix<Ta>& A, const T beta,
         const GenBandMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
-    template <class T> 
+    template <typename T>
     inline void AddMM(
         const CT alpha, const GenBandMatrix<CT>& A, const CT beta,
         const GenBandMatrix<T>& B, BandMatrixView<CT> C)
     { AddMM(beta,B,alpha,A,C); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMM(
-        const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B, 
+        const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
         MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMM(
-        const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B, 
+        const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
         BandMatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMM(
-        const T alpha, const GenMatrix<Ta>& A, const GenBandMatrix<Tb>& B, 
+        const T alpha, const GenMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
         MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void ElemMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
         BandMatrixView<CT> C)
     { ElemMultMM<add>(CT(alpha),A,B,C); }
 
     // Specialize disallowed complex combinations:
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMV(
         const CT , const GenBandMatrix<Ta>& ,
         const GenVector<Tb>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T> 
+    template <typename T>
     inline void MultXM(const CT , BandMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T, class Ta> 
+    template <typename T, typename Ta>
     inline void AddMM(
         const CT , const GenBandMatrix<Ta>& , BandMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T, class Ta> 
+    template <typename T, typename Ta>
     inline void AddMM(
         const CT , const GenBandMatrix<Ta>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     inline void AddMM(
         const CT , const GenBandMatrix<Ta>& ,
         const CT , const GenBandMatrix<Tb>& , BandMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     inline void AddMM(
         const CT , const GenBandMatrix<Ta>& ,
         const CT , const GenMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     inline void AddMM(
         const CT , const GenMatrix<Ta>& ,
         const CT , const GenBandMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMM(
         const CT , const GenBandMatrix<Ta>& ,
         const GenMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMM(
         const CT , const GenBandMatrix<Ta>& ,
         const GenBandMatrix<Tb>& , BandMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void MultMM(
         const CT , const GenMatrix<Ta>& ,
         const GenBandMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void ElemMultMM(
         const CT , const GenBandMatrix<Ta>& ,
         const GenBandMatrix<Tb>& , BandMatrixView<T> )

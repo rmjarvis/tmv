@@ -27,7 +27,7 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T> 
     bool isNaN(T x);
 
 } // namespace mv

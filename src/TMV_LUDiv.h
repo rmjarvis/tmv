@@ -26,31 +26,31 @@
 
 namespace tmv {
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void LU_LDivEq(
         const GenMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m);
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void LU_RDivEq(
         const GenMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m);
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void LU_Inverse(
         const GenMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m);
 
     // Specialize disallowed complex combinations:
 #define CT std::complex<T>
-    template <class T> 
+    template <typename T> 
     inline void LU_LDivEq(
         const GenMatrix<CT>& , const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T> 
+    template <typename T> 
     inline void LU_RDivEq(
         const GenMatrix<CT>& , const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T> 
+    template <typename T> 
     inline void LU_Inverse(
         const GenMatrix<CT>& , const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }

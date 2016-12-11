@@ -21,7 +21,7 @@
 
 
 // Need to define the following with #define statements.
-// (The given definition is for a regular Matrix.  Modify as 
+// (The given definition is for a regular Matrix.  Modify as
 // appropriate for the various other matrices.)
 //
 // #define GENMATRIX GenMatrix
@@ -51,61 +51,61 @@
 
 // x/m
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<T,T X> operator/(T x, const GENMATRIX<T X>& m)
 { return QUOTXM<T,T X>(x,m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator/(CT x, const GENMATRIX<T X>& m)
 { return QUOTXM<CT,T X>(x,m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator/(CCT x, const GENMATRIX<T X>& m)
 { return QUOTXM<CT,T X>(CT(x),m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator/(VCT x, const GENMATRIX<T X>& m)
 { return QUOTXM<CT,T X>(CT(x),m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,CT X> operator/(T x, const GENMATRIX<CT X>& m)
 { return QUOTXM<CT,CT X>(CT(x),m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,CT X> operator/(CCT x, const GENMATRIX<CT X>& m)
 { return QUOTXM<CT,CT X>(CT(x),m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,CT X> operator/(VCT x, const GENMATRIX<CT X>& m)
 { return QUOTXM<CT,CT X>(CT(x),m); }
 
 // x%m
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<T,T X> operator%(T x, const GENMATRIX<T X>& m)
 { return QUOTXM<T,T X>(x,m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator%(CT x, const GENMATRIX<T X>& m)
 { return QUOTXM<CT,T X>(x,m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator%(CCT x, const GENMATRIX<T X>& m)
 { return QUOTXM<CT,T X>(CT(x),m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator%(VCT x, const GENMATRIX<T X>& m)
 { return QUOTXM<CT,T X>(CT(x),m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,CT X> operator%(T x, const GENMATRIX<CT X>& m)
 { return QUOTXM<CT,CT X>(CT(x),m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,CT X> operator%(CCT x, const GENMATRIX<CT X>& m)
 { return QUOTXM<CT,CT X>(CT(x),m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,CT X> operator%(VCT x, const GENMATRIX<CT X>& m)
 { return QUOTXM<CT,CT X>(CT(x),m); }
 

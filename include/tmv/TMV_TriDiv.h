@@ -35,7 +35,7 @@
 namespace tmv {
 
 #ifndef NOTHROW
-    template <class T> 
+    template <typename T>
     class SingularUpperTriMatrix : public Singular
     {
     public:
@@ -48,7 +48,7 @@ namespace tmv {
         { Singular::write(os); os<<A<<std::endl; }
     };
 
-    template <class T> 
+    template <typename T>
     class SingularLowerTriMatrix : public Singular
     {
     public:
@@ -62,27 +62,27 @@ namespace tmv {
     };
 #endif
 
-    template <class T, class T1> 
+    template <typename T, typename T1>
     void TriLDivEq(const GenUpperTriMatrix<T1>& A, VectorView<T> v);
 
-    template <class T, class T1> 
+    template <typename T, typename T1>
     void TriLDivEq(const GenLowerTriMatrix<T1>& A, VectorView<T> v);
 
-    template <class T, class T1> 
+    template <typename T, typename T1>
     void TriLDivEq(const GenUpperTriMatrix<T1>& A, MatrixView<T> m);
 
-    template <class T, class T1> 
+    template <typename T, typename T1>
     void TriLDivEq(const GenLowerTriMatrix<T1>& A, MatrixView<T> m);
 
-    template <class T, class T1> 
+    template <typename T, typename T1>
     void TriLDivEq(
         const GenUpperTriMatrix<T1>& A, UpperTriMatrixView<T> m);
 
-    template <class T, class T1> 
+    template <typename T, typename T1>
     void TriLDivEq(
         const GenLowerTriMatrix<T1>& A, LowerTriMatrixView<T> m);
 
-    template <class T> 
+    template <typename T>
     void TriInverse(UpperTriMatrixView<T> minv);
 
 } // namespace mv

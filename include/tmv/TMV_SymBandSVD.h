@@ -38,157 +38,157 @@ namespace tmv {
     // Furthermore, since A is hermitian, V.inverse() = V.adjoint().
     // On input, lambda and V must have the same size as A.
     // On output, the lambda are sorted to be increasing in value.
-    template <class T> 
+    template <typename T>
     void Eigen(
         const GenSymBandMatrix<T>& A,
         MatrixView<T> V, VectorView<TMV_RealType(T)> lambda);
 
     // The same, but don't return V
-    template <class T> 
+    template <typename T>
     void Eigen(
         const GenSymBandMatrix<T>& A,
         VectorView<TMV_RealType(T)> lambda);
 
     // Decompose A into U S Vt
-    template <class T> 
+    template <typename T>
     void SV_Decompose(
         const GenSymBandMatrix<T>& A, MatrixView<T> U,
         DiagMatrixView<TMV_RealType(T)> S, MatrixView<T> Vt);
 
     // The same, but don't return U and/or V
-    template <class T> 
+    template <typename T>
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
         MatrixView<T> U, DiagMatrixView<TMV_RealType(T)> S);
-    template <class T> 
+    template <typename T>
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
         DiagMatrixView<TMV_RealType(T)> S, MatrixView<T> Vt);
-    template <class T> 
+    template <typename T>
     void SV_Decompose(
         const GenSymBandMatrix<T>& A, DiagMatrixView<TMV_RealType(T)> S);
 
     // Find S such that SS = A with S positive definite.
     // A must be positive definite hermitian.
-    template <class T> 
+    template <typename T>
     void SquareRoot(const GenSymBandMatrix<T>& A, SymMatrixView<T> S);
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void Eigen(
         const GenSymBandMatrix<T>& A,
         MatrixView<T> V, Vector<TMV_RealType(T),A2>& lambda)
     { Eigen(A,V,lambda.view()); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void Eigen(
         const GenSymBandMatrix<T>& A,
         Matrix<T,A1>& V, VectorView<TMV_RealType(T)> lambda)
     { Eigen(A,V.view(),lambda); }
 
-    template <class T, int A1, int A2> 
+    template <typename T, int A1, int A2>
     inline void Eigen(
         const GenSymBandMatrix<T>& A,
         Matrix<T,A1>& V, Vector<TMV_RealType(T),A2>& lambda)
     { Eigen(A,V.view(),lambda.view()); }
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void Eigen(
         const GenSymBandMatrix<T>& A, Vector<TMV_RealType(T),A2>& lambda)
     { Eigen(A,lambda.view()); }
 
-    template <class T, int A3> 
+    template <typename T, int A3>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A, MatrixView<T> U,
         DiagMatrixView<TMV_RealType(T)> S, Matrix<T,A3>& Vt)
     { SV_Decompose(A,U,S,Vt.view()); }
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A, MatrixView<T> U,
         DiagMatrix<TMV_RealType(T),A2>& S, MatrixView<T> Vt)
     { SV_Decompose(A,U,S.view(),Vt); }
 
-    template <class T, int A2, int A3> 
+    template <typename T, int A2, int A3>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A, MatrixView<T> U,
         DiagMatrix<TMV_RealType(T),A2>& S, Matrix<T,A3>& Vt)
     { SV_Decompose(A,U,S.view(),Vt.view()); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A, Matrix<T,A1>& U,
         DiagMatrixView<TMV_RealType(T)> S, MatrixView<T> Vt)
     { SV_Decompose(A,U.view(),S,Vt); }
 
-    template <class T, int A1, int A3> 
+    template <typename T, int A1, int A3>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A, Matrix<T,A1>& U,
         DiagMatrixView<TMV_RealType(T)> S, Matrix<T,A3>& Vt)
     { SV_Decompose(A,U.view(),S,Vt.view()); }
 
-    template <class T, int A1, int A2> 
+    template <typename T, int A1, int A2>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A, Matrix<T,A1>& U,
         DiagMatrix<TMV_RealType(T),A2>& S, MatrixView<T> Vt)
     { SV_Decompose(A,U.view(),S.view(),Vt); }
 
-    template <class T, int A1, int A2, int A3> 
+    template <typename T, int A1, int A2, int A3>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A, Matrix<T,A1>& U,
         DiagMatrix<TMV_RealType(T),A2>& S, Matrix<T,A3>& Vt)
     { SV_Decompose(A,U.view(),S.view(),Vt.view()); }
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A,
         MatrixView<T> U, DiagMatrix<TMV_RealType(T),A2>& S)
     { SV_Decompose(A,U,S.view()); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A,
         Matrix<T,A1>& U, DiagMatrixView<TMV_RealType(T)> S)
     { SV_Decompose(A,U.view(),S); }
 
-    template <class T, int A1, int A2> 
+    template <typename T, int A1, int A2>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A,
         Matrix<T,A1>& U, DiagMatrix<TMV_RealType(T),A2>& S)
     { SV_Decompose(A,U.view(),S.view()); }
 
-    template <class T, int A3> 
+    template <typename T, int A3>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A,
         DiagMatrixView<TMV_RealType(T)> S, Matrix<T,A3>& Vt)
     { SV_Decompose(A,S,Vt.view()); }
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A,
         DiagMatrix<TMV_RealType(T),A2>& S, MatrixView<T> Vt)
     { SV_Decompose(A,S.view(),Vt); }
 
-    template <class T, int A2, int A3> 
+    template <typename T, int A2, int A3>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A,
         DiagMatrix<TMV_RealType(T),A2>& S, Matrix<T,A3>& Vt)
     { SV_Decompose(A,S.view(),Vt.view()); }
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void SV_Decompose(
         const GenSymBandMatrix<T>& A, DiagMatrix<TMV_RealType(T),A2>& S)
     { SV_Decompose(A,S.view()); }
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void SquareRoot(const GenSymBandMatrix<T>& A, HermMatrix<T,A2>& S)
     { SquareRoot(A,S.view()); }
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void SquareRoot(const GenSymBandMatrix<T>& A, SymMatrix<T,A2>& S)
     { SquareRoot(A,S.view()); }
 
-    template <class T> 
-    class HermBandSVDiv : public SymDivider<T> 
+    template <typename T>
+    class HermBandSVDiv : public SymDivider<T>
     {
 
     public :
@@ -204,13 +204,13 @@ namespace tmv {
         // Div, DivEq
         //
 
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(MatrixView<T1> m) const;
-        template <class T1> 
+        template <typename T1>
         void doRDivEq(MatrixView<T1> m) const;
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doLDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doRDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         //
@@ -219,9 +219,9 @@ namespace tmv {
 
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(MatrixView<T1> minv) const;
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(SymMatrixView<T1> sinv) const;
         inline void makeInverse(
             SymMatrixView<TMV_RealType(T)> sinv) const
@@ -277,8 +277,8 @@ namespace tmv {
 
     }; // HermBandSVDiv
 
-    template <class T> 
-    class SymBandSVDiv : public SymDivider<T> 
+    template <typename T>
+    class SymBandSVDiv : public SymDivider<T>
     {
 
     public :
@@ -294,13 +294,13 @@ namespace tmv {
         // Div, DivEq
         //
 
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(MatrixView<T1> m) const;
-        template <class T1> 
+        template <typename T1>
         void doRDivEq(MatrixView<T1> m) const;
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doLDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doRDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
 #include "tmv/TMV_AuxAllDiv.h"
@@ -311,9 +311,9 @@ namespace tmv {
 
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(MatrixView<T1> minv) const;
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(SymMatrixView<T1> sinv) const;
         inline void makeInverse(SymMatrixView<TMV_RealType(T)> sinv) const
         {

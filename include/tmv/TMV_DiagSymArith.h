@@ -31,15 +31,15 @@ namespace tmv {
     // DiagMatrix + SymMatrix
     //
 
-    template <class T, class T1, class T2> 
-    class SumDS : public SymMatrixComposite<T> 
+    template <typename T, typename T1, typename T2>
+    class SumDS : public SymMatrixComposite<T>
     {
     public:
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
         inline SumDS(
-            T _x1, const GenDiagMatrix<T1>& _m1, 
+            T _x1, const GenDiagMatrix<T1>& _m1,
             T _x2, const GenSymMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
@@ -50,7 +50,7 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline const GenSymMatrix<T2>& getM2() const { return m2; }
         inline void assignToM(MatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
@@ -64,7 +64,7 @@ namespace tmv {
             }
         }
         inline void assignToM(MatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             if (SameStorage(m0,m1.diag())) {
@@ -77,7 +77,7 @@ namespace tmv {
             }
         }
         inline void assignToS(SymMatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
@@ -91,12 +91,12 @@ namespace tmv {
             }
         }
         inline void assignToS(SymMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             if (!m2.issym()) {
-                TMVAssert(isReal(T1()) && 
-                          TMV_IMAG(x1) == T1(0) && 
+                TMVAssert(isReal(T1()) &&
+                          TMV_IMAG(x1) == T1(0) &&
                           TMV_IMAG(x2) == T1(0));
             }
             if (SameStorage(m0,m1.diag())) {
@@ -115,45 +115,45 @@ namespace tmv {
         const GenSymMatrix<T2>& m2;
     };
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<T> operator+=(
-        SymMatrixView<T> m1, const GenDiagMatrix<T>& m2) 
+        SymMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.issym());
         AddVV(T(1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<CT> operator+=(
-        SymMatrixView<CT> m1, const GenDiagMatrix<T>& m2) 
-    { 
+        SymMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         AddVV(T(1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<T> operator-=(
-        SymMatrixView<T> m1, const GenDiagMatrix<T>& m2) 
-    { 
+        SymMatrixView<T> m1, const GenDiagMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.issym());
         AddVV(T(-1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<CT> operator-=(
-        SymMatrixView<CT> m1, const GenDiagMatrix<T>& m2) 
-    { 
+        SymMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         AddVV(T(-1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline SymMatrixView<T> operator+=(
         SymMatrixView<T> m, const ProdXD<T,T2>& pxm)
     {
@@ -163,7 +163,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<CT> operator+=(
         SymMatrixView<CT> m, const ProdXD<T,T>& pxm)
     {
@@ -172,7 +172,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline SymMatrixView<T> operator-=(
         SymMatrixView<T> m, const ProdXD<T,T2>& pxm)
     {
@@ -182,7 +182,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<CT> operator-=(
         SymMatrixView<CT> m, const ProdXD<T,T>& pxm)
     {
@@ -208,7 +208,7 @@ namespace tmv {
     // DiagMatrix * SymMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdDS : public MatrixComposite<T>
     {
     public:
@@ -258,7 +258,7 @@ namespace tmv {
         const GenSymMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdSD : public MatrixComposite<T>
     {
     public:
@@ -338,7 +338,7 @@ namespace tmv {
     // SymMatrix / % DiagMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class QuotSD : public MatrixComposite<T>
     {
     public:
@@ -376,7 +376,7 @@ namespace tmv {
         const GenDiagMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class RQuotSD : public MatrixComposite<T>
     {
     public:

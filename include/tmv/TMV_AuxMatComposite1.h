@@ -20,13 +20,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-// This file sets up the Composite classes for all operations with a 
+// This file sets up the Composite classes for all operations with a
 // (sparse) matrix that returns a Matrix and is of the form:
 // (M) op (S)
 // (ie. the first operand is the normal Matrix.)
 //
 // Need to define the following with #define statements.
-// (The given definition is for a Band Matrix.  Modify as 
+// (The given definition is for a Band Matrix.  Modify as
 // appropriate for the various other matrices.)
 //
 // #define GENMATRIX2 GenBandMatrix
@@ -44,18 +44,18 @@
 // Matrix + Matrix
 //
 
-template <class T, class T1, class T2> 
-class SUMMM : 
-    public MatrixComposite<T> 
+template <typename T, typename T1, typename T2>
+class SUMMM :
+    public MatrixComposite<T>
 {
 public:
     inline SUMMM(
-        const T _x1, const GenMatrix<T1>& _m1, 
+        const T _x1, const GenMatrix<T1>& _m1,
         const T _x2, const GENMATRIX2<T2>& _m2) :
         x1(_x1), m1(_m1), x2(_x2), m2(_m2)
-    { 
+    {
         TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize()); 
+        TMVAssert(m1.rowsize() == m2.rowsize());
     }
     inline ptrdiff_t colsize() const { return m1.colsize(); }
     inline ptrdiff_t rowsize() const { return m1.rowsize(); }
@@ -64,13 +64,13 @@ public:
     inline T getX2() const { return x2; }
     inline const GENMATRIX2<T2>& getM2() const { return m2; }
     inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
-    { 
+    {
         TMVAssert(isReal(T()));
         TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
         AddMM(x1,m1,x2,m2,m0);
     }
     inline void assignToM(MatrixView<TMV_ComplexType(T)> m0) const
-    { 
+    {
         TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
         AddMM(x1,m1,x2,m2,m0);
     }
@@ -81,47 +81,47 @@ private:
     const GENMATRIX2<T2>& m2;
 };
 
-template <class T> 
+template <typename T>
 inline MatrixView<T> operator+=(
-    MatrixView<T> m1, const GENMATRIX2<T>& m2) 
-{ 
-    TMVAssert(m1.colsize() == m2.colsize());
-    TMVAssert(m1.rowsize() == m2.rowsize());
-    AddMM(T(1),m2,m1); 
-    return m1; 
-}
-
-template <class T> 
-inline MatrixView<CT> operator+=(
-    MatrixView<CT> m1, const GENMATRIX2<T>& m2) 
+    MatrixView<T> m1, const GENMATRIX2<T>& m2)
 {
     TMVAssert(m1.colsize() == m2.colsize());
     TMVAssert(m1.rowsize() == m2.rowsize());
-    AddMM(CT(1),m2,m1); 
-    return m1; 
+    AddMM(T(1),m2,m1);
+    return m1;
 }
 
-template <class T> 
+template <typename T>
+inline MatrixView<CT> operator+=(
+    MatrixView<CT> m1, const GENMATRIX2<T>& m2)
+{
+    TMVAssert(m1.colsize() == m2.colsize());
+    TMVAssert(m1.rowsize() == m2.rowsize());
+    AddMM(CT(1),m2,m1);
+    return m1;
+}
+
+template <typename T>
 inline MatrixView<T> operator-=(
-    MatrixView<T> m1, const GENMATRIX2<T>& m2) 
-{ 
+    MatrixView<T> m1, const GENMATRIX2<T>& m2)
+{
     TMVAssert(m1.colsize() == m2.colsize());
     TMVAssert(m1.rowsize() == m2.rowsize());
-    AddMM(T(-1),m2,m1); 
-    return m1; 
+    AddMM(T(-1),m2,m1);
+    return m1;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator-=(
-    MatrixView<CT> m1, const GENMATRIX2<T>& m2) 
-{ 
+    MatrixView<CT> m1, const GENMATRIX2<T>& m2)
+{
     TMVAssert(m1.colsize() == m2.colsize());
     TMVAssert(m1.rowsize() == m2.rowsize());
-    AddMM(CT(-1),m2,m1); 
-    return m1; 
+    AddMM(CT(-1),m2,m1);
+    return m1;
 }
 
-template <class T, class T2> 
+template <typename T, typename T2>
 inline MatrixView<T> operator+=(
     MatrixView<T> m, const PRODXM2<T,T2>& pxm)
 {
@@ -131,7 +131,7 @@ inline MatrixView<T> operator+=(
     return m;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator+=(
     MatrixView<CT> m, const PRODXM2<T,T>& pxm)
 {
@@ -141,7 +141,7 @@ inline MatrixView<CT> operator+=(
     return m;
 }
 
-template <class T, class T2> 
+template <typename T, typename T2>
 inline MatrixView<T> operator-=(
     MatrixView<T> m, const PRODXM2<T,T2>& pxm)
 {
@@ -151,7 +151,7 @@ inline MatrixView<T> operator-=(
     return m;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator-=(
     MatrixView<CT> m, const PRODXM2<T,T>& pxm)
 {
@@ -170,13 +170,13 @@ inline MatrixView<CT> operator-=(
 // Matrix * Matrix
 //
 
-template <class T, class T1, class T2> 
-class PRODMM : 
+template <typename T, typename T1, typename T2>
+class PRODMM :
     public MatrixComposite<T>
 {
 public:
     inline PRODMM(
-        const T _x, const GenMatrix<T1>& _m1, 
+        const T _x, const GenMatrix<T1>& _m1,
         const GENMATRIX2<T2>& _m2) : x(_x), m1(_m1), m2(_m2)
     { TMVAssert(m1.rowsize() == m2.colsize()) ; }
     inline ptrdiff_t colsize() const { return m1.colsize(); }
@@ -201,84 +201,84 @@ private:
     const GENMATRIX2<T2>& m2;
 };
 
-template <class T> 
+template <typename T>
 inline MatrixView<T> operator*=(
     MatrixView<T> m1, const GENMATRIX2<T>& m2)
-{ 
+{
     TMVAssert(m2.colsize()==m2.rowsize());
     TMVAssert(m1.rowsize()==m2.rowsize());
-    MultMM<false>(T(1),m1,m2,m1); 
-    return m1; 
+    MultMM<false>(T(1),m1,m2,m1);
+    return m1;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator*=(
     MatrixView<CT> m1, const GENMATRIX2<T>& m2)
-{ 
+{
     TMVAssert(m2.colsize()==m2.rowsize());
     TMVAssert(m1.rowsize()==m2.rowsize());
-    MultMM<false>(CT(1),m1,m2,m1); 
-    return m1; 
+    MultMM<false>(CT(1),m1,m2,m1);
+    return m1;
 }
 
-template <class T, class T2> 
+template <typename T, typename T2>
 inline MatrixView<T> operator*=(
     MatrixView<T> m1, const PRODXM2<T,T2>& pxm)
-{ 
+{
     TMVAssert(pxm.colsize()==pxm.rowsize());
     TMVAssert(m1.rowsize()==pxm.rowsize());
-    MultMM<false>(pxm.getX(),m1,pxm.getM(),m1); 
-    return m1; 
+    MultMM<false>(pxm.getX(),m1,pxm.getM(),m1);
+    return m1;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator*=(
     MatrixView<CT> m1, const PRODXM2<T,T>& pxm)
-{ 
+{
     TMVAssert(pxm.colsize()==pxm.rowsize());
     TMVAssert(m1.rowsize()==pxm.rowsize());
-    MultMM<false>(CT(pxm.getX()),m1,pxm.getM(),m1); 
-    return m1; 
+    MultMM<false>(CT(pxm.getX()),m1,pxm.getM(),m1);
+    return m1;
 }
 
-template <class T, class T2, class T3> 
+template <typename T, typename T2, typename T3>
 inline MatrixView<T> operator+=(
     MatrixView<T> m, const PRODMM<T,T2,T3>& pmm)
-{ 
+{
     TMVAssert(m.colsize() == pmm.colsize());
     TMVAssert(m.rowsize() == pmm.rowsize());
-    MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-    return m; 
+    MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+    return m;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator+=(
     MatrixView<CT> m, const PRODMM<T,T,T>& pmm)
-{ 
+{
     TMVAssert(m.colsize() == pmm.colsize());
     TMVAssert(m.rowsize() == pmm.rowsize());
-    MultMM<true>(CT(pmm.getX()),pmm.getM1(),pmm.getM2(),m); 
-    return m; 
+    MultMM<true>(CT(pmm.getX()),pmm.getM1(),pmm.getM2(),m);
+    return m;
 }
 
-template <class T, class T2, class T3> 
+template <typename T, typename T2, typename T3>
 inline MatrixView<T> operator-=(
     MatrixView<T> m, const PRODMM<T,T2,T3>& pmm)
-{ 
+{
     TMVAssert(m.colsize() == pmm.colsize());
     TMVAssert(m.rowsize() == pmm.rowsize());
-    MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-    return m; 
+    MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+    return m;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator-=(
     MatrixView<CT> m, const PRODMM<T,T,T>& pmm)
-{ 
+{
     TMVAssert(m.colsize() == pmm.colsize());
     TMVAssert(m.rowsize() == pmm.rowsize());
-    MultMM<true>(CT(-pmm.getX()),pmm.getM1(),pmm.getM2(),m); 
-    return m; 
+    MultMM<true>(CT(-pmm.getX()),pmm.getM1(),pmm.getM2(),m);
+    return m;
 }
 
 #include "tmv/TMV_AuxProdMM.h"
@@ -290,7 +290,7 @@ inline MatrixView<CT> operator-=(
 // Matrix / % Matrix
 //
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 class QUOTMM : public MatrixComposite<T>
 {
 public:
@@ -322,7 +322,7 @@ protected:
     const GENMATRIX2<T2>& m2;
 };
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 class TQUOTMM : public QUOTMM<T,T1,T2>
 {
 public :
@@ -338,8 +338,8 @@ private :
     mutable auto_ptr<Matrix<T1,ColMajor> > m1p;
 };
 
-template <class T, class T1, class T2> 
-class RQUOTMM : 
+template <typename T, typename T1, typename T2>
+class RQUOTMM :
     public MatrixComposite<T>
 {
 public:
@@ -371,7 +371,7 @@ protected:
     const GENMATRIX2<T2>& m2;
 };
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 class TRQUOTMM : public RQUOTMM<T,T1,T2>
 {
 public :
@@ -387,67 +387,67 @@ private :
     mutable auto_ptr<Matrix<T1,RowMajor> > m1p;
 };
 
-template <class T> 
+template <typename T>
 inline MatrixView<T> operator/=(
     MatrixView<T> m1, const GENMATRIX2<T>& m2)
-{ 
+{
     TMVAssert(m2.colsize() == m2.rowsize());
     TMVAssert(m1.colsize() == m2.rowsize());
-    m2.LDivEq(m1); 
-    return m1; 
+    m2.LDivEq(m1);
+    return m1;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator/=(
     MatrixView<CT> m1, const GENMATRIX2<T>& m2)
-{ 
+{
     TMVAssert(m2.colsize() == m2.rowsize());
     TMVAssert(m1.colsize() == m2.rowsize());
-    m2.LDivEq(m1); 
-    return m1; 
+    m2.LDivEq(m1);
+    return m1;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<T> operator%=(
     MatrixView<T> m1, const GENMATRIX2<T>& m2)
-{ 
+{
     TMVAssert(m2.colsize() == m2.rowsize());
     TMVAssert(m1.rowsize() == m2.rowsize());
-    m2.RDivEq(m1); 
-    return m1; 
+    m2.RDivEq(m1);
+    return m1;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator%=(
     MatrixView<CT> m1, const GENMATRIX2<T>& m2)
-{ 
+{
     TMVAssert(m2.colsize() == m2.rowsize());
     TMVAssert(m1.rowsize() == m2.rowsize());
-    m2.RDivEq(m1); 
-    return m1; 
+    m2.RDivEq(m1);
+    return m1;
 }
 
 
-template <class T, class Tm> 
+template <typename T, typename Tm>
 inline MatrixView<T> operator*=(
     MatrixView<T> m1, const QUOTXM<T,Tm>& qxm)
-{ 
+{
     TMVAssert(qxm.getM().isSquare());
     TMVAssert(m1.rowsize() == qxm.getM().rowsize());
-    qxm.getM().RDivEq(m1); 
+    qxm.getM().RDivEq(m1);
     m1 *= qxm.getX();
-    return m1; 
+    return m1;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator*=(
     MatrixView<CT> m1, const QUOTXM<T,T>& qxm)
-{ 
+{
     TMVAssert(qxm.getM().isSquare());
     TMVAssert(m1.rowsize() == qxm.getM().rowsize());
-    qxm.getM().RDivEq(m1); 
+    qxm.getM().RDivEq(m1);
     m1 *= qxm.getX();
-    return m1; 
+    return m1;
 }
 
 #include "tmv/TMV_AuxQuotMM.h"

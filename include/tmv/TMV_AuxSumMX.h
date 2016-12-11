@@ -49,7 +49,7 @@
 #define VCT VarConjRef<std::complex<T> >
 #endif
 
-#ifndef SUMMX_1 
+#ifndef SUMMX_1
 #define SUMMX_1 SUMMX
 #define NO_1
 #endif
@@ -69,39 +69,39 @@ inline SUMMX_1<long double,int> operator+(
     const GENMATRIX<int>& m1, long double x2)
 { return SUMMX_1<long double,int>((long double)(1),m1,x2); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,int X2> operator+(const GENMATRIX<int X1>& m1, CCT x2)
 { return SUMMX_1<CT,int X2>(CT(1),m1,CT(x2)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,int X2> operator+(const GENMATRIX<int X1>& m1, VCT x2)
 { return SUMMX_1<CT,int X2>(CT(1),m1,CT(x2)); }
 #else
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<T,T X2> operator+(const GENMATRIX<T X1>& m1, T x2)
 { return SUMMX_1<T,T X2>(T(1),m1,x2); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,T X2> operator+(const GENMATRIX<T X1>& m1, CT x2)
 { return SUMMX_1<CT,T X2>(CT(1),m1,x2); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,T X2> operator+(const GENMATRIX<T X1>& m1, CCT x2)
 { return SUMMX_1<CT,T X2>(CT(1),m1,CT(x2)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,T X2> operator+(const GENMATRIX<T X1>& m1, VCT x2)
 { return SUMMX_1<CT,T X2>(CT(1),m1,CT(x2)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,CT X2> operator+(const GENMATRIX<CT X1>& m1, T x2)
 { return SUMMX_1<CT,CT X2>(CT(1),m1,x2); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,CT X2> operator+(const GENMATRIX<CT X1>& m1, CCT x2)
 { return SUMMX_1<CT,CT X2>(CT(1),m1,CT(x2)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,CT X2> operator+(const GENMATRIX<CT X1>& m1, VCT x2)
 { return SUMMX_1<CT,CT X2>(CT(1),m1,CT(x2)); }
 #endif
@@ -121,39 +121,39 @@ inline SUMMX_1<long double,int> operator+(
     long double x1, const GENMATRIX<int>& m2)
 { return SUMMX_1<long double,int>((long double)(1),m2,x1); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,int X2> operator+(CCT x1, const GENMATRIX<int X1>& m2)
 { return SUMMX_1<CT,int X2>(CT(1),m2,CT(x1)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,int X2> operator+(VCT x1, const GENMATRIX<int X1>& m2)
 { return SUMMX_1<CT,int X2>(CT(1),m2,CT(x1)); }
 #else
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<T,T X2> operator+(T x1, const GENMATRIX<T X1>& m2)
 { return SUMMX_1<T,T X2>(T(1),m2,x1); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,T X2> operator+(CT x1, const GENMATRIX<T X1>& m2)
 { return SUMMX_1<CT,T X2>(CT(1),m2,x1); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,T X2> operator+(CCT x1, const GENMATRIX<T X1>& m2)
 { return SUMMX_1<CT,T X2>(CT(1),m2,CT(x1)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,T X2> operator+(VCT x1, const GENMATRIX<T X1>& m2)
 { return SUMMX_1<CT,T X2>(CT(1),m2,CT(x1)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,CT X2> operator+(T x1, const GENMATRIX<CT X1>& m2)
 { return SUMMX_1<CT,CT X2>(CT(1),m2,x1); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,CT X2> operator+(CCT x1, const GENMATRIX<CT X1>& m2)
 { return SUMMX_1<CT,CT X2>(CT(1),m2,CT(x1)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,CT X2> operator+(VCT x1, const GENMATRIX<CT X1>& m2)
 { return SUMMX_1<CT,CT X2>(CT(1),m2,CT(x1)); }
 #endif
@@ -173,39 +173,39 @@ inline SUMMX_1<long double,int> operator-(
     const GENMATRIX<int>& m1, long double x2)
 { return SUMMX_1<long double,int>((long double)(1),m1,-x2); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,int X2> operator-(const GENMATRIX<int X1>& m1, CCT x2)
 { return SUMMX_1<CT,int X2>(CT(1),m1,-CT(x2)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,int X2> operator-(const GENMATRIX<int X1>& m1, VCT x2)
 { return SUMMX_1<CT,int X2>(CT(1),m1,-CT(x2)); }
 #else
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<T,T X2> operator-(const GENMATRIX<T X1>& m1, T x2)
 { return SUMMX_1<T,T X2>(T(1),m1,-x2); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,T X2> operator-(const GENMATRIX<T X1>& m1, CT x2)
 { return SUMMX_1<CT,T X2>(CT(1),m1,-x2); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,T X2> operator-(const GENMATRIX<T X1>& m1, CCT x2)
 { return SUMMX_1<CT,T X2>(CT(1),m1,-CT(x2)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,T X2> operator-(const GENMATRIX<T X1>& m1, VCT x2)
 { return SUMMX_1<CT,T X2>(CT(1),m1,-CT(x2)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,CT X2> operator-(const GENMATRIX<CT X1>& m1, T x2)
 { return SUMMX_1<CT,CT X2>(CT(1),m1,-x2); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,CT X2> operator-(const GENMATRIX<CT X1>& m1, CCT x2)
 { return SUMMX_1<CT,CT X2>(CT(1),m1,-CT(x2)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX_1<CT,CT X2> operator-(const GENMATRIX<CT X1>& m1, VCT x2)
 { return SUMMX_1<CT,CT X2>(CT(1),m1,-CT(x2)); }
 #endif
@@ -225,354 +225,354 @@ inline SUMMX<long double,int> operator-(
     long double x1, const GENMATRIX<int>& m2)
 { return SUMMX<long double,int>((long double)(-1),m2,x1); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,int X2> operator-(CCT x1, const GENMATRIX<int X1>& m2)
 { return SUMMX<CT,int X2>(CT(-1),m2,CT(x1)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,int X2> operator-(VCT x1, const GENMATRIX<int X1>& m2)
 { return SUMMX<CT,int X2>(CT(-1),m2,CT(x1)); }
 #undef INTT
 #else
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<T,T X2> operator-(T x1, const GENMATRIX<T X1>& m2)
 { return SUMMX<T,T X2>(T(-1),m2,x1); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator-(CT x1, const GENMATRIX<T X1>& m2)
 { return SUMMX<CT,T X2>(CT(-1),m2,x1); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator-(CCT x1, const GENMATRIX<T X1>& m2)
 { return SUMMX<CT,T X2>(CT(-1),m2,CT(x1)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator-(VCT x1, const GENMATRIX<T X1>& m2)
 { return SUMMX<CT,T X2>(CT(-1),m2,CT(x1)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,CT X2> operator-(T x1, const GENMATRIX<CT X1>& m2)
 { return SUMMX<CT,CT X2>(CT(-1),m2,x1); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,CT X2> operator-(CCT x1, const GENMATRIX<CT X1>& m2)
 { return SUMMX<CT,CT X2>(CT(-1),m2,CT(x1)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,CT X2> operator-(VCT x1, const GENMATRIX<CT X1>& m2)
 { return SUMMX<CT,CT X2>(CT(-1),m2,CT(x1)); }
 #endif
 
 // -(x*m+x)
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<T,T1 X2> operator-(const SUMMX<T,T1 X2>& smx)
 { return SUMMX<T,T1 X2>(-smx.getX1(),smx.getM(),-smx.getX2); }
 
 // x*(x*m+x)
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<T,T1 X2> operator*(const T x, const SUMMX<T,T1 X2>& smx)
 { return SUMMX<T,T1 X2>(smx.getX1()*x,smx.getM(),smx.getX2()*x); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const T x, const SUMMX<CT,T1 X2>& smx)
 { return SUMMX<CT,T1 X2>(smx.getX1()*x,smx.getM(),smx.getX2()*x); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const CT x, const SUMMX<T,T X2>& smx)
 { return SUMMX<CT,T X2>(smx.getX1()*x,smx.getM(),smx.getX2()*x); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const CCT x, const SUMMX<T,T X2>& smx)
 { return SUMMX<CT,T X2>(smx.getX1()*CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const VCT x, const SUMMX<T,T X2>& smx)
 { return SUMMX<CT,T X2>(smx.getX1()*CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const CCT x, const SUMMX<CT,T1 X2>& smx)
 { return SUMMX<CT,T1 X2>(smx.getX1()*CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const VCT x, const SUMMX<CT,T1 X2>& smx)
 { return SUMMX<CT,T1 X2>(smx.getX1()*CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
 // (x*m+x)*x
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<T,T1 X2> operator*(const SUMMX<T,T1 X2>& smx, const T x)
 { return SUMMX<T,T1 X2>(smx.getX1()*x,smx.getM(),smx.getX2()*x); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const SUMMX<CT,T1 X2>& smx, const T x)
 { return SUMMX<CT,T1 X2>(smx.getX1()*x,smx.getM(),smx.getX2()*x); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const SUMMX<T,T X2>& smx, const CT x)
 { return SUMMX<CT,T X2>(smx.getX1()*x,smx.getM(),smx.getX2()*x); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const SUMMX<T,T X2>& smx, const CCT x)
 { return SUMMX<CT,T X2>(smx.getX1()*CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const SUMMX<T,T X2>& smx, const VCT x)
 { return SUMMX<CT,T X2>(smx.getX1()*CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const SUMMX<CT,T1 X2>& smx, const CCT x)
 { return SUMMX<CT,T1 X2>(smx.getX1()*CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const SUMMX<CT,T1 X2>& smx, const VCT x)
 { return SUMMX<CT,T1 X2>(smx.getX1()*CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
 // (x*m+x)/x
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<T,T1 X2> operator/(const SUMMX<T,T1 X2>& smx, const T x)
 { return SUMMX<T,T1 X2>(TMV_Divide(smx.getX1(),x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator/(const SUMMX<CT,T1 X2>& smx, const T x)
 { return SUMMX<CT,T1 X2>(TMV_Divide(smx.getX1(),x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator/(const SUMMX<T,T X2>& smx, const CT x)
 { return SUMMX<CT,T X2>(TMV_Divide(smx.getX1(),x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator/(const SUMMX<T,T X2>& smx, const CCT x)
 { return SUMMX<CT,T X2>(TMV_Divide(smx.getX1(),CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator/(const SUMMX<T,T X2>& smx, const VCT x)
 { return SUMMX<CT,T X2>(TMV_Divide(smx.getX1(),CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator/(const SUMMX<CT,T1 X2>& smx, const CCT x)
 { return SUMMX<CT,T1 X2>(TMV_Divide(smx.getX1(),CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator/(const SUMMX<CT,T1 X2>& smx, const VCT x)
 { return SUMMX<CT,T1 X2>(TMV_Divide(smx.getX1(),CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
 // x+(x*m)
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<T,T2 X2> operator+(const T x3, const PRODXM<T,T2 X1>& pxm)
 { return SUMMX<T,T2 X2>(pxm.getX1(),pxm.getM2(),x3); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator+(const T x3, const PRODXM<CT,T2 X1>& pxm)
 { return SUMMX<CT,T2 X2>(pxm.getX1(),pxm.getM2(),x3); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator+(const CT x3, const PRODXM<T,T X1>& pxm)
 { return SUMMX<CT,T X2>(pxm.getX1(),pxm.getM2(),x3); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator+(const CCT x3, const PRODXM<T,T X1>& pxm)
 { return SUMMX<CT,T X2>(pxm.getX1(),pxm.getM2(),CT(x3)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator+(const VCT x3, const PRODXM<T,T X1>& pxm)
 { return SUMMX<CT,T X2>(pxm.getX1(),pxm.getM2(),CT(x3)); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator+(const CCT x3, const PRODXM<CT,T2 X1>& pxm)
 { return SUMMX<CT,T2 X2>(pxm.getX1(),pxm.getM2(),CT(x3)); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator+(const VCT x3, const PRODXM<CT,T2 X1>& pxm)
 { return SUMMX<CT,T2 X2>(pxm.getX1(),pxm.getM2(),CT(x3)); }
 
 // (x*m)+x
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<T,T2 X2> operator+(const PRODXM<T,T2 X1>& pxm, const T x3)
 { return SUMMX<T,T2 X2>(pxm.getX1(),pxm.getM2(),x3); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator+(const PRODXM<CT,T2 X1>& pxm, const T x3)
 { return SUMMX<CT,T2 X2>(pxm.getX1(),pxm.getM2(),x3); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator+(const PRODXM<T,T X1>& pxm, const CT x3)
 { return SUMMX<CT,T X2>(pxm.getX1(),pxm.getM2(),x3); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator+(const PRODXM<T,T X1>& pxm, const CCT x3)
 { return SUMMX<CT,T X2>(pxm.getX1(),pxm.getM2(),CT(x3)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator+(const PRODXM<T,T X1>& pxm, const VCT x3)
 { return SUMMX<CT,T X2>(pxm.getX1(),pxm.getM2(),CT(x3)); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator+(const PRODXM<CT,T2 X1>& pxm, const CCT x3)
 { return SUMMX<CT,T2 X2>(pxm.getX1(),pxm.getM2(),CT(x3)); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator+(const PRODXM<CT,T2 X1>& pxm, const VCT x3)
 { return SUMMX<CT,T2 X2>(pxm.getX1(),pxm.getM2(),CT(x3)); }
 
 // x-(x*m)
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<T,T2 X2> operator-(const T x3, const PRODXM<T,T2 X1>& pxm)
 { return SUMMX<T,T2 X2>(-pxm.getX1(),pxm.getM2(),x3); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator-(const T x3, const PRODXM<CT,T2 X1>& pxm)
 { return SUMMX<CT,T2 X2>(-pxm.getX1(),pxm.getM2(),x3); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator-(const CT x3, const PRODXM<T,T X1>& pxm)
 { return SUMMX<CT,T X2>(-pxm.getX1(),pxm.getM2(),x3); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator-(const CCT x3, const PRODXM<T,T X1>& pxm)
 { return SUMMX<CT,T X2>(-pxm.getX1(),pxm.getM2(),CT(x3)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator-(const VCT x3, const PRODXM<T,T X1>& pxm)
 { return SUMMX<CT,T X2>(-pxm.getX1(),pxm.getM2(),CT(x3)); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator-(const CCT x3, const PRODXM<CT,T2 X1>& pxm)
 { return SUMMX<CT,T2 X2>(-pxm.getX1(),pxm.getM2(),CT(x3)); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator-(const VCT x3, const PRODXM<CT,T2 X1>& pxm)
 { return SUMMX<CT,T2 X2>(-pxm.getX1(),pxm.getM2(),CT(x3)); }
 
 // (x*m)-x
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<T,T2 X2> operator-(const PRODXM<T,T2 X1>& pxm, const T x3)
 { return SUMMX<T,T2 X2>(pxm.getX1(),pxm.getM2(),-x3); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator-(const PRODXM<CT,T2 X1>& pxm, const T x3)
 { return SUMMX<CT,T2 X2>(pxm.getX1(),pxm.getM2(),-x3); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator-(const PRODXM<T,T X1>& pxm, const CT x3)
 { return SUMMX<CT,T X2>(pxm.getX1(),pxm.getM2(),-x3); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator-(const PRODXM<T,T X1>& pxm, const CCT x3)
 { return SUMMX<CT,T X2>(pxm.getX1(),pxm.getM2(),-CT(x3)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator-(const PRODXM<T,T X1>& pxm, const VCT x3)
 { return SUMMX<CT,T X2>(pxm.getX1(),pxm.getM2(),-CT(x3)); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator-(const PRODXM<CT,T2 X1>& pxm, const CCT x3)
 { return SUMMX<CT,T2 X2>(pxm.getX1(),pxm.getM2(),-CT(x3)); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline SUMMX<CT,T2 X2> operator-(const PRODXM<CT,T2 X1>& pxm, const VCT x3)
 { return SUMMX<CT,T2 X2>(pxm.getX1(),pxm.getM2(),-CT(x3)); }
 
 #ifndef NO_1
 // -(x*m+x)
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<T,T1 X2> operator-(const SUMMX_1<T,T1 X2>& smx)
 { return SUMMX<T,T1 X2>(T(-1),smx.getM(),-smx.getX2); }
 
 // x*(x*m+x)
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<T,T1 X2> operator*(const T x, const SUMMX_1<T,T1 X2>& smx)
 { return SUMMX<T,T1 X2>(x,smx.getM(),smx.getX2()*x); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const T x, const SUMMX_1<CT,T1 X2>& smx)
 { return SUMMX<CT,T1 X2>(x,smx.getM(),smx.getX2()*x); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const CT x, const SUMMX_1<T,T X2>& smx)
 { return SUMMX<CT,T X2>(x,smx.getM(),smx.getX2()*x); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const CCT x, const SUMMX_1<T,T X2>& smx)
 { return SUMMX<CT,T X2>(CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const VCT x, const SUMMX_1<T,T X2>& smx)
 { return SUMMX<CT,T X2>(CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const CCT x, const SUMMX_1<CT,T1 X2>& smx)
 { return SUMMX<CT,T1 X2>(CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const VCT x, const SUMMX_1<CT,T1 X2>& smx)
 { return SUMMX<CT,T1 X2>(CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
 // (x*m+x)*x
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<T,T1 X2> operator*(const SUMMX_1<T,T1 X2>& smx, const T x)
 { return SUMMX<T,T1 X2>(x,smx.getM(),smx.getX2()*x); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const SUMMX_1<CT,T1 X2>& smx, const T x)
 { return SUMMX<CT,T1 X2>(x,smx.getM(),smx.getX2()*x); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const SUMMX_1<T,T X2>& smx, const CT x)
 { return SUMMX<CT,T X2>(x,smx.getM(),smx.getX2()*x); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const SUMMX_1<T,T X2>& smx, const CCT x)
 { return SUMMX<CT,T X2>(CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator*(const SUMMX_1<T,T X2>& smx, const VCT x)
 { return SUMMX<CT,T X2>(CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const SUMMX_1<CT,T1 X2>& smx, const CCT x)
 { return SUMMX<CT,T1 X2>(CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator*(const SUMMX_1<CT,T1 X2>& smx, const VCT x)
 { return SUMMX<CT,T1 X2>(CT(x),smx.getM(),smx.getX2()*CT(x)); }
 
 // (x*m+x)/x
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<T,T1 X2> operator/(const SUMMX_1<T,T1 X2>& smx, const T x)
 { return SUMMX<T,T1 X2>(TMV_InverseOf(x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator/(const SUMMX_1<CT,T1 X2>& smx, const T x)
 { return SUMMX<CT,T1 X2>(TMV_InverseOf(x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator/(const SUMMX_1<T,T X2>& smx, const CT x)
 { return SUMMX<CT,T X2>(TMV_InverseOf(x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator/(const SUMMX_1<T,T X2>& smx, const CCT x)
 { return SUMMX<CT,T X2>(TMV_InverseOf(CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
-template <class T Y> 
+template <typename T Y>
 inline SUMMX<CT,T X2> operator/(const SUMMX_1<T,T X2>& smx, const VCT x)
 { return SUMMX<CT,T X2>(TMV_InverseOf(CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator/(const SUMMX_1<CT,T1 X2>& smx, const CCT x)
 { return SUMMX<CT,T1 X2>(TMV_InverseOf(CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline SUMMX<CT,T1 X2> operator/(const SUMMX_1<CT,T1 X2>& smx, const VCT x)
 { return SUMMX<CT,T1 X2>(TMV_InverseOf(CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 #endif

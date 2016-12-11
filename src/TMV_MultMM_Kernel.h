@@ -38,7 +38,7 @@ namespace tmv {
     // If we have SSE commands, therea are specialized double and float
     // versions below.
     
-    template <class T>
+    template <typename T>
     static void generic_multmm_16_16_16(
         const T* A0, const T* B0, T* C0)
     {
@@ -259,7 +259,7 @@ namespace tmv {
             C0 += 16; 
         } while (--j2);
     }
-    template <class T>
+    template <typename T>
     static void generic_multmm_M_16_16(
         const ptrdiff_t M, const T* A0, const T* B0, T* C0)
     {
@@ -571,7 +571,7 @@ namespace tmv {
             C1 += M;
         } while (--j);
     }
-    template <class T>
+    template <typename T>
     static void generic_multmm_16_N_16(
         const ptrdiff_t N, const T* A0, const T* B0, T* C0)
     {
@@ -963,7 +963,7 @@ namespace tmv {
             } while (--i);
         }
     }
-    template <class T>
+    template <typename T>
     static void generic_multmm_16_16_K(
         const ptrdiff_t K, const T* A0, const T* B0, T* C0)
     {
@@ -1035,7 +1035,7 @@ namespace tmv {
             C0 += 16; C1 += 16;
         } while (--j);
     }
-    template <class T>
+    template <typename T>
     static void generic_multmm_M_N_K(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K, const ptrdiff_t Kd,
         const T* A0, const T* B0, T* C0)
@@ -1202,31 +1202,31 @@ namespace tmv {
     // First the ones that that just call the generic functions.
     // There are always inlined, but get overloaded below
     // as necessary depending on the INST_* definitions.
-    template <class T>
+    template <typename T>
     static void multmm_16_16_16(
         const ptrdiff_t , const ptrdiff_t , const ptrdiff_t ,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void multmm_M_16_16(
         const ptrdiff_t M, const ptrdiff_t , const ptrdiff_t ,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void multmm_16_N_16(
         const ptrdiff_t , const ptrdiff_t N, const ptrdiff_t ,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void multmm_16_16_K(
         const ptrdiff_t , const ptrdiff_t , const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void multmm_M_N_K(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
@@ -3439,67 +3439,67 @@ namespace tmv {
     // a generic T, then the overloaded functions cannot be specified.
     // So we specify this one instead.
 
-    template <class T>
+    template <typename T>
     static void call_multmm_16_16_16(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_16_16(M,N,K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void call_multmm_M_16_16(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_M_16_16(M,N,K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void call_multmm_16_N_16(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_N_16(M,N,K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void call_multmm_16_16_32(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_16_32(M,N,K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void call_multmm_M_16_32(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_M_16_32(M,N,K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void call_multmm_16_N_32(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_N_32(M,N,K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void call_multmm_16_16_64(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_16_64(M,N,K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void call_multmm_M_16_64(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_M_16_64(M,N,K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void call_multmm_16_N_64(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_N_64(M,N,K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void call_multmm_16_16_K(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_16_K(M,N,K,A0,B0,C0); }
 
-    template <class T>
+    template <typename T>
     static void call_multmm_M_N_K(
         const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)

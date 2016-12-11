@@ -27,37 +27,37 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T>
     class GenBandMatrix;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class ConstBandMatrixView;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class BandMatrixView;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class BandMatrix;
 
-    template <class T> 
+    template <typename T>
     class BandLUDiv;
 
-    template <class T> 
+    template <typename T>
     class BandSVDiv;
 
-    template <class T> 
+    template <typename T>
     class BandQRDiv;
 
-    template <class T, class Tm> 
+    template <typename T, typename Tm>
     class QuotXB;
 
     ptrdiff_t BandStorageLength(StorageType s, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi);
     ptrdiff_t BandNumElements(ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi);
 
-    template <class T1, class T2> 
+    template <typename T1, typename T2>
     void Copy(const GenBandMatrix<T1>& m1, BandMatrixView<T2> m2);
 
-    template <class T> 
+    template <typename T>
     struct AssignableToBandMatrix : virtual public AssignableToMatrix<T>
     {
         typedef TMV_RealType(T) RT;
@@ -69,25 +69,25 @@ namespace tmv {
         virtual inline ~AssignableToBandMatrix() {}
     };
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const BandMatrix<T,A>& )
-    { 
+    {
         return std::string("BandMatrix<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T> 
+    template <typename T>
     inline std::string TMV_Text(const GenBandMatrix<T>& )
     {
         return std::string("GenBandMatrix<") + TMV_Text(T()) + ">";
     }
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const ConstBandMatrixView<T,A>& )
     {
         return std::string("ConstBandMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const BandMatrixView<T,A>& )
     {
         return std::string("BandMatrixView<") +

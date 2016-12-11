@@ -33,15 +33,15 @@ namespace tmv {
     // TriMatrix + SymBandMatrix
     //
 
-    template <class T, class T1, class T2> 
-    class SumUsB : public MatrixComposite<T> 
+    template <typename T, typename T1, typename T2>
+    class SumUsB : public MatrixComposite<T>
     {
     public:
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
         inline SumUsB(
-            T _x1, const GenUpperTriMatrix<T1>& _m1, 
+            T _x1, const GenUpperTriMatrix<T1>& _m1,
             T _x2, const GenSymBandMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
@@ -52,7 +52,7 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
         inline void assignToM(MatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -66,7 +66,7 @@ namespace tmv {
             }
         }
         inline void assignToM(MatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             if (SameStorage(m0,m2)) {
@@ -85,15 +85,15 @@ namespace tmv {
         const GenSymBandMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
-    class SumLsB : public MatrixComposite<T> 
+    template <typename T, typename T1, typename T2>
+    class SumLsB : public MatrixComposite<T>
     {
     public:
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
         inline SumLsB(
-            T _x1, const GenLowerTriMatrix<T1>& _m1, 
+            T _x1, const GenLowerTriMatrix<T1>& _m1,
             T _x2, const GenSymBandMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
@@ -104,7 +104,7 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
         inline void assignToM(MatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -118,7 +118,7 @@ namespace tmv {
             }
         }
         inline void assignToM(MatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             if (SameStorage(m0,m2)) {
@@ -164,7 +164,7 @@ namespace tmv {
     // TriMatrix * SymBandMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdUsB : public MatrixComposite<T>
     {
     public:
@@ -214,7 +214,7 @@ namespace tmv {
         const GenSymBandMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdsBU : public MatrixComposite<T>
     {
     public:
@@ -264,7 +264,7 @@ namespace tmv {
         const GenUpperTriMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdLsB : public MatrixComposite<T>
     {
     public:
@@ -314,7 +314,7 @@ namespace tmv {
         const GenSymBandMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdsBL : public MatrixComposite<T>
     {
     public:
@@ -412,7 +412,7 @@ namespace tmv {
     // SymBandMatrix / % TriMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class QuotsBU : public MatrixComposite<T>
     {
     public:
@@ -450,7 +450,7 @@ namespace tmv {
         const GenUpperTriMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class RQuotsBU : public MatrixComposite<T>
     {
     public:
@@ -488,7 +488,7 @@ namespace tmv {
         const GenUpperTriMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class QuotsBL : public MatrixComposite<T>
     {
     public:
@@ -526,7 +526,7 @@ namespace tmv {
         const GenLowerTriMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class RQuotsBL : public MatrixComposite<T>
     {
     public:

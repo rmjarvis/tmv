@@ -31,15 +31,15 @@ namespace tmv {
     // SymBandMatrix + SymMatrix
     //
 
-    template <class T, class T1, class T2> 
-    class SumsBS : public SymMatrixComposite<T> 
+    template <typename T, typename T1, typename T2>
+    class SumsBS : public SymMatrixComposite<T>
     {
     public:
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
         inline SumsBS(
-            T _x1, const GenSymBandMatrix<T1>& _m1, 
+            T _x1, const GenSymBandMatrix<T1>& _m1,
             T _x2, const GenSymMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
@@ -51,7 +51,7 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline const GenSymMatrix<T2>& getM2() const { return m2; }
         inline void assignToM(MatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
@@ -65,7 +65,7 @@ namespace tmv {
             }
         }
         inline void assignToM(MatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             if (SameStorage(m0,m1)) {
@@ -131,7 +131,7 @@ namespace tmv {
         const GenSymMatrix<T2>& m2;
     };
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<T> operator+=(
         SymMatrixView<T> m1, const GenSymBandMatrix<T>& m2)
     {
@@ -141,7 +141,7 @@ namespace tmv {
         return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<CT> operator+=(
         SymMatrixView<CT> m1, const GenSymBandMatrix<T>& m2)
     {
@@ -150,7 +150,7 @@ namespace tmv {
         return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<T> operator-=(
         SymMatrixView<T> m1, const GenSymBandMatrix<T>& m2)
     {
@@ -160,7 +160,7 @@ namespace tmv {
         return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<CT> operator-=(
         SymMatrixView<CT> m1, const GenSymBandMatrix<T>& m2)
     {
@@ -169,7 +169,7 @@ namespace tmv {
         return m1;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline SymMatrixView<T> operator+=(
         SymMatrixView<T> m, const ProdXsB<T,T2>& pxm)
     {
@@ -180,7 +180,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<CT> operator+=(
         SymMatrixView<CT> m, const ProdXsB<T,T>& pxm)
     {
@@ -189,7 +189,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline SymMatrixView<T> operator-=(
         SymMatrixView<T> m, const ProdXsB<T,T2>& pxm)
     {
@@ -200,7 +200,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymMatrixView<CT> operator-=(
         SymMatrixView<CT> m, const ProdXsB<T,T>& pxm)
     {
@@ -227,7 +227,7 @@ namespace tmv {
     // SymBandMatrix * SymMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdsBS : public MatrixComposite<T>
     {
     public:
@@ -265,7 +265,7 @@ namespace tmv {
         const GenSymMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdSsB : public MatrixComposite<T>
     {
     public:
@@ -276,9 +276,9 @@ namespace tmv {
             T _x, const GenSymMatrix<T1>& _m1,
             const GenSymBandMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
-        { 
-            TMVAssert(m2.colsize() == m1.size()); 
-            TMVAssert(m2.rowsize() == m1.size()); 
+        {
+            TMVAssert(m2.colsize() == m1.size());
+            TMVAssert(m2.rowsize() == m1.size());
         }
         inline ptrdiff_t colsize() const { return m1.size(); }
         inline ptrdiff_t rowsize() const { return m1.size(); }
@@ -306,7 +306,7 @@ namespace tmv {
         const GenSymBandMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2>
+    template <typename T, typename T1, typename T2>
     inline MatrixView<T> operator+=(
         MatrixView<T> m, const ProdSsB<T,T1,T2>& pmm)
     {
@@ -316,7 +316,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<CT> operator+=(
         MatrixView<CT> m, const ProdSsB<T,T,T>& pmm)
     {
@@ -326,7 +326,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T, class T1, class T2>
+    template <typename T, typename T1, typename T2>
     inline MatrixView<T> operator-=(
         MatrixView<T> m, const ProdSsB<T,T1,T2>& pmm)
     {
@@ -336,7 +336,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<CT> operator-=(
         MatrixView<CT> m, const ProdSsB<T,T,T>& pmm)
     {
@@ -346,7 +346,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T, class T1, class T2>
+    template <typename T, typename T1, typename T2>
     inline MatrixView<T> operator+=(
         MatrixView<T> m, const ProdsBS<T,T1,T2>& pmm)
     {
@@ -356,7 +356,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<CT> operator+=(
         MatrixView<CT> m, const ProdsBS<T,T,T>& pmm)
     {
@@ -366,7 +366,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T, class T1, class T2>
+    template <typename T, typename T1, typename T2>
     inline MatrixView<T> operator-=(
         MatrixView<T> m, const ProdsBS<T,T1,T2>& pmm)
     {
@@ -376,7 +376,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<CT> operator-=(
         MatrixView<CT> m, const ProdsBS<T,T,T>& pmm)
     {

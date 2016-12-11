@@ -27,7 +27,7 @@
 
 namespace tmv {
 
-    template <bool herm, class T> 
+    template <bool herm, typename T> 
     void SymSquare(MatrixView<T> A);
 
 }

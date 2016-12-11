@@ -32,7 +32,7 @@ namespace tmv {
 #define CCT ConjRef<std::complex<T> >
 #define VCT VarConjRef<std::complex<T> >
 
-    template <class T>
+    template <typename T>
     class ProdPV : public VectorComposite<T>
     {
     public:
@@ -43,7 +43,7 @@ namespace tmv {
         inline const Permutation& getP() const { return p; }
         inline const GenVector<T>& getV() const { return v; }
         inline void assignToV(VectorView<TMV_RealType(T)> v0) const
-        { 
+        {
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T()));
             p.apply(v0=v);
@@ -58,7 +58,7 @@ namespace tmv {
         const GenVector<T>& v;
     };
 
-    template <class T>
+    template <typename T>
     class ProdVP : public VectorComposite<T>
     {
     public:
@@ -69,7 +69,7 @@ namespace tmv {
         inline const GenVector<T>& getV() const { return v; }
         inline const Permutation& getP() const { return p; }
         inline void assignToV(VectorView<TMV_RealType(T)> v0) const
-        { 
+        {
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T()));
             p.inverse().apply(v0=v);
@@ -84,15 +84,15 @@ namespace tmv {
         const Permutation& p;
     };
 
-    template <class T> 
+    template <typename T>
     inline ProdVP<T> operator*(const GenVector<T>& v, const Permutation& p)
     { return ProdVP<T>(v,p); }
 
-    template <class T> 
+    template <typename T>
     inline ProdPV<T> operator*(const Permutation& p, const GenVector<T>& v)
     { return ProdPV<T>(p,v); }
 
-    template <class T>
+    template <typename T>
     inline VectorView<T> operator*=(VectorView<T> v, const Permutation& p)
     {
         TMVAssert(v.size() == p.colsize());
@@ -100,7 +100,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T>
+    template <typename T>
     class ProdPM : public MatrixComposite<T>
     {
     public:
@@ -112,7 +112,7 @@ namespace tmv {
         inline const Permutation& getP() const { return p; }
         inline const BaseMatrix<T>& getM() const { return m; }
         inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             TMVAssert(isReal(T()));
@@ -129,9 +129,9 @@ namespace tmv {
         const BaseMatrix<T>& m;
     };
 
-    template <class T>
+    template <typename T>
     class ProdMP : public MatrixComposite<T>
-    {   
+    {
     public:
         inline ProdMP(const BaseMatrix<T>& _m, const Permutation& _p) :
             m(_m), p(_p)
@@ -142,7 +142,7 @@ namespace tmv {
         inline const BaseMatrix<T>& getM() const { return m; }
         inline const Permutation& getP() const { return p; }
         inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             TMVAssert(isReal(T()));
@@ -159,15 +159,15 @@ namespace tmv {
         const Permutation& p;
     };
 
-    template <class T> 
+    template <typename T>
     inline ProdMP<T> operator*(const BaseMatrix<T>& m, const Permutation& p)
     { return ProdMP<T>(m,p); }
 
-    template <class T> 
+    template <typename T>
     inline ProdPM<T> operator*(const Permutation& p, const BaseMatrix<T>& m)
     { return ProdPM<T>(p,m); }
 
-    template <class T>
+    template <typename T>
     inline MatrixView<T> operator*=(MatrixView<T> m, const Permutation& p)
     {
         TMVAssert(p.colsize()==p.rowsize());
@@ -176,7 +176,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T>
+    template <typename T>
     class QuotVP : public VectorComposite<T>
     {
     public:
@@ -202,7 +202,7 @@ namespace tmv {
         const Permutation& p;
     };
 
-    template <class T>
+    template <typename T>
     class RQuotVP : public VectorComposite<T>
     {
     public:
@@ -228,11 +228,11 @@ namespace tmv {
         const Permutation& p;
     };
 
-    template <class T> 
+    template <typename T>
     inline QuotVP<T> operator/(const GenVector<T>& v, const Permutation& p)
     { return QuotVP<T>(v,p); }
 
-    template <class T>
+    template <typename T>
     inline VectorView<T> operator/=(VectorView<T> v, const Permutation& p)
     {
         TMVAssert(p.colsize() == p.rowsize());
@@ -241,11 +241,11 @@ namespace tmv {
         return v;
     }
 
-    template <class T> 
+    template <typename T>
     inline RQuotVP<T> operator%(const GenVector<T>& v, const Permutation& p)
     { return RQuotVP<T>(v,p); }
 
-    template <class T>
+    template <typename T>
     inline VectorView<T> operator%=(VectorView<T> v, const Permutation& p)
     {
         TMVAssert(p.colsize() == p.rowsize());
@@ -254,11 +254,11 @@ namespace tmv {
         return v;
     }
 
-    template <class T>
+    template <typename T>
     class QuotMP : public MatrixComposite<T>
     {
     public:
-        inline QuotMP(const BaseMatrix<T>& _m, const Permutation& _p) : 
+        inline QuotMP(const BaseMatrix<T>& _m, const Permutation& _p) :
             m(_m), p(_p)
         { TMVAssert( m.colsize() == p.colsize() ); }
         inline ptrdiff_t colsize() const { return p.rowsize(); }
@@ -283,7 +283,7 @@ namespace tmv {
     };
 
 
-    template <class T>
+    template <typename T>
     class RQuotMP : public MatrixComposite<T>
     {
     public:
@@ -311,11 +311,11 @@ namespace tmv {
         const Permutation& p;
     };
 
-    template <class T> 
+    template <typename T>
     inline QuotMP<T> operator/(const BaseMatrix<T>& m, const Permutation& p)
     { return QuotMP<T>(m,p); }
 
-    template <class T>
+    template <typename T>
     inline MatrixView<T> operator/=(MatrixView<T> m, const Permutation& p)
     {
         TMVAssert(p.colsize()==p.rowsize());
@@ -324,11 +324,11 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline RQuotMP<T> operator%(const BaseMatrix<T>& m, const Permutation& p)
     { return RQuotMP<T>(m,p); }
 
-    template <class T>
+    template <typename T>
     inline MatrixView<T> operator%=(MatrixView<T> m, const Permutation& p)
     {
         TMVAssert(p.colsize()==p.rowsize());

@@ -26,42 +26,42 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T> 
     void QR_Decompose(
         BandMatrixView<T> QRx, VectorView<T> Qbeta, T& signdet);
 
-    template <class T> 
+    template <typename T> 
     void GetQFromBandQR(
         MatrixView<T> QRx, const GenVector<T>& Qbeta, ptrdiff_t nlo);
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void QR_LDivEq(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta,
         MatrixView<T> m);
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void QR_RDivEq(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta,
         MatrixView<T> m);
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2> 
     void QR_LDiv(
         const GenBandMatrix<T1>& QR, const GenVector<T1>& Qbeta,
         const GenMatrix<T2>& m, MatrixView<T> x);
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2> 
     void QR_RDiv(
         const GenBandMatrix<T1>& QR, const GenVector<T1>& Qbeta,
         const GenMatrix<T2>& m, MatrixView<T> x);
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void Q_LDivEq(
         const GenBandMatrix<T1>& Q, const GenVector<T1>& Qbeta,
         MatrixView<T> m);
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void Q_RDivEq(
         const GenBandMatrix<T1>& Q, const GenVector<T1>& Qbeta,
         MatrixView<T> m);
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void QR_Inverse(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta,
         MatrixView<T> m);
@@ -70,60 +70,60 @@ namespace tmv {
     // Specialize disallowed complex combinations:
 #define CT std::complex<T>
 
-    template <class T>
+    template <typename T>
     inline void QR_LDivEq(
         const GenBandMatrix<CT>& , const GenVector<CT>& ,
         MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void QR_RDivEq(
         const GenBandMatrix<CT>& , const GenVector<CT>& ,
         MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T>
+    template <typename T>
     inline void QR_LDiv(
         const GenBandMatrix<CT>& , const GenVector<CT>& ,
         const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void QR_LDiv(
         const GenBandMatrix<CT>& , const GenVector<CT>& ,
         const GenMatrix<T>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void QR_LDiv(
         const GenBandMatrix<T>& , const GenVector<T>& ,
         const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void QR_RDiv(
         const GenBandMatrix<CT>& , const GenVector<CT>& ,
         const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void QR_RDiv(
         const GenBandMatrix<CT>& , const GenVector<CT>& ,
         const GenMatrix<T>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void QR_RDiv(
         const GenBandMatrix<T>& , const GenVector<T>& ,
         const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T>
+    template <typename T>
     inline void Q_LDivEq(
         const GenBandMatrix<CT>& , const GenVector<CT>& ,
         MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void Q_RDivEq(
         const GenBandMatrix<CT>& , const GenVector<CT>& ,
         MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T>
+    template <typename T>
     inline void QR_Inverse(
         const GenBandMatrix<CT>& , const GenVector<CT>& ,
         MatrixView<T> )

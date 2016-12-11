@@ -25,7 +25,7 @@
 
 namespace tmv {
 
-    template <bool add, bool cx, class T, class Ta, class Tx> 
+    template <bool add, bool cx, typename T, typename Ta, typename Tx> 
     void UnitAMultMV1(
         const GenMatrix<Ta>& A, const GenVector<Tx>& x,
         VectorView<T> y);

@@ -24,7 +24,7 @@
 //
 // This file defines the TMV BaseMatrix class.
 //
-// This base class defines some of the things that all 
+// This base class defines some of the things that all
 // matrices need to be able to do, as well as some of the
 // arithmetic operations (those that return a Vector).
 // This should be used as the base class for generic
@@ -42,31 +42,31 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T>
     class BaseMatrix;
 
-    template <class T> 
+    template <typename T>
     class GenMatrix;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class ConstMatrixView;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class MatrixView;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class Matrix;
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A=0>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A=0>
     class SmallMatrix;
 
-    template <class T, ptrdiff_t M, ptrdiff_t N> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N>
     class SmallMatrixComposite;
 
-    template <class T> 
+    template <typename T>
     class Divider;
 
-    template <class T> 
+    template <typename T>
     struct AssignableToMatrix
     {
         typedef TMV_RealType(T) RT;
@@ -74,20 +74,20 @@ namespace tmv {
 
         virtual ptrdiff_t colsize() const = 0;
         virtual ptrdiff_t rowsize() const = 0;
-        inline ptrdiff_t ncols() const 
+        inline ptrdiff_t ncols() const
         { return rowsize(); }
-        inline ptrdiff_t nrows() const 
+        inline ptrdiff_t nrows() const
         { return colsize(); }
-        inline bool isSquare() const 
+        inline bool isSquare() const
         { return colsize() == rowsize(); }
 
-        virtual void assignToM(MatrixView<RT> m) const = 0; 
-        virtual void assignToM(MatrixView<CT> m) const = 0; 
+        virtual void assignToM(MatrixView<RT> m) const = 0;
+        virtual void assignToM(MatrixView<CT> m) const = 0;
 
         virtual inline ~AssignableToMatrix() {}
     };
 
-    template <class T> 
+    template <typename T>
     class BaseMatrix : virtual public AssignableToMatrix<T>
     {
     public :
@@ -121,7 +121,7 @@ namespace tmv {
         virtual RT maxAbsElement() const = 0;
         virtual RT maxAbs2Element() const = 0;
 
-        // 
+        //
         // I/O: Write
         //
 
@@ -131,7 +131,7 @@ namespace tmv {
 
     }; // BaseMatrix
 
-    template <class T> 
+    template <typename T>
     class DivHelper : virtual public AssignableToMatrix<T>
     {
     public:
@@ -143,23 +143,23 @@ namespace tmv {
         //
 
         DivHelper();
-        // Cannot do this inline, since need to delete pdiv, 
+        // Cannot do this inline, since need to delete pdiv,
         // and I only define DivImpl in BaseMatrix.cpp.
         virtual ~DivHelper();
 
         using AssignableToMatrix<T>::colsize;
         using AssignableToMatrix<T>::rowsize;
 
-        T det() const 
+        T det() const
         {
             TMVAssert(rowsize() == colsize());
-            return doDet(); 
+            return doDet();
         }
 
-        RT logDet(T* sign) const 
+        RT logDet(T* sign) const
         {
             TMVAssert(rowsize() == colsize());
-            return doLogDet(sign); 
+            return doLogDet(sign);
         }
 
         void makeInverse(MatrixView<T> minv) const
@@ -169,7 +169,7 @@ namespace tmv {
             doMakeInverse(minv);
         }
 
-        template <class T1> 
+        template <typename T1>
         inline void makeInverse(MatrixView<T1> minv) const
         {
             TMVAssert(minv.colsize() == rowsize());
@@ -177,7 +177,7 @@ namespace tmv {
             doMakeInverse(minv);
         }
 
-        template <class T1, int A>
+        template <typename T1, int A>
         inline void makeInverse(Matrix<T1,A>& minv) const
         {
             TMVAssert(minv.colsize() == rowsize());
@@ -186,20 +186,20 @@ namespace tmv {
         }
 
         inline void makeInverseATA(MatrixView<T> ata) const
-        { 
-            TMVAssert(ata.colsize() == 
+        {
+            TMVAssert(ata.colsize() ==
                       (rowsize() < colsize() ? rowsize() : colsize()));
-            TMVAssert(ata.rowsize() == 
+            TMVAssert(ata.rowsize() ==
                       (rowsize() < colsize() ? rowsize() : colsize()));
             doMakeInverseATA(ata);
         }
 
         template <int A>
         inline void makeInverseATA(Matrix<T,A>& ata) const
-        { 
-            TMVAssert(ata.colsize() == 
+        {
+            TMVAssert(ata.colsize() ==
                       (rowsize() < colsize() ? rowsize() : colsize()));
-            TMVAssert(ata.rowsize() == 
+            TMVAssert(ata.rowsize() ==
                       (rowsize() < colsize() ? rowsize() : colsize()));
             doMakeInverseATA(ata.view());
         }
@@ -210,63 +210,63 @@ namespace tmv {
         inline RT norm2() const
         {
             TMVAssert(divIsSet() && getDivType() == SV);
-            return doNorm2(); 
+            return doNorm2();
         }
 
         inline RT condition() const
         {
             TMVAssert(divIsSet() && getDivType() == SV);
-            return doCondition(); 
+            return doCondition();
         }
 
         // m^-1 * v -> v
-        template <class T1> 
-        inline void LDivEq(VectorView<T1> v) const 
+        template <typename T1>
+        inline void LDivEq(VectorView<T1> v) const
         {
             TMVAssert(colsize() == rowsize());
             TMVAssert(colsize() == v.size());
             doLDivEq(v);
         }
 
-        template <class T1> 
-        inline void LDivEq(MatrixView<T1> m) const 
-        { 
+        template <typename T1>
+        inline void LDivEq(MatrixView<T1> m) const
+        {
             TMVAssert(colsize() == rowsize());
             TMVAssert(colsize() == m.colsize());
             doLDivEq(m);
         }
 
         // v * m^-1 -> v
-        template <class T1> 
-        inline void RDivEq(VectorView<T1> v) const 
-        { 
+        template <typename T1>
+        inline void RDivEq(VectorView<T1> v) const
+        {
             TMVAssert(colsize() == rowsize());
             TMVAssert(colsize() == v.size());
             doRDivEq(v);
         }
 
-        template <class T1> 
-        inline void RDivEq(MatrixView<T1> m) const 
-        { 
+        template <typename T1>
+        inline void RDivEq(MatrixView<T1> m) const
+        {
             TMVAssert(colsize() == rowsize());
             TMVAssert(colsize() == m.rowsize());
             doRDivEq(m);
         }
 
         // m^-1 * v1 -> v0
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         inline void LDiv(
             const GenVector<T1>& v1, VectorView<T0> v0) const
-        { 
+        {
             TMVAssert(rowsize() == v0.size());
             TMVAssert(colsize() == v1.size());
             doLDiv(v1,v0);
         }
 
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         inline void LDiv(
             const GenMatrix<T1>& m1, MatrixView<T0> m0) const
-        { 
+        {
             TMVAssert(rowsize() == m0.colsize());
             TMVAssert(colsize() == m1.colsize());
             TMVAssert(m1.rowsize() == m0.rowsize());
@@ -274,19 +274,19 @@ namespace tmv {
         }
 
         // v1 * m^-1 -> v0
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         inline void RDiv(
             const GenVector<T1>& v1, VectorView<T0> v0) const
-        { 
+        {
             TMVAssert(rowsize() == v1.size());
             TMVAssert(colsize() == v0.size());
             doRDiv(v1,v0);
         }
 
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         inline void RDiv(
             const GenMatrix<T1>& m1, MatrixView<T0> m0) const
-        { 
+        {
             TMVAssert(rowsize() == m1.rowsize());
             TMVAssert(colsize() == m0.rowsize());
             TMVAssert(m1.colsize() == m0.colsize());
@@ -336,30 +336,30 @@ namespace tmv {
 
         T doDet() const;
         RT doLogDet(T* sign) const;
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(MatrixView<T1> minv) const;
         void doMakeInverseATA(MatrixView<T> minv) const;
         bool doIsSingular() const;
         RT doNorm2() const;
         RT doCondition() const;
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(VectorView<T1> v) const;
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(MatrixView<T1> m) const;
-        template <class T1> 
+        template <typename T1>
         void doRDivEq(VectorView<T1> v) const;
-        template <class T1> 
+        template <typename T1>
         void doRDivEq(MatrixView<T1> m) const;
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         void doLDiv(
             const GenVector<T1>& v1, VectorView<T0> v0) const;
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         void doLDiv(
             const GenMatrix<T1>& m1, MatrixView<T0> m0) const;
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         void doRDiv(
             const GenVector<T1>& v1, VectorView<T0> v0) const;
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         void doRDiv(
             const GenMatrix<T1>& m1, MatrixView<T0> m0) const;
 
@@ -369,59 +369,59 @@ namespace tmv {
     // Functions of Matrices:
     //
 
-    template <class T> 
+    template <typename T>
     inline T Det(const BaseMatrix<T>& m)
     { return m.det(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) LogDet(const BaseMatrix<T>& m)
     { return m.logDet(); }
 
-    template <class T> 
+    template <typename T>
     inline T Trace(const BaseMatrix<T>& m)
     { return m.trace(); }
 
-    template <class T> 
+    template <typename T>
     inline T SumElements(const BaseMatrix<T>& m)
     { return m.sumElements(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) SumAbsElements(const BaseMatrix<T>& m)
     { return m.sumAbsElements(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) SumAbs2Elements(const BaseMatrix<T>& m)
     { return m.sumAbs2Elements(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) Norm(const BaseMatrix<T>& m)
     { return m.norm(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) NormSq(const BaseMatrix<T>& m)
     { return m.normSq(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) NormF(const BaseMatrix<T>& m)
     { return m.normF(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) Norm1(const BaseMatrix<T>& m)
     { return m.norm1(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) Norm2(const BaseMatrix<T>& m)
     { return m.norm2(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) NormInf(const BaseMatrix<T>& m)
     { return m.normInf(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) MaxAbsElement(const BaseMatrix<T>& m)
     { return m.maxAbsElement(); }
 
-    template <class T> 
+    template <typename T>
     inline TMV_RealType(T) MaxAbs2Element(const BaseMatrix<T>& m)
     { return m.maxAbs2Element(); }
 
@@ -430,35 +430,35 @@ namespace tmv {
     // I/O
     //
 
-    template <class T>
+    template <typename T>
     inline std::ostream& operator<<(
         const TMV_Writer& writer, const BaseMatrix<T>& m)
     { m.write(writer); return writer.getos(); }
 
-    template <class T> 
+    template <typename T>
     inline std::ostream& operator<<(
         std::ostream& os, const BaseMatrix<T>& m)
     { return os << IOStyle() << m; }
 
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const Matrix<T,A>& )
     {
         return std::string("Matrix<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
-    template <class T> 
+    template <typename T>
     inline std::string TMV_Text(const GenMatrix<T>& )
     {
         return std::string("GenMatrix<") + TMV_Text(T()) + ">";
     }
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const ConstMatrixView<T,A>& )
     {
         return std::string("ConstMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const MatrixView<T,A>& )
     {
         return std::string("MatrixView<") +

@@ -26,7 +26,7 @@
 //
 // Constructors:
 //
-//    explicit SmallVector<T,N,A>()  
+//    explicit SmallVector<T,N,A>()
 //        Makes a Vector of size N with _uninitialized_ values
 //
 //    SmallVector<T,N,A>(T x)
@@ -37,7 +37,7 @@
 //    SmallVector<T,N,A>(const GenVector<T>& vv)
 //        Makes a SmallVector which copies the elements of vv.
 //
-// 
+//
 // SmallVector doesn't have views like a regular Vector.
 // All the normal viewing kinds of routines just return a regular VectorView.
 // It is mostly useful for fast element access and simple tasks
@@ -45,7 +45,7 @@
 // inline, so the compiler can optimize the calculation for the particular
 // value of N.  It is ually faster, but may take longer to compile
 // depending on what calculations you are doing with them.
-// 
+//
 
 #ifndef TMV_SmallVector_H
 #define TMV_SmallVector_H
@@ -59,14 +59,14 @@
 
 namespace tmv {
 
-    template <class T, ptrdiff_t N> 
+    template <typename T, ptrdiff_t N>
     class SmallVectorComposite;
 
-    template <class T1, class T2, ptrdiff_t N, int A1, int A2> 
+    template <typename T1, typename T2, ptrdiff_t N, int A1, int A2>
     inline void Copy(const SmallVector<T1,N,A1>& v1, SmallVector<T2,N,A2>& v2);
 
-    template <class T, ptrdiff_t N, int A> 
-    class SmallVector 
+    template <typename T, ptrdiff_t N, int A>
+    class SmallVector
     {
     public:
 
@@ -101,23 +101,23 @@ namespace tmv {
 #endif
         }
 
-        explicit inline SmallVector(const T& x) 
+        explicit inline SmallVector(const T& x)
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             if (x == T(0)) setZero();
-            else setAllTo(x); 
+            else setAllTo(x);
         }
 
-        inline SmallVector(const type& v2) 
+        inline SmallVector(const type& v2)
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             for(ptrdiff_t i=0;i<N;++i) itsv[i] = v2.cref(i);
         }
 
-        template <int A2> 
-        inline SmallVector(const SmallVector<T,N,A2>& v2) 
+        template <int A2>
+        inline SmallVector(const SmallVector<T,N,A2>& v2)
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
@@ -125,17 +125,17 @@ namespace tmv {
             for(ptrdiff_t i=0;i<N;++i) itsv[i] = v2.cref(i);
         }
 
-        template <class T2, int A2> 
-        inline SmallVector(const SmallVector<T2,N,A2>& v2) 
+        template <typename T2, int A2>
+        inline SmallVector(const SmallVector<T2,N,A2>& v2)
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             TMVAssert(v2.size() == N);
-            Copy(v2,*this); 
+            Copy(v2,*this);
         }
 
-        template <int A2> 
-        inline SmallVector(const Vector<T,A2>& v2) 
+        template <int A2>
+        inline SmallVector(const Vector<T,A2>& v2)
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
@@ -143,8 +143,8 @@ namespace tmv {
             for(ptrdiff_t i=0;i<N;++i) itsv[i] = v2.cref(i);
         }
 
-        template <class T2> 
-        inline SmallVector(const GenVector<T2>& v2) 
+        template <typename T2>
+        inline SmallVector(const GenVector<T2>& v2)
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
@@ -153,7 +153,7 @@ namespace tmv {
             view() = v2;
         }
 
-        inline SmallVector(const AssignableToVector<RT>& v2) 
+        inline SmallVector(const AssignableToVector<RT>& v2)
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
@@ -161,7 +161,7 @@ namespace tmv {
             view() = v2;
         }
 
-        inline SmallVector(const AssignableToVector<CT>& v2) 
+        inline SmallVector(const AssignableToVector<CT>& v2)
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
@@ -170,14 +170,14 @@ namespace tmv {
             view() = v2;
         }
 
-        inline SmallVector(const SmallVectorComposite<RT,N>& v2) 
+        inline SmallVector(const SmallVectorComposite<RT,N>& v2)
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             v2.assignTov(*this);
         }
 
-        inline SmallVector(const SmallVectorComposite<CT,N>& v2) 
+        inline SmallVector(const SmallVectorComposite<CT,N>& v2)
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(isComplex(T()));
@@ -198,71 +198,71 @@ namespace tmv {
         //
 
         inline type& operator=(type& v2)
-        { 
-            if (&v2 != this) 
+        {
+            if (&v2 != this)
                 for(ptrdiff_t i=0;i<N;++i) itsv[i] = v2.cref(i);
-            return *this; 
+            return *this;
         }
 
-        template <int A2> 
+        template <int A2>
         inline type& operator=(SmallVector<T,N,A2>& v2)
-        { 
-            if (&v2 != this) 
+        {
+            if (&v2 != this)
                 for(ptrdiff_t i=0;i<N;++i) itsv[i] = v2.cref(i);
-            return *this; 
+            return *this;
         }
 
-        template <class T2, int A2> 
-        inline type& operator=(const SmallVector<T2,N,A2>& v2) 
-        { 
+        template <typename T2, int A2>
+        inline type& operator=(const SmallVector<T2,N,A2>& v2)
+        {
             TMVAssert(isReal(T2()) || isComplex(T()));
             TMVAssert(v2.size() == N);
             Copy(v2,*this);
-            return *this; 
+            return *this;
         }
 
-        inline type& operator=(const Vector<T>& v2) 
+        inline type& operator=(const Vector<T>& v2)
         {
             TMVAssert(v2.size() == N);
             for(ptrdiff_t i=0;i<N;++i) itsv[i] = v2.cref(i);
-            return *this; 
+            return *this;
         }
 
-        template <class T2> 
-        inline type& operator=(const GenVector<T2>& v2) 
+        template <typename T2>
+        inline type& operator=(const GenVector<T2>& v2)
         {
             TMVAssert(isReal(T2()) || isComplex(T()));
             TMVAssert(v2.size() == N);
             view() = v2;
-            return *this; 
+            return *this;
         }
 
-        inline type& operator=(const AssignableToVector<RT>& v2) 
+        inline type& operator=(const AssignableToVector<RT>& v2)
         {
             TMVAssert(v2.size() == N);
             view() = v2;
-            return *this; 
+            return *this;
         }
 
-        inline type& operator=(const AssignableToVector<CT>& v2) 
+        inline type& operator=(const AssignableToVector<CT>& v2)
         {
             TMVAssert(isComplex(T()));
             TMVAssert(v2.size() == N);
             view() = v2;
-            return *this; 
+            return *this;
         }
 
-        inline type& operator=(const SmallVectorComposite<RT,N>& v2) 
+        inline type& operator=(const SmallVectorComposite<RT,N>& v2)
         {
             v2.assignTov(*this);
-            return *this; 
+            return *this;
         }
 
-        inline type& operator=(const SmallVectorComposite<CT,N>& v2) 
+        inline type& operator=(const SmallVectorComposite<CT,N>& v2)
         {
             TMVAssert(isComplex(T()));
             v2.assignTov(*this);
-            return *this; 
+            return *this;
         }
 
 
@@ -270,68 +270,68 @@ namespace tmv {
         // Access Functions
         //
 
-        inline const_iterator begin() const 
+        inline const_iterator begin() const
         { return const_iterator(itsv,1); }
-        inline const_iterator end() const 
+        inline const_iterator end() const
         { return begin()+N; }
-        inline const_reverse_iterator rbegin() const 
+        inline const_reverse_iterator rbegin() const
         { return const_reverse_iterator(itsv+(N-1),-1); }
-        inline const_reverse_iterator rend() const 
+        inline const_reverse_iterator rend() const
         { return rbegin()+N; }
 
         typedef ListAssigner<T,iterator> MyListAssigner;
         inline MyListAssigner operator<<(const T& x)
         { return MyListAssigner(begin(),size(),x); }
 
-        inline T operator[](ptrdiff_t i) const 
-        { 
+        inline T operator[](ptrdiff_t i) const
+        {
             if (A == ptrdiff_t(CStyle)) {
                 TMVAssert(i>=0 && i<N);
-                return cref(i); 
+                return cref(i);
             } else {
                 TMVAssert(i>=1 && i<=N);
-                return cref(i-1); 
+                return cref(i-1);
             }
         }
-        inline T operator()(ptrdiff_t i) const 
-        { 
+        inline T operator()(ptrdiff_t i) const
+        {
             if (A == ptrdiff_t(CStyle)) {
                 TMVAssert(i>=0 && i<N);
-                return cref(i); 
+                return cref(i);
             } else {
                 TMVAssert(i>=1 && i<=N);
-                return cref(i-1); 
+                return cref(i-1);
             }
         }
 
-        inline iterator begin() 
+        inline iterator begin()
         { return iterator(itsv,1 TMV_FIRSTLAST ); }
-        inline iterator end() 
+        inline iterator end()
         { return begin() + N; }
 
-        inline reverse_iterator rbegin() 
+        inline reverse_iterator rbegin()
         { return reverse_iterator(itsv+N-1,-1 TMV_FIRSTLAST ); }
-        inline reverse_iterator rend() 
+        inline reverse_iterator rend()
         { return rbegin()+N; }
 
-        inline T& operator[](ptrdiff_t i) 
-        { 
+        inline T& operator[](ptrdiff_t i)
+        {
             if (A == ptrdiff_t(CStyle)) {
                 TMVAssert(i>=0 && i<N);
-                return ref(i); 
+                return ref(i);
             } else {
                 TMVAssert(i>=1 && i<=N);
-                return ref(i-1); 
+                return ref(i-1);
             }
         }
-        inline T& operator()(ptrdiff_t i) 
-        { 
+        inline T& operator()(ptrdiff_t i)
+        {
             if (A == ptrdiff_t(CStyle)) {
                 TMVAssert(i>=0 && i<N);
-                return ref(i); 
+                return ref(i);
             } else {
                 TMVAssert(i>=1 && i<=N);
-                return ref(i-1); 
+                return ref(i-1);
             }
         }
 
@@ -500,8 +500,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& setZero() 
-        { 
+        inline type& setZero()
+        {
             for(ptrdiff_t i=0;i<N;++i) itsv[i] = T(0);
             return *this;
         }
@@ -514,7 +514,7 @@ namespace tmv {
         }
 
         inline type& setAllTo(const T& x)
-        { 
+        {
             for(ptrdiff_t i=0;i<N;++i) itsv[i] = x;
             return *this;
         }
@@ -526,16 +526,16 @@ namespace tmv {
         }
 
         inline type& conjugateSelf()
-        { 
+        {
             if (isComplex(T())) {
                 RT* itsvi = reinterpret_cast<RT*>(ptr())+1;
                 for(ptrdiff_t i=0;i<2*N;i+=2) itsvi[i] = -itsvi[i];
             }
-            return *this; 
+            return *this;
         }
 
         inline type& makeBasis(ptrdiff_t i)
-        { 
+        {
             if (A == ptrdiff_t(CStyle)) {
                 TMVAssert(i>=0 && i<N);
                 setZero(); itsv[i] = T(1);
@@ -543,7 +543,7 @@ namespace tmv {
                 TMVAssert(i>=1 && i<=N);
                 setZero(); itsv[i-1] = T(1);
             }
-            return *this; 
+            return *this;
         }
 
         inline type& swap(ptrdiff_t i1, ptrdiff_t i2)
@@ -560,7 +560,7 @@ namespace tmv {
             return *this;
         }
 
-        inline type& permute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
+        inline type& permute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2)
         {
             if (A == ptrdiff_t(CStyle)) {
                 TMVAssert(i1>=0 && i1<=i2 && i2<=N);
@@ -572,7 +572,7 @@ namespace tmv {
             return *this;
         }
 
-        inline type& permute(const ptrdiff_t* p) 
+        inline type& permute(const ptrdiff_t* p)
         { return permute(p,A==ptrdiff_t(CStyle)?0:1,N); }
 
         inline type& reversePermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2)
@@ -702,25 +702,25 @@ namespace tmv {
     // Copy SmallVectors
     //
 
-    template <ptrdiff_t N, class T1, class T2> 
+    template <ptrdiff_t N, typename T1, typename T2>
     struct DoCopyv
     {
         DoCopyv(const T1* v1, T2* v2)
         { for(ptrdiff_t i=0;i<N;++i) v2[i] = v1[i]; }
     };
 
-    template <ptrdiff_t N, class T> 
+    template <ptrdiff_t N, typename T>
     struct DoCopyv<N,std::complex<T>,T>
     {
         DoCopyv(const std::complex<T>* , T* )
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <ptrdiff_t N, class T1, class T2> 
+    template <ptrdiff_t N, typename T1, typename T2>
     inline void SmallVectorCopy(const T1* v1, T2* v2)
     { DoCopyv<N,T1,T2>(v1,v2); }
 
-    template <class T1, class T2, ptrdiff_t N, int A1, int A2> 
+    template <typename T1, typename T2, ptrdiff_t N, int A1, int A2>
     inline void Copy(const SmallVector<T1,N,A1>& v1, SmallVector<T2,N,A2>& v2)
     { DoCopyv<N,T1,T2>(v1.cptr(),v2.ptr()); }
 
@@ -728,7 +728,7 @@ namespace tmv {
     // Swap SmallVectors
     //
 
-    template <class T, ptrdiff_t N, int A1, int A2> 
+    template <typename T, ptrdiff_t N, int A1, int A2>
     inline void Swap(SmallVector<T,N,A1>& v1, SmallVector<T,N,A2>& v2)
     { for(ptrdiff_t i=0;i<N;++i) TMV_SWAP(v1.ref(i),v2.ref(i)); }
 
@@ -736,69 +736,69 @@ namespace tmv {
     // Functions of Vectors
     //
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline TMV_RealType(T) Norm(const SmallVector<T,N,A>& v)
     { return v.norm(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline TMV_RealType(T) Norm1( const SmallVector<T,N,A>& v)
     { return v.norm1(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline TMV_RealType(T) NormSq( const SmallVector<T,N,A>& v)
     { return v.normSq(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline TMV_RealType(T) Norm2( const SmallVector<T,N,A>& v)
     { return v.norm2(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline TMV_RealType(T) NormInf( const SmallVector<T,N,A>& v)
     { return v.normInf(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline T SumElements( const SmallVector<T,N,A>& v)
     { return v.sumElements(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline TMV_RealType(T) SumAbsElements(const SmallVector<T,N,A>& v)
     { return v.sumAbsElements(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline TMV_RealType(T) SumAbs2Elements(const SmallVector<T,N,A>& v)
     { return v.sumAbs2Elements(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline T MinElement(const SmallVector<T,N,A>& v)
     { return v.minElement(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline T MaxElement(const SmallVector<T,N,A>& v)
     { return v.maxElement(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline TMV_RealType(T) MinAbsElement(const SmallVector<T,N,A>& v)
     { return v.minAbsElement(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline TMV_RealType(T) MaxAbsElement(const SmallVector<T,N,A>& v)
     { return v.maxAbsElement(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline ConstVectorView<T,A> Conjugate(const SmallVector<T,N,A>& v)
     { return v.conjugate(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline VectorView<T,A> Conjugate(SmallVector<T,N,A>& v)
     { return v.conjugate(); }
 
-    
+
 
     //
     // Vector ==, != Vector
     //
 
-    template <class T1, class T2, ptrdiff_t N, int A1, int A2> 
+    template <typename T1, typename T2, ptrdiff_t N, int A1, int A2>
     inline bool operator==(
         const SmallVector<T1,N,A1>& v1, const SmallVector<T2,N,A2>& v2)
     {
@@ -806,27 +806,27 @@ namespace tmv {
         return true;
     }
 
-    template <class T1, class T2, ptrdiff_t N, int A1, int A2> 
+    template <typename T1, typename T2, ptrdiff_t N, int A1, int A2>
     inline bool operator!=(
         const SmallVector<T1,N,A1>& v1, const SmallVector<T2,N,A2>& v2)
     { return !(v1 == v2); }
 
-    template <class T1, class T2, ptrdiff_t N, int A> 
+    template <typename T1, typename T2, ptrdiff_t N, int A>
     inline bool operator==(
         const GenVector<T1>& v1, const SmallVector<T2,N,A>& v2)
     { return v1 == v2.view(); }
 
-    template <class T1, class T2, ptrdiff_t N, int A> 
+    template <typename T1, typename T2, ptrdiff_t N, int A>
     inline bool operator==(
         const SmallVector<T1,N,A>& v1, const GenVector<T2>& v2)
     { return v1.view() == v2; }
 
-    template <class T1, class T2, ptrdiff_t N, int A> 
+    template <typename T1, typename T2, ptrdiff_t N, int A>
     inline bool operator!=(
         const GenVector<T1>& v1, const SmallVector<T2,N,A>& v2)
     { return v1 != v2.view(); }
 
-    template <class T1, class T2, ptrdiff_t N, int A> 
+    template <typename T1, typename T2, ptrdiff_t N, int A>
     inline bool operator!=(
         const SmallVector<T1,N,A>& v1, const GenVector<T2>& v2)
     { return v1.view() != v2; }
@@ -836,22 +836,22 @@ namespace tmv {
     // I/O
     //
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline std::ostream& operator<<(
         const TMV_Writer& writer, const SmallVector<T,N,A>& v)
     { v.view().write(writer); return writer.getos(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline std::ostream& operator<<(
         std::ostream& os, const SmallVector<T,N,A>& v)
     { return os << IOStyle() << v; }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline std::istream& operator>>(
         const TMV_Reader& reader, SmallVector<T,N,A>& v)
     { v.view().read(reader); return reader.getis(); }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline std::istream& operator>>(
         std::istream& is, SmallVector<T,N,A>& v)
     { return is >> IOStyle() >> v; }

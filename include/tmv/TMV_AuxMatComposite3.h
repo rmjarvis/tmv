@@ -25,7 +25,7 @@
 // (Some do not: DiagMatrix for example, returns another DiagMatix.)
 //
 // Need to define the following with #define statements.
-// (The given definition is for a Band Matrix.  Modify as 
+// (The given definition is for a Band Matrix.  Modify as
 // appropriate for the various other matrices.)
 //
 // #define GENMATRIX2 GenBandMatrix
@@ -37,8 +37,8 @@
 // Scalar / Matrix
 //
 
-template <class T, class Tm> 
-class QUOTXM : public MatrixComposite<T> 
+template <typename T, typename Tm>
+class QUOTXM : public MatrixComposite<T>
 {
 public:
     inline QUOTXM(const T _x, const GENMATRIX2<Tm>& _m) : x(_x), m(_m) {}

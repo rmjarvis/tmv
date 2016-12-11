@@ -22,18 +22,18 @@
 
 //---------------------------------------------------------------------------
 //
-// This file contains the code for doing division using 
+// This file contains the code for doing division using
 // QRP Decomposition.
 //
-// In a QR Decomposition, if R is singular, then back-substitution will 
-// fail in solving R x = Qt b.  However, there is a trick that still 
-// gives us a valid least squares solution to A x = b.  
+// In a QR Decomposition, if R is singular, then back-substitution will
+// fail in solving R x = Qt b.  However, there is a trick that still
+// gives us a valid least squares solution to A x = b.
 // This is to use column pivoting to obtain a decomposition:
 // A = Q [ R11 R12 ] P
 //       [  0   0  ]
-// where R11 is upper triangular. 
+// where R11 is upper triangular.
 //
-// With this decomposition, 
+// With this decomposition,
 // Q R P x = b
 // R P x = Qt b
 // Let z = P x (ie. we will solve for z first, then x = z / P = P * z)
@@ -48,23 +48,23 @@
 // The minimum norm will occur for any z2 if z1 = R11^-1 (c1 - R12 z2)
 // So a solution can be found with z2 = 0.
 // This solution then has minimum |A x - b| (ie. the least squares
-// solution).  
+// solution).
 //
-// For dividing from the other side with m > n, we can always find a 
+// For dividing from the other side with m > n, we can always find a
 // possible solution (assuming R is non-singular):
 //
-// xt Q R P = bt 
+// xt Q R P = bt
 // xt Q R = bt Pt
 // xt Q = bt Pt R^-1  (This is done by front-substitution)
 // xt = bt Pt R^-1 Qt
 //
 // This solution does satisfy the equation xt A = bt, but
-// it will not be the solution with minimum |x|.  
+// it will not be the solution with minimum |x|.
 // Use SVD for the min |x| solution.
 //
 // If R is singular, we of course have a problem with the front-substitution
 // step.  This time, the QRP decomposition does not work quite as well.
-// Take the front-substitution step (the Q and P steps don't affect 
+// Take the front-substitution step (the Q and P steps don't affect
 // this minimization), and write R as above:
 //
 // zt R = ct
@@ -74,12 +74,12 @@
 // |zt R - ct|^2 = |z1t R11 - c1t|^2 + |z1t R12 - c2t|^2
 // We can set z2t = 0, since it is arbitrary.
 // But it is not so clear what the correct z1t is in this case.
-// We take z1t = c1t R11^-1, as an approximate solution, but point out 
-// that this is not really correct. You should use SVD instead for 
+// We take z1t = c1t R11^-1, as an approximate solution, but point out
+// that this is not really correct. You should use SVD instead for
 // the correct least squares solution in this case.
 //
-// You can control whether QRP does a strict reordering so that the 
-// diagonal elements of R are in decreasing order of absolute value 
+// You can control whether QRP does a strict reordering so that the
+// diagonal elements of R are in decreasing order of absolute value
 // (which I call Strict QRP), or whether they are just reordered well
 // enough to put the correct zeros at the end (which I call Loose QRP) using
 // the function tmv::UseStrictQRP();
@@ -101,57 +101,57 @@
 namespace tmv {
 
     // Decompose A (input as Q) into Q R P.
-    template <class T> 
+    template <typename T>
     void QRP_Decompose(
         MatrixView<T> Q, UpperTriMatrixView<T> R, ptrdiff_t* P, bool strict);
 
-    template <class T> 
+    template <typename T>
     void QRP_Decompose(
         MatrixView<T> QRx, VectorView<T> beta, ptrdiff_t* P, T& signdet, bool strict);
 
     class Permutation;
 
-    // Default value of strict=false is given in TMV_Permutation.h 
+    // Default value of strict=false is given in TMV_Permutation.h
     // for these next two functions.
-    template <class T> 
+    template <typename T>
     void QRP_Decompose(
         MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& P, bool strict);
 
-    template <class T> 
+    template <typename T>
     void QRP_Decompose(
         MatrixView<T> QRx, VectorView<T> beta, Permutation& P, T& signdet,
         bool strict);
 
     // Decompose A into Q R P, but don't return Q or P.
     // R is returned as A.upperTri().
-    template <class T> 
+    template <typename T>
     void QRP_Decompose(MatrixView<T> A, bool strict=false);
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void QRP_Decompose(
         MatrixView<T> Q, UpperTriMatrix<T,A2>& R, Permutation& P,
         bool strict=false)
     { QRP_Decompose(Q,R.view(),P,strict); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void QRP_Decompose(
         Matrix<T,A1>& Q, UpperTriMatrixView<T> R, Permutation& P,
         bool strict=false)
     { QRP_Decompose(Q.view(),R,P,strict); }
 
-    template <class T, int A1, int A2> 
+    template <typename T, int A1, int A2>
     inline void QRP_Decompose(
         Matrix<T,A1>& Q, UpperTriMatrix<T,A2>& R, Permutation& P,
         bool strict=false)
     { QRP_Decompose(Q.view(),R.view(),P,strict); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void QRP_Decompose(Matrix<T,A1>& A, bool strict=false)
     { QRP_Decompose(A.view(),strict); }
 
     struct QRP_StrictSingleton
     {
-        // Technically, I think this isn't thread safe, but I'd be 
+        // Technically, I think this isn't thread safe, but I'd be
         // pretty shocked if people were having multiple threads
         // call this funtion at the same time.
         static inline bool& inst()
@@ -167,8 +167,8 @@ namespace tmv {
     inline bool QRP_IsStrict()
     { return QRP_StrictSingleton::inst(); }
 
-    template <class T> 
-    class QRPDiv : public Divider<T> 
+    template <typename T>
+    class QRPDiv : public Divider<T>
     {
 
     public :
@@ -184,16 +184,16 @@ namespace tmv {
         // Div, DivEq
         //
 
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(MatrixView<T1> m) const;
 
-        template <class T1> 
+        template <typename T1>
         void doRDivEq(MatrixView<T1> m) const;
 
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doLDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doRDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         //
@@ -202,7 +202,7 @@ namespace tmv {
 
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(MatrixView<T1> minv) const;
         void doMakeInverseATA(MatrixView<T> minv) const;
         bool isSingular() const;

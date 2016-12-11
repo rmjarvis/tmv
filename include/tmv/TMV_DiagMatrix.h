@@ -25,7 +25,7 @@
 // This file defines the TMV DiagMatrix class.
 //
 // The DiagMatrix class is provided for efficient storage of a diagonal
-// matrix.  You can do most of the things that you can do with a 
+// matrix.  You can do most of the things that you can do with a
 // regular Matrix, but it will do them more efficiently.
 //
 // Constructors:
@@ -65,7 +65,7 @@
 //    DiagMatrix& setZero()
 //    DiagMatrix& setAllTo(T x)
 //    DiagMatrix& addToAll(T x)
-//    DiagMatrix<T>& transposeSelf() 
+//    DiagMatrix<T>& transposeSelf()
 //        (Does nothing.)
 //    DiagMatrix& conjugateSelf()
 //    DiagMatrix& setToIdentity(x = 1)
@@ -106,7 +106,7 @@
 //    m.normInf() or NormInf(m)
 //    m.maxAbsElement() or MaxAbsElements(m)
 //    m.maxAbs2Element() or MaxAbs2Elements(m)
-//        (Note - for diagonal matrices, 
+//        (Note - for diagonal matrices,
 //        norm1 = norm2 = normInf = maxAbsElement.)
 //
 //    m.inverse() or Inverse(m)
@@ -114,9 +114,9 @@
 //    m.makeInverse(minv) (takes either Matrix or DiagMatrix argument)
 //    m.makeInverseATA(invata) (takes either Matrix or DiagMatrix argument)
 //
-// I/O: 
+// I/O:
 //
-//    os << d 
+//    os << d
 //        Writes d to ostream os as a full matrix
 //
 //    os << CompactIO() << d
@@ -140,8 +140,8 @@
 
 namespace tmv {
 
-    template <class T> 
-    class GenDiagMatrix : 
+    template <typename T>
+    class GenDiagMatrix :
         virtual public AssignableToDiagMatrix<T>,
         virtual public AssignableToUpperTriMatrix<T>,
         virtual public AssignableToLowerTriMatrix<T>,
@@ -182,30 +182,30 @@ namespace tmv {
         inline ptrdiff_t rowsize() const { return size(); }
         inline DiagType dt() const { return NonUnitDiag; }
 
-        inline T operator()(ptrdiff_t i, ptrdiff_t j) const 
+        inline T operator()(ptrdiff_t i, ptrdiff_t j) const
         {
             TMVAssert(i>=0 && i<size());
             TMVAssert(j>=0 && j<size());
-            if (i==j) return diag()(i); 
+            if (i==j) return diag()(i);
             else return T(0);
         }
 
-        inline T operator()(ptrdiff_t i) const 
+        inline T operator()(ptrdiff_t i) const
         {
             TMVAssert(i>=0 && i<size());
-            return diag()(i); 
+            return diag()(i);
         }
 
         inline const_vec_type diag() const { return cdiag(); }
 
-        template <class T2> 
+        template <typename T2>
         inline bool isSameAs(const BaseMatrix<T2>& ) const
         { return false; }
 
         inline bool isSameAs(const GenDiagMatrix<T>& m2) const
-        { 
+        {
             if (this == &m2) return true;
-            else return (diag().isSameAs(m2.diag())); 
+            else return (diag().isSameAs(m2.diag()));
         }
 
         inline void assignToM(MatrixView<RT> m2) const
@@ -213,7 +213,7 @@ namespace tmv {
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
             TMVAssert(isReal(T()));
-            m2.diag() = diag(); 
+            m2.diag() = diag();
             m2.upperTri().offDiag().setZero();
             m2.lowerTri().offDiag().setZero();
         }
@@ -221,7 +221,7 @@ namespace tmv {
         {
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
-            m2.diag() = diag(); 
+            m2.diag() = diag();
             m2.upperTri().offDiag().setZero();
             m2.lowerTri().offDiag().setZero();
         }
@@ -230,13 +230,13 @@ namespace tmv {
         {
             TMVAssert(m2.size() == size());
             TMVAssert(isReal(T()));
-            m2.diag() = diag(); 
+            m2.diag() = diag();
             m2.offDiag().setZero();
         }
         inline void assignToU(UpperTriMatrixView<CT> m2) const
         {
             TMVAssert(m2.size() == size());
-            m2.diag() = diag(); 
+            m2.diag() = diag();
             m2.offDiag().setZero();
         }
 
@@ -244,26 +244,26 @@ namespace tmv {
         {
             TMVAssert(m2.size() == size());
             TMVAssert(isReal(T()));
-            m2.diag() = diag(); 
+            m2.diag() = diag();
             m2.offDiag().setZero();
         }
         inline void assignToL(LowerTriMatrixView<CT> m2) const
         {
             TMVAssert(m2.size() == size());
-            m2.diag() = diag(); 
+            m2.diag() = diag();
             m2.offDiag().setZero();
         }
 
         inline void assignToD(DiagMatrixView<RT> m2) const
-        { 
+        {
             TMVAssert(m2.size() == size());
             TMVAssert(isReal(T()));
-            m2.diag() = diag(); 
+            m2.diag() = diag();
         }
         inline void assignToD(DiagMatrixView<CT> m2) const
         {
             TMVAssert(m2.size() == size());
-            m2.diag() = diag(); 
+            m2.diag() = diag();
         }
 
         //
@@ -330,28 +330,28 @@ namespace tmv {
         inline RT sumAbs2Elements() const
         { return diag().sumAbs2Elements(); }
 
-        inline RT norm() const 
+        inline RT norm() const
         { return normF(); }
 
-        inline RT normF() const 
+        inline RT normF() const
         { return diag().norm(); }
 
-        inline RT normSq(RT scale = RT(1)) const 
+        inline RT normSq(RT scale = RT(1)) const
         { return diag().normSq(scale); }
 
-        inline RT norm1() const 
+        inline RT norm1() const
         { return diag().maxAbsElement(); }
 
-        inline RT doNorm2() const 
+        inline RT doNorm2() const
         { return diag().maxAbsElement(); }
 
-        inline RT doCondition() const 
+        inline RT doCondition() const
         { return diag().maxAbsElement()/diag().minAbsElement(); }
 
-        inline RT norm2() const 
+        inline RT norm2() const
         { return doNorm2(); }
 
-        inline RT condition() const 
+        inline RT condition() const
         { return doCondition(); }
 
         inline RT normInf() const
@@ -363,36 +363,36 @@ namespace tmv {
         inline RT maxAbs2Element() const
         { return diag().maxAbs2Element(); }
 
-        inline bool isSingular() const 
+        inline bool isSingular() const
         { return diag().minAbsElement() == RT(0); }
 
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(MatrixView<T1> minv) const;
 
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(DiagMatrixView<T1> minv) const;
 
         void doMakeInverseATA(MatrixView<T> ata) const;
         void doMakeInverseATA(DiagMatrixView<T> ata) const;
 
         inline void makeInverse(MatrixView<T> minv) const
-        { 
+        {
             TMVAssert(minv.colsize() == size());
             TMVAssert(minv.rowsize() == size());
             doMakeInverse(minv);
         }
 
-        template <class T1> 
+        template <typename T1>
         inline void makeInverse(MatrixView<T1> minv) const
-        { 
+        {
             TMVAssert(minv.colsize() == size());
             TMVAssert(minv.rowsize() == size());
             doMakeInverse(minv);
         }
 
-        template <class T1> 
+        template <typename T1>
         inline void makeInverse(DiagMatrixView<T1> minv) const
-        { 
+        {
             TMVAssert(minv.size() == size());
             doMakeInverse(minv);
         }
@@ -402,26 +402,26 @@ namespace tmv {
         { return QInverse(); }
 
         inline void makeInverseATA(MatrixView<T> ata) const
-        { 
+        {
             TMVAssert(ata.colsize() == size());
             TMVAssert(ata.rowsize() == size());
             doMakeInverseATA(ata);
         }
         inline void makeInverseATA(DiagMatrixView<T> ata) const
-        { 
+        {
             TMVAssert(ata.size() == size());
             doMakeInverseATA(ata);
         }
 
-        template <class T1, int A>
+        template <typename T1, int A>
         inline void makeInverse(DiagMatrix<T1,A>& minv) const
         { makeInverse(minv.view()); }
 
-        template <class T1, int A>
+        template <typename T1, int A>
         inline void makeInverse(Matrix<T1,A>& minv) const
         { makeInverse(minv.view()); }
 
-        template <int A> 
+        template <int A>
         inline void makeInverseATA(DiagMatrix<T,A>& minv) const
         { makeInverseATA(minv.view()); }
 
@@ -430,36 +430,36 @@ namespace tmv {
         { makeInverseATA(minv.view()); }
 
 
-        // 
+        //
         // I/O
         //
 
         void write(const TMV_Writer& writer) const;
 
-        // 
+        //
         // Arithmetic Helpers
         //
 
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(VectorView<T1> v) const;
 
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         void doLDiv(const GenVector<T1>& v1, VectorView<T0> v0) const;
 
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(MatrixView<T1> m) const;
 
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         void doLDiv(const GenMatrix<T1>& m1, MatrixView<T0> m0) const;
 
-        template <class T1> 
+        template <typename T1>
         inline void LDivEq(VectorView<T1> v) const
         {
             TMVAssert(v.size() == size());
             doLDivEq(v);
         }
 
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         inline void LDiv(
             const GenVector<T1>& v1, VectorView<T0> v0) const
         {
@@ -468,22 +468,22 @@ namespace tmv {
             doLDiv(v1,v0);
         }
 
-        template <class T1> 
+        template <typename T1>
         inline void RDivEq(VectorView<T1> v) const
         { LDivEq(v); }
 
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         inline void RDiv(
             const GenVector<T1>& v1, VectorView<T0> v0) const
         { LDiv(v1,v0); }
 
-        template <class T1> 
+        template <typename T1>
         inline void LDivEq(MatrixView<T1> m) const
         {
             TMVAssert(m.colsize() == size());
             doLDivEq(m);
         }
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         inline void LDiv(
             const GenMatrix<T1>& m1, MatrixView<T0> m0) const
         {
@@ -492,19 +492,19 @@ namespace tmv {
             TMVAssert(m1.rowsize() == m0.rowsize());
             doLDiv(m1,m0);
         }
-        template <class T1> 
+        template <typename T1>
         inline void RDivEq(MatrixView<T1> m) const
         { LDivEq(m.transpose()); }
 
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         void RDiv(const GenMatrix<T1>& m1, MatrixView<T0> m0) const
         { LDiv(m1.transpose(),m0.transpose()); }
 
-        template <class T1> 
+        template <typename T1>
         void DivEq(DiagMatrixView<T1> m) const
         { LDivEq(m.diag()); }
 
-        template <class T1, class T0> 
+        template <typename T1, typename T0>
         void Div(
             const GenDiagMatrix<T1>& m1, DiagMatrixView<T0> m0) const
         { LDiv(m1.diag(),m0.diag()); }
@@ -516,7 +516,7 @@ namespace tmv {
         inline void unsetDiv() const {}
         inline void resetDiv() const {}
         inline bool divIsSet() const { return true; }
-        inline void divideUsing(DivType TMV_DEBUGPARAM(dt)) const 
+        inline void divideUsing(DivType TMV_DEBUGPARAM(dt)) const
         { TMVAssert(dt == LU); }
         inline bool checkDecomp(std::ostream* fout=0) const { return true; }
         inline bool checkDecomp(
@@ -547,7 +547,7 @@ namespace tmv {
 
     }; // GenDiagMatrix
 
-    template <class T, int A> 
+    template <typename T, int A>
     class ConstDiagMatrixView : public GenDiagMatrix<T>
     {
     public :
@@ -556,7 +556,7 @@ namespace tmv {
         typedef ConstDiagMatrixView<T,A> type;
         typedef ConstVectorView<T> const_vec_type;
 
-        inline ConstDiagMatrixView(const type& rhs) : itsdiag(rhs.cdiag()) 
+        inline ConstDiagMatrixView(const type& rhs) : itsdiag(rhs.cdiag())
         { TMVAssert(Attrib<A>::viewok); }
 
         inline ConstDiagMatrixView(const base& rhs) : itsdiag(rhs.diag())
@@ -578,8 +578,8 @@ namespace tmv {
 
     }; // ConstDiagMatrixView
 
-    template <class T> 
-    class ConstDiagMatrixView<T,FortranStyle> : 
+    template <typename T>
+    class ConstDiagMatrixView<T,FortranStyle> :
         public ConstDiagMatrixView<T,CStyle>
     {
     public :
@@ -609,21 +609,21 @@ namespace tmv {
         // Access Functions
         //
 
-        inline T operator()(ptrdiff_t i, ptrdiff_t j) const 
-        { 
+        inline T operator()(ptrdiff_t i, ptrdiff_t j) const
+        {
             TMVAssert(i>0 && i<=c_type::size());
             TMVAssert(j>0 && j<=c_type::size());
             if (i==j) return diag()(i);
             else return T(0);
         }
 
-        inline T operator()(ptrdiff_t i) const 
-        { 
+        inline T operator()(ptrdiff_t i) const
+        {
             TMVAssert(i>0 && i<=c_type::size());
             return diag()(i);
         }
 
-        inline const_vec_type diag() const 
+        inline const_vec_type diag() const
         { return const_vec_type(c_type::diag()); }
 
         //
@@ -667,7 +667,7 @@ namespace tmv {
 
     }; // ConstDiagMatrixView - FortranStyle
 
-    template <class T, int A> 
+    template <typename T, int A>
     class DiagMatrixView : public GenDiagMatrix<T>
     {
     public:
@@ -696,13 +696,13 @@ namespace tmv {
         // Constructors
         //
 
-        inline DiagMatrixView(const type& rhs) : itsdiag(rhs.itsdiag) 
+        inline DiagMatrixView(const type& rhs) : itsdiag(rhs.itsdiag)
         { TMVAssert(Attrib<A>::diagmatrixok); }
 
         explicit inline DiagMatrixView(vec_type _diag) : itsdiag(_diag)
         { TMVAssert(Attrib<A>::diagmatrixok); }
 
-        virtual inline ~DiagMatrixView() {} 
+        virtual inline ~DiagMatrixView() {}
 
         //
         // Op=
@@ -711,35 +711,35 @@ namespace tmv {
         inline type& operator=(const type& m2)
         { m2.assignToD(*this); return *this; }
 
-        inline type& operator=(const GenDiagMatrix<RT>& m2) 
+        inline type& operator=(const GenDiagMatrix<RT>& m2)
         { m2.assignToD(*this); return *this; }
 
-        inline type& operator=(const GenDiagMatrix<CT>& m2) 
+        inline type& operator=(const GenDiagMatrix<CT>& m2)
         { m2.assignToD(*this); return *this; }
 
-        template <class T2> 
-        inline type& operator=(const GenDiagMatrix<T2>& m2) 
+        template <typename T2>
+        inline type& operator=(const GenDiagMatrix<T2>& m2)
         { itsdiag = m2.diag(); return *this; }
 
-        inline type& operator=(const T& x) 
+        inline type& operator=(const T& x)
         { return setToIdentity(x); }
 
-        inline type& operator=(const AssignableToDiagMatrix<RT>& m2) 
-        { 
+        inline type& operator=(const AssignableToDiagMatrix<RT>& m2)
+        {
             TMVAssert(size() == m2.size());
             m2.assignToD(*this);
             return *this;
         }
 
-        inline type& operator=(const AssignableToDiagMatrix<CT>& m2) 
-        { 
+        inline type& operator=(const AssignableToDiagMatrix<CT>& m2)
+        {
             TMVAssert(size() == m2.size());
             m2.assignToD(*this);
             return *this;
         }
 
         typedef ListAssigner<T,iterator> MyListAssigner;
-        inline MyListAssigner operator<<(const T& x) 
+        inline MyListAssigner operator<<(const T& x)
         { return MyListAssigner(begin(),size(),x); }
 
 
@@ -747,16 +747,16 @@ namespace tmv {
         // Access
         //
 
-        inline reference operator()(ptrdiff_t i) 
-        { 
+        inline reference operator()(ptrdiff_t i)
+        {
             TMVAssert(i>=0 && i<size());
-            return diag()(i); 
+            return diag()(i);
         }
-        inline reference operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j)) 
-        { 
+        inline reference operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j))
+        {
             TMVAssert(i>=0 && i<size());
-            TMVAssert(i==j); 
-            return diag()(i); 
+            TMVAssert(i==j);
+            return diag()(i);
         }
 
         inline vec_type diag() { return itsdiag; }
@@ -773,27 +773,27 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& setZero() 
+        inline type& setZero()
         { diag().setZero(); return *this; }
 
-        inline type& setAllTo(const T& x) 
+        inline type& setAllTo(const T& x)
         { diag().setAllTo(x); return *this; }
 
-        inline type& addToAll(const T& x) 
+        inline type& addToAll(const T& x)
         { diag().addToAll(x); return *this; }
 
-        inline type& clip(RT thresh) 
+        inline type& clip(RT thresh)
         { diag().clip(thresh); return *this; }
 
-        inline type& transposeSelf() 
+        inline type& transposeSelf()
         { return *this; }
 
-        inline type& conjugateSelf() 
+        inline type& conjugateSelf()
         { diag().conjugateSelf(); return *this; }
 
         type& invertSelf();
 
-        inline type& setToIdentity(const T& x=T(1)) 
+        inline type& setToIdentity(const T& x=T(1))
         { return setAllTo(x); }
 
         //
@@ -882,7 +882,7 @@ namespace tmv {
 
     }; // DiagMatrixView
 
-    template <class T> 
+    template <typename T>
     class DiagMatrixView<T,FortranStyle> : public DiagMatrixView<T,CStyle>
     {
     public:
@@ -917,13 +917,13 @@ namespace tmv {
         explicit inline DiagMatrixView(VectorView<T> _diag) :
             c_type(_diag) {}
 
-        virtual inline ~DiagMatrixView() {} 
+        virtual inline ~DiagMatrixView() {}
 
         //
         // Op=
         //
 
-        inline type& operator=(const type& m2) 
+        inline type& operator=(const type& m2)
         { c_type::operator=(m2); return *this; }
 
         inline type& operator=(const c_type& m2)
@@ -935,11 +935,11 @@ namespace tmv {
         inline type& operator=(const GenDiagMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        template <class T2> 
+        template <typename T2>
         inline type& operator=(const GenDiagMatrix<T2>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline type& operator=(const T& x) 
+        inline type& operator=(const T& x)
         { c_type::operator=(x); return *this; }
 
         inline type& operator=(const AssignableToDiagMatrix<RT>& m2)
@@ -957,41 +957,41 @@ namespace tmv {
         // Access
         //
 
-        inline reference operator()(ptrdiff_t i) 
-        { 
+        inline reference operator()(ptrdiff_t i)
+        {
             TMVAssert(i>0 && i<=c_type::size());
-            return diag()(i); 
+            return diag()(i);
         }
-        inline reference operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j)) 
-        { 
-            TMVAssert(i==j); 
+        inline reference operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j))
+        {
+            TMVAssert(i==j);
             TMVAssert(i>0 && i<=c_type::size());
-            return diag()(i); 
+            return diag()(i);
         }
 
-        inline vec_type diag() 
+        inline vec_type diag()
         { return c_type::diag(); }
 
-        inline T operator()(ptrdiff_t i) const 
-        { 
+        inline T operator()(ptrdiff_t i) const
+        {
             TMVAssert(i>0 && i<=c_type::size());
-            return diag()(i); 
+            return diag()(i);
         }
-        inline T operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j)) const 
-        { 
-            TMVAssert(i==j); 
+        inline T operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j)) const
+        {
+            TMVAssert(i==j);
             TMVAssert(i>0 && i<=c_type::size());
-            return diag()(i); 
+            return diag()(i);
         }
 
-        inline const_vec_type diag() const 
+        inline const_vec_type diag() const
         { return c_type::diag(); }
 
         //
         // Modifying Functions
         //
 
-        inline type& setZero() 
+        inline type& setZero()
         { diag().setZero(); return *this; }
 
         inline type& setAllTo(const T& x)
@@ -1012,7 +1012,7 @@ namespace tmv {
         inline type& invertSelf()
         { return c_type::invertSelf(); }
 
-        inline type& setToIdentity(const T& x=T(1)) 
+        inline type& setToIdentity(const T& x=T(1))
         { diag().setAllTo(x); return *this; }
 
 
@@ -1035,7 +1035,7 @@ namespace tmv {
         inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep)
         {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
-            return view_type(diag().subVector(i1,i2,istep)); 
+            return view_type(diag().subVector(i1,i2,istep));
         }
 
         inline realpart_type realPart()
@@ -1071,7 +1071,7 @@ namespace tmv {
         inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
-            return view_type(diag().subVector(i1,i2,istep)); 
+            return view_type(diag().subVector(i1,i2,istep));
         }
 
         inline const_realpart_type realPart() const
@@ -1095,7 +1095,7 @@ namespace tmv {
     }; // FortranStyle DiagMatrixView
 
 
-    template <class T, int A> 
+    template <typename T, int A>
     class DiagMatrix : public GenDiagMatrix<T>
     {
     public:
@@ -1124,10 +1124,10 @@ namespace tmv {
         // Constructors
         //
 
-        inline explicit DiagMatrix(ptrdiff_t _size=0) : itsdiag(_size) 
+        inline explicit DiagMatrix(ptrdiff_t _size=0) : itsdiag(_size)
         { TMVAssert(_size >= 0); }
 
-        inline DiagMatrix(ptrdiff_t _size, const T& x) : itsdiag(_size,x)  
+        inline DiagMatrix(ptrdiff_t _size, const T& x) : itsdiag(_size,x)
         { TMVAssert(_size >= 0); }
 
         inline explicit DiagMatrix(const GenVector<T>& rhs) : itsdiag(rhs) {}
@@ -1136,23 +1136,23 @@ namespace tmv {
 
         inline DiagMatrix(const type& rhs) : itsdiag(rhs.diag()) {}
 
-        inline DiagMatrix(const GenDiagMatrix<RT>& rhs) : itsdiag(rhs.size()) 
+        inline DiagMatrix(const GenDiagMatrix<RT>& rhs) : itsdiag(rhs.size())
         { rhs.assignToD(view()); }
 
-        inline DiagMatrix(const GenDiagMatrix<CT>& rhs) : itsdiag(rhs.size()) 
-        { 
+        inline DiagMatrix(const GenDiagMatrix<CT>& rhs) : itsdiag(rhs.size())
+        {
             TMVAssert(isComplex(T()));
-            rhs.assignToD(view()); 
+            rhs.assignToD(view());
         }
 
-        template <class T2> 
+        template <typename T2>
         inline DiagMatrix(const GenDiagMatrix<T2>& rhs) : itsdiag(rhs.diag()) {}
 
         inline DiagMatrix(const AssignableToDiagMatrix<RT>& m2) :
             itsdiag(m2.colsize())
         {
             TMVAssert(m2.colsize() == m2.rowsize());
-            m2.assignToD(view()); 
+            m2.assignToD(view());
         }
 
         inline DiagMatrix(const AssignableToDiagMatrix<CT>& m2) :
@@ -1160,7 +1160,7 @@ namespace tmv {
         {
             TMVAssert(m2.colsize() == m2.rowsize());
             TMVAssert(isComplex(T()));
-            m2.assignToD(view()); 
+            m2.assignToD(view());
         }
 
         virtual inline ~DiagMatrix() {}
@@ -1174,47 +1174,47 @@ namespace tmv {
         {
             TMVAssert(m2.size() == size());
             m2.assignToD(view());
-            return *this; 
+            return *this;
         }
 
         inline type& operator=(const GenDiagMatrix<RT>& m2)
         {
             TMVAssert(m2.size() == size());
-            m2.assignToD(view()); 
-            return *this; 
+            m2.assignToD(view());
+            return *this;
         }
 
         inline type& operator=(const GenDiagMatrix<CT>& m2)
         {
             TMVAssert(m2.size() == size());
             TMVAssert(isComplex(T()));
-            m2.assignToD(view()); 
-            return *this; 
+            m2.assignToD(view());
+            return *this;
         }
 
-        template <class T2> 
+        template <typename T2>
         inline type& operator=(const GenDiagMatrix<T2>& m2)
-        { 
+        {
             TMVAssert(m2.size() == size());
-            view() = m2; 
-            return *this; 
+            view() = m2;
+            return *this;
         }
 
         inline type& operator=(const T& x) { view() = x; return *this; }
 
         inline type& operator=(const AssignableToDiagMatrix<RT>& m2)
-        { 
+        {
             TMVAssert(m2.size() == size());
             m2.assignToD(view());
-            return *this; 
+            return *this;
         }
 
         inline type& operator=(const AssignableToDiagMatrix<CT>& m2)
-        { 
+        {
             TMVAssert(m2.size() == size());
             TMVAssert(isComplex(T()));
             m2.assignToD(view());
-            return *this; 
+            return *this;
         }
 
         typedef ListAssigner<T,iterator> MyListAssigner;
@@ -1226,49 +1226,49 @@ namespace tmv {
         // Access
         //
 
-        inline T& operator()(ptrdiff_t i) 
-        { 
-            if (A==CStyle) { 
-                TMVAssert(i>=0 && i<size());
-                return itsdiag(i); 
-            } else { 
-                TMVAssert(i>0 && i<=size());
-                return itsdiag(i-1); 
-            }
-        }
-
-        inline T& operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j)) 
-        { 
-            if (A==CStyle) { 
-                TMVAssert(i>=0 && i<size()); 
-                TMVAssert(j>=0 && j<size()); 
-            } else { 
-                TMVAssert(i>0 && i<=size()); 
-                TMVAssert(j>0 && j<=size()); 
-            }
-            TMVAssert(i==j);
-            return operator()(i);
-        }
-
-        inline T operator()(ptrdiff_t i) const 
+        inline T& operator()(ptrdiff_t i)
         {
-            if (A==CStyle) { 
+            if (A==CStyle) {
                 TMVAssert(i>=0 && i<size());
                 return itsdiag(i);
-            } else { 
+            } else {
                 TMVAssert(i>0 && i<=size());
                 return itsdiag(i-1);
             }
         }
 
-        inline T operator()(ptrdiff_t i,ptrdiff_t j) const 
+        inline T& operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j))
         {
-            if (A==CStyle) { 
-                TMVAssert(i>=0 && i<size()); 
-                TMVAssert(j>=0 && j<size()); 
-            } else { 
-                TMVAssert(i>0 && i<=size()); 
-                TMVAssert(j>0 && j<=size()); 
+            if (A==CStyle) {
+                TMVAssert(i>=0 && i<size());
+                TMVAssert(j>=0 && j<size());
+            } else {
+                TMVAssert(i>0 && i<=size());
+                TMVAssert(j>0 && j<=size());
+            }
+            TMVAssert(i==j);
+            return operator()(i);
+        }
+
+        inline T operator()(ptrdiff_t i) const
+        {
+            if (A==CStyle) {
+                TMVAssert(i>=0 && i<size());
+                return itsdiag(i);
+            } else {
+                TMVAssert(i>0 && i<=size());
+                return itsdiag(i-1);
+            }
+        }
+
+        inline T operator()(ptrdiff_t i,ptrdiff_t j) const
+        {
+            if (A==CStyle) {
+                TMVAssert(i>=0 && i<size());
+                TMVAssert(j>=0 && j<size());
+            } else {
+                TMVAssert(i>0 && i<=size());
+                TMVAssert(j>0 && j<=size());
             }
             if (i==j) return operator()(i);
             else return T(0);
@@ -1282,52 +1282,52 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& setZero() 
+        inline type& setZero()
         { itsdiag.setZero(); return *this; }
 
-        inline type& setAllTo(const T& x) 
+        inline type& setAllTo(const T& x)
         { itsdiag.setAllTo(x); return *this; }
 
-        inline type& addToAll(const T& x) 
+        inline type& addToAll(const T& x)
         { itsdiag.addToAll(x); return *this; }
 
         inline type& clip(RT thresh)
         { diag().clip(thresh); return *this; }
 
-        inline type& transposeSelf() 
+        inline type& transposeSelf()
         { return *this; }
 
-        inline type& conjugateSelf() 
+        inline type& conjugateSelf()
         { itsdiag.conjugateSelf(); return *this; }
 
         inline type& invertSelf()
         { view().invertSelf(); return *this; }
 
-        inline type& setToIdentity(const T& x=T(1)) 
+        inline type& setToIdentity(const T& x=T(1))
         { itsdiag.setAllTo(x); return *this; }
 
         //
         // subDiagMatrix
         //
 
-        inline view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) 
+        inline view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2)
         { return view_type(itsdiag.cSubVector(i1,i2)); }
 
-        inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) 
-        { 
+        inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2)
+        {
             TMVAssert(diag().hasSubVector(i1,i2,1));
             if (A == int(FortranStyle)) { --i1; }
-            return cSubDiagMatrix(i1,i2); 
+            return cSubDiagMatrix(i1,i2);
         }
 
-        inline view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
+        inline view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep)
         { return view_type(itsdiag.cSubVector(i1,i2,istep)); }
 
-        inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
-        { 
+        inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep)
+        {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             if (A == int(FortranStyle)) { --i1; i2 += istep-1; }
-            return cSubDiagMatrix(i1,i2,istep); 
+            return cSubDiagMatrix(i1,i2,istep);
         }
 
         inline realpart_type realPart()
@@ -1350,7 +1350,7 @@ namespace tmv {
         { return const_view_type(itsdiag.cSubVector(i1,i2,istep)); }
 
         inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
-        { 
+        {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             if (A == int(FortranStyle)) { --i1; i2 += istep-1; }
             return cSubDiagMatrix(i1,i2,istep);
@@ -1374,30 +1374,30 @@ namespace tmv {
         inline const_view_type adjoint() const
         { return conjugate(); }
 
-        inline view_type view() 
+        inline view_type view()
         { return view_type(itsdiag.view()); }
 
-        inline view_type transpose() 
+        inline view_type transpose()
         { return view(); }
 
         inline view_type conjugate()
         { return view_type(itsdiag.conjugate()); }
 
-        inline view_type adjoint() 
+        inline view_type adjoint()
         { return conjugate(); }
 
         //
         // I/O
         //
-        
+
         void read(const TMV_Reader& reader);
 
         using base::size;
 
-        inline void resize(ptrdiff_t n) 
-        { 
+        inline void resize(ptrdiff_t n)
+        {
             TMVAssert(n >= 0);
-            itsdiag.resize(n); 
+            itsdiag.resize(n);
         }
 
         inline iterator begin()
@@ -1432,54 +1432,54 @@ namespace tmv {
     //   DiagMatrixViewOf(T* v, n, step)
     //
 
-    template <class T> 
+    template <typename T>
     inline ConstDiagMatrixView<T> DiagMatrixViewOf(const GenVector<T>& v)
     { return ConstDiagMatrixView<T>(v); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline ConstDiagMatrixView<T,A> DiagMatrixViewOf(
         const ConstVectorView<T,A>& v)
     { return ConstDiagMatrixView<T,A>(v); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline ConstDiagMatrixView<T,A> DiagMatrixViewOf(const Vector<T,A>& v)
     { return ConstDiagMatrixView<T,A>(v.view()); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline DiagMatrixView<T,A> DiagMatrixViewOf(VectorView<T,A> v)
     { return DiagMatrixView<T,A>(v); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline DiagMatrixView<T,A> DiagMatrixViewOf(Vector<T,A>& v)
     { return DiagMatrixView<T,A>(v.view()); }
 
-    template <class T> 
+    template <typename T>
     inline ConstDiagMatrixView<T> DiagMatrixViewOf(const T* m, ptrdiff_t size)
     {
         TMVAssert(size >= 0);
-        return ConstDiagMatrixView<T>(VectorViewOf(m,size)); 
+        return ConstDiagMatrixView<T>(VectorViewOf(m,size));
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<T> DiagMatrixViewOf(T* m, ptrdiff_t size)
     {
         TMVAssert(size >= 0);
-        return DiagMatrixView<T>(VectorViewOf(m,size)); 
+        return DiagMatrixView<T>(VectorViewOf(m,size));
     }
 
-    template <class T> 
+    template <typename T>
     inline ConstDiagMatrixView<T> DiagMatrixViewOf(
         const T* m, ptrdiff_t size, ptrdiff_t step)
     {
         TMVAssert(size >= 0);
-        return ConstDiagMatrixView<T>(VectorViewOf(m,size,step)); 
+        return ConstDiagMatrixView<T>(VectorViewOf(m,size,step));
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<T> DiagMatrixViewOf(T* m, ptrdiff_t size, ptrdiff_t step)
     {
         TMVAssert(size >= 0);
-        return DiagMatrixView<T>(VectorViewOf(m,size,step)); 
+        return DiagMatrixView<T>(VectorViewOf(m,size,step));
     }
 
 
@@ -1487,15 +1487,15 @@ namespace tmv {
     // Swap Matrices
     //
 
-    template <class T> 
+    template <typename T>
     inline void Swap(DiagMatrixView<T> m1, DiagMatrixView<T> m2)
     { Swap(m1.diag(),m2.diag()); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline void Swap(DiagMatrix<T,A>& m1, DiagMatrixView<T> m2)
     { Swap(m1.diag(),m2.diag()); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline void Swap(DiagMatrixView<T> m1, DiagMatrix<T,A>& m2)
     { Swap(m1.diag(),m2.diag()); }
 
@@ -1503,67 +1503,67 @@ namespace tmv {
     // Views:
     //
 
-    template <class T> 
+    template <typename T>
     inline ConstDiagMatrixView<T> Transpose(const GenDiagMatrix<T>& m)
     { return m.transpose(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline ConstDiagMatrixView<T,A> Transpose(const ConstDiagMatrixView<T,A>& m)
     { return m.transpose(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline ConstDiagMatrixView<T,A> Transpose(const DiagMatrix<T,A>& m)
     { return m.transpose(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline DiagMatrixView<T,A> Transpose(DiagMatrixView<T,A> m)
     { return m.transpose(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline DiagMatrixView<T,A> Transpose(DiagMatrix<T,A>& m)
     { return m.transpose(); }
 
-    template <class T> 
+    template <typename T>
     inline ConstDiagMatrixView<T> Conjugate(const GenDiagMatrix<T>& m)
     { return m.conjugate(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline ConstDiagMatrixView<T,A> Conjugate(const ConstDiagMatrixView<T,A>& m)
     { return m.conjugate(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline ConstDiagMatrixView<T,A> Conjugate(const DiagMatrix<T,A>& m)
     { return m.conjugate(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline DiagMatrixView<T,A> Conjugate(DiagMatrixView<T,A> m)
     { return m.conjugate(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline DiagMatrixView<T,A> Conjugate(DiagMatrix<T,A>& m)
     { return m.conjugate(); }
 
-    template <class T> 
+    template <typename T>
     inline ConstDiagMatrixView<T> Adjoint(const GenDiagMatrix<T>& m)
     { return m.adjoint(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline ConstDiagMatrixView<T,A> Adjoint(const ConstDiagMatrixView<T,A>& m)
     { return m.adjoint(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline ConstDiagMatrixView<T,A> Adjoint(const DiagMatrix<T,A>& m)
     { return m.adjoint(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline DiagMatrixView<T,A> Adjoint(DiagMatrixView<T,A> m)
     { return m.adjoint(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline DiagMatrixView<T,A> Adjoint(DiagMatrix<T,A>& m)
     { return m.adjoint(); }
 
-    template <class T> 
+    template <typename T>
     inline QuotXD<T,T> Inverse(const GenDiagMatrix<T>& m)
     { return m.inverse(); }
 
@@ -1573,37 +1573,37 @@ namespace tmv {
     // DiagMatrix ==, != DiagMatrix
     //
 
-    template <class T1, class T2> 
+    template <typename T1, typename T2>
     inline bool operator==(
         const GenDiagMatrix<T1>& m1, const GenDiagMatrix<T2>& m2)
     { return m1.diag() == m2.diag(); }
 
-    template <class T1, class T2> 
+    template <typename T1, typename T2>
     inline bool operator!=(
         const GenDiagMatrix<T1>& m1, const GenDiagMatrix<T2>& m2)
     { return !(m1 == m2); }
 
-    template <class T1, class T2> 
+    template <typename T1, typename T2>
     inline bool operator==(
         const GenDiagMatrix<T1>& m1, const GenMatrix<T2>& m2)
     {
-        return 
-            m1.diag() == m2.diag() && 
+        return
+            m1.diag() == m2.diag() &&
             m2.upperTri().offDiag().maxAbs2Element() == T2(0) &&
             m2.lowerTri().offDiag().maxAbs2Element() == T2(0);
     }
 
-    template <class T1, class T2> 
+    template <typename T1, typename T2>
     inline bool operator==(
         const GenMatrix<T1>& m1, const GenDiagMatrix<T2>& m2)
     { return m2 == m1; }
 
-    template <class T1, class T2> 
+    template <typename T1, typename T2>
     inline bool operator!=(
         const GenDiagMatrix<T1>& m1, const GenMatrix<T2>& m2)
     { return !(m1 == m2); }
 
-    template <class T1, class T2> 
+    template <typename T1, typename T2>
     inline bool operator!=(
         const GenMatrix<T1>& m1, const GenDiagMatrix<T2>& m2)
     { return !(m1 == m2); }
@@ -1612,22 +1612,22 @@ namespace tmv {
     // I/O
     //
 
-    template <class T>
+    template <typename T>
     inline std::istream& operator>>(
         const TMV_Reader& reader, DiagMatrixView<T> m)
     { m.read(reader); return reader.getis(); }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline std::istream& operator>>(
         const TMV_Reader& reader, DiagMatrix<T,A>& m)
     { m.read(reader); return reader.getis(); }
 
-    template <class T>
+    template <typename T>
     inline std::istream& operator>>(
         std::istream& is, DiagMatrixView<T> m)
     { return is >> IOStyle() >> m; }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline std::istream& operator>>(std::istream& is, DiagMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 

@@ -22,16 +22,16 @@
 
 //---------------------------------------------------------------------------
 //
-// This file contains the code for doing division of BandMatrices using 
+// This file contains the code for doing division of BandMatrices using
 // LU Decomposition.
 //
-// The basics of LU decomposition for band matrices are the same as 
+// The basics of LU decomposition for band matrices are the same as
 // for regular matrices.  However, there are a few wrinkles about doing
-// it efficiently.  
+// it efficiently.
 //
-// We leave the details to the comments in TMV_BandLUDiv.cpp, but 
+// We leave the details to the comments in TMV_BandLUDiv.cpp, but
 // the main difference for the routines in this file is that L can
-// be stored in a lower band matrix with m.nlo() subdiagonals.  
+// be stored in a lower band matrix with m.nlo() subdiagonals.
 // However, U needs m.nlo() + m.nhi() superdiagonals for its storage.
 //
 //
@@ -47,53 +47,53 @@
 
 namespace tmv {
 
-    // Decompose A into P L U 
+    // Decompose A into P L U
     // L, U, and P must have the same size as A.
     // L should be UnitDiag.
     // U should be NonUnitDiag.
-    template <class T> 
+    template <typename T>
     void LU_Decompose(
         const GenBandMatrix<T>& A, LowerTriMatrixView<T> L,
         BandMatrixView<T> U, ptrdiff_t* P);
 
     // Do the decomposition in compressed form.
-    template <class T> 
+    template <typename T>
     void LU_Decompose(BandMatrixView<T> LUx, ptrdiff_t* P, ptrdiff_t Anhi);
 
     class Permutation;
 
-    template <class T> 
+    template <typename T>
     void LU_Decompose(
         const GenBandMatrix<T>& A, LowerTriMatrixView<T> L,
         BandMatrixView<T> U, Permutation& P);
 
-    template <class T> 
+    template <typename T>
     void LU_Decompose(BandMatrixView<T> LUx, Permutation& P, ptrdiff_t Anhi);
-    
-    template <class T, int A1> 
+
+    template <typename T, int A1>
     inline void LU_Decompose(
         const GenBandMatrix<T>& A, LowerTriMatrix<T,A1>& L,
         BandMatrixView<T> U, Permutation& P)
     { LU_Decompose(A,L.view(),U,P); }
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void LU_Decompose(
         const GenBandMatrix<T>& A, LowerTriMatrixView<T> L,
         BandMatrix<T,A2>& U, Permutation& P)
     { LU_Decompose(A,L,U.view(),P); }
 
-    template <class T, int A1, int A2> 
+    template <typename T, int A1, int A2>
     inline void LU_Decompose(
         const GenBandMatrix<T>& A, LowerTriMatrix<T,A1>& L,
         BandMatrix<T,A2>& U, Permutation& P)
     { LU_Decompose(A,L.view(),U.view(),P); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void LU_Decompose(BandMatrix<T,A1>& LUx, Permutation& P, ptrdiff_t Anhi)
     { LU_Decompose(LUx.view(),P,Anhi); }
-    
-    template <class T> 
-    class BandLUDiv : public Divider<T> 
+
+    template <typename T>
+    class BandLUDiv : public Divider<T>
     {
 
     public :
@@ -111,14 +111,14 @@ namespace tmv {
         //
 
 
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(MatrixView<T1> m) const;
-        template <class T1> 
+        template <typename T1>
         void doRDivEq(MatrixView<T1> m) const;
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doLDiv(
             const GenMatrix<T1>& m, MatrixView<T2> x) const;
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doRDiv(
             const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
@@ -128,7 +128,7 @@ namespace tmv {
 
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(MatrixView<T1> minv) const;
         void doMakeInverseATA(MatrixView<T> minv) const;
         bool isSingular() const;

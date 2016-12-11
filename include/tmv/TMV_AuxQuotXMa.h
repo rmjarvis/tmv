@@ -21,7 +21,7 @@
 
 
 // Need to define the following with #define statements.
-// (The given definition is for a regular Matrix.  Modify as 
+// (The given definition is for a regular Matrix.  Modify as
 // appropriate for the various other matrices.)
 //
 // #define GENMATRIX GenMatrix
@@ -51,97 +51,97 @@
 
 // -(x/m)
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<T,T2 X> operator-(const QUOTXM<T,T2 X>& qxm)
 { return QUOTXM<T,T2 X>(-qxm.getX(),qxm GETM); }
 
 // x*(x/m)
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<T,T2 X> operator*(const T x, const QUOTXM<T,T2 X>& qxm)
 { return QUOTXM<T,T2 X>(x*qxm.getX(),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const T x, const QUOTXM<CT,T2 X>& qxm)
 { return QUOTXM<CT,T2 X>(x*qxm.getX(),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const CT x, const QUOTXM<T,T X>& qxm)
 { return QUOTXM<CT,T X>(x*qxm.getX(),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const CCT x, const QUOTXM<T,T X>& qxm)
 { return QUOTXM<CT,T X>(CT(x)*qxm.getX(),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const VCT x, const QUOTXM<T,T X>& qxm)
 { return QUOTXM<CT,T X>(CT(x)*qxm.getX(),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const CCT x, const QUOTXM<CT,T2 X>& qxm)
 { return QUOTXM<CT,T2 X>(CT(x)*qxm.getX(),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const VCT x, const QUOTXM<CT,T2 X>& qxm)
 { return QUOTXM<CT,T2 X>(CT(x)*qxm.getX(),qxm GETM); }
 
 // (x/m)*x
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<T,T2 X> operator*(const QUOTXM<T,T2 X>& qxm, const T x)
 { return QUOTXM<T,T2 X>(x*qxm.getX(),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const QUOTXM<CT,T2 X>& qxm, const T x)
 { return QUOTXM<CT,T2 X>(x*qxm.getX(),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const QUOTXM<T,T X>& qxm, const CT x)
 { return QUOTXM<CT,T X>(x*qxm.getX(),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const QUOTXM<T,T X>& qxm, const CCT x)
 { return QUOTXM<CT,T X>(CT(x)*qxm.getX(),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const QUOTXM<T,T X>& qxm, const VCT x)
 { return QUOTXM<CT,T X>(CT(x)*qxm.getX(),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const QUOTXM<CT,T2 X>& qxm, const CCT x)
 { return QUOTXM<CT,T2 X>(CT(x)*qxm.getX(),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const QUOTXM<CT,T2 X>& qxm, const VCT x)
 { return QUOTXM<CT,T2 X>(CT(x)*qxm.getX(),qxm GETM); }
 
 // (x/m)/x
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<T,T2 X> operator/(const QUOTXM<T,T2 X>& qxm, const T x)
 { return QUOTXM<T,T2 X>(TMV_Divide(qxm.getX(),x),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator/(const QUOTXM<CT,T2 X>& qxm, const T x)
 { return QUOTXM<CT,T2 X>(TMV_Divide(qxm.getX(),x),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator/(const QUOTXM<T,T X>& qxm, const CT x)
 { return QUOTXM<CT,T X>(TMV_Divide(qxm.getX(),x),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator/(const QUOTXM<T,T X>& qxm, const CCT x)
 { return QUOTXM<CT,T X>(TMV_Divide(qxm.getX(),CT(x)),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator/(const QUOTXM<T,T X>& qxm, const VCT x)
 { return QUOTXM<CT,T X>(TMV_Divide(qxm.getX(),CT(x)),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator/(const QUOTXM<CT,T2 X>& qxm, const CCT x)
 { return QUOTXM<CT,T2 X>(TMV_Divide(qxm.getX(),CT(x)),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator/(const QUOTXM<CT,T2 X>& qxm, const VCT x)
 { return QUOTXM<CT,T2 X>(TMV_Divide(qxm.getX(),CT(x)),qxm GETM); }
 
@@ -149,97 +149,97 @@ inline QUOTXM<CT,T2 X> operator/(const QUOTXM<CT,T2 X>& qxm, const VCT x)
 
 // -(1/m)
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<T,T2 X> operator-(const QUOTXM_1<T,T2 X>& qxm)
 { return QUOTXM<T,T2 X>(T(-1),qxm GETM); }
 
 // x*(1/m)
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<T,T2 X> operator*(const T x, const QUOTXM_1<T,T2 X>& qxm)
 { return QUOTXM<T,T2 X>(x,qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const T x, const QUOTXM_1<CT,T2 X>& qxm)
 { return QUOTXM<CT,T2 X>(x,qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const CT x, const QUOTXM_1<T,T X>& qxm)
 { return QUOTXM<CT,T X>(x,qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const CCT x, const QUOTXM_1<T,T X>& qxm)
 { return QUOTXM<CT,T X>(CT(x),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const VCT x, const QUOTXM_1<T,T X>& qxm)
 { return QUOTXM<CT,T X>(CT(x),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const CCT x, const QUOTXM_1<CT,T2 X>& qxm)
 { return QUOTXM<CT,T2 X>(CT(x),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const VCT x, const QUOTXM_1<CT,T2 X>& qxm)
 { return QUOTXM<CT,T2 X>(CT(x),qxm GETM); }
 
 // (1/m)*x
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<T,T2 X> operator*(const QUOTXM_1<T,T2 X>& qxm, const T x)
 { return QUOTXM<T,T2 X>(x,qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const QUOTXM_1<CT,T2 X>& qxm, const T x)
 { return QUOTXM<CT,T2 X>(x,qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const QUOTXM_1<T,T X>& qxm, const CT x)
 { return QUOTXM<CT,T X>(x,qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const QUOTXM_1<T,T X>& qxm, const CCT x)
 { return QUOTXM<CT,T X>(CT(x),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator*(const QUOTXM_1<T,T X>& qxm, const VCT x)
 { return QUOTXM<CT,T X>(CT(x),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const QUOTXM_1<CT,T2 X>& qxm, const CCT x)
 { return QUOTXM<CT,T2 X>(CT(x),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator*(const QUOTXM_1<CT,T2 X>& qxm, const VCT x)
 { return QUOTXM<CT,T2 X>(CT(x),qxm GETM); }
 
 // (1/m)/x
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<T,T2 X> operator/(const QUOTXM_1<T,T2 X>& qxm, const T x)
 { return QUOTXM<T,T2 X>(TMV_InverseOf(x),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator/(const QUOTXM_1<CT,T2 X>& qxm, const T x)
 { return QUOTXM<CT,T2 X>(TMV_InverseOf(x),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator/(const QUOTXM_1<T,T X>& qxm, const CT x)
 { return QUOTXM<CT,T X>(TMV_InverseOf(x),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator/(const QUOTXM_1<T,T X>& qxm, const CCT x)
 { return QUOTXM<CT,T X>(TMV_InverseOf(CT(x)),qxm GETM); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTXM<CT,T X> operator/(const QUOTXM_1<T,T X>& qxm, const VCT x)
 { return QUOTXM<CT,T X>(TMV_InverseOf(CT(x)),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator/(const QUOTXM_1<CT,T2 X>& qxm, const CCT x)
 { return QUOTXM<CT,T2 X>(TMV_InverseOf(CT(x)),qxm GETM); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTXM<CT,T2 X> operator/(const QUOTXM_1<CT,T2 X>& qxm, const VCT x)
 { return QUOTXM<CT,T2 X>(TMV_InverseOf(CT(x)),qxm GETM); }
 

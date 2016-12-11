@@ -55,58 +55,58 @@ namespace tmv {
     // and P is a permutation.
     // The hermitian-ness of D must be the same as A.
     // L is returned as A.lowerTri(UnitDiag).
-    template <class T> 
+    template <typename T>
     void LDL_Decompose(
         SymMatrixView<T> A, SymBandMatrixView<T> D, ptrdiff_t* P);
 
-    template <class T> 
+    template <typename T>
     void LDL_Decompose(
         SymMatrixView<T> A, VectorView<T> xD,
         ptrdiff_t* P, TMV_RealType(T)& logdet, T& signdet);
 
     class Permutation;
 
-    template <class T> 
+    template <typename T>
     void LDL_Decompose(
         SymMatrixView<T> A, SymBandMatrixView<T> D, Permutation& P);
 
-    template <class T> 
+    template <typename T>
     void LDL_Decompose(
         SymMatrixView<T> A, VectorView<T> xD,
         Permutation& P, TMV_RealType(T)& logdet, T& signdet);
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void LDL_Decompose(
         SymMatrixView<T> A, HermBandMatrix<T,A2>& D, Permutation& P)
     { LDL_Decompose(A,D.view(),P); }
 
-    template <class T, int A2> 
+    template <typename T, int A2>
     inline void LDL_Decompose(
         SymMatrixView<T> A, SymBandMatrix<T,A2>& D, Permutation& P)
     { LDL_Decompose(A,D.view(),P); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void LDL_Decompose(
         HermMatrix<T,A1>& A, SymBandMatrixView<T> D, Permutation& P)
     { LDL_Decompose(A.view(),D,P); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void LDL_Decompose(
         SymMatrix<T,A1>& A, SymBandMatrixView<T> D, Permutation& P)
     { LDL_Decompose(A.view(),D,P); }
 
-    template <class T, int A1, int A2> 
+    template <typename T, int A1, int A2>
     inline void LDL_Decompose(
         HermMatrix<T,A1>& A, HermBandMatrix<T,A2>& D, Permutation& P)
     { LDL_Decompose(A.view(),D.view(),P); }
 
-    template <class T, int A1, int A2> 
+    template <typename T, int A1, int A2>
     inline void LDL_Decompose(
         SymMatrix<T,A1>& A, SymBandMatrix<T,A2>& D, Permutation& P)
     { LDL_Decompose(A.view(),D.view(),P); }
 
-    template <class T> 
-    class SymLDLDiv : public SymDivider<T> 
+    template <typename T>
+    class SymLDLDiv : public SymDivider<T>
     {
 
     public :
@@ -122,16 +122,16 @@ namespace tmv {
         // Divider Versions of DivEq and Div
         //
 
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(MatrixView<T1> m) const;
 
-        template <class T1> 
+        template <typename T1>
         void doRDivEq(MatrixView<T1> m) const;
 
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doLDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const;
 
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doRDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const;
 
         //
@@ -141,10 +141,10 @@ namespace tmv {
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
 
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(MatrixView<T1> minv) const;
 
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(SymMatrixView<T1> minv) const;
 
         inline void makeInverse(SymMatrixView<TMV_RealType(T)> sinv) const

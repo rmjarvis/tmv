@@ -38,14 +38,14 @@
 //
 // [  c  s  ] [ x ] = [ r ]
 // [ -s* c* ] [ y ]   [ 0 ]
-// 
+//
 // [ Note: often (eg. in Golub and Van Loan) Givens matrices are defined
 //   as the transpose (or adjoint) of this.  We prefer this definition. ]
 //
 // (1)  c x + s y = r
 // (2)  c* y - s* x = 0
 //
-// From (2), we get  s* = yc*/x, so 
+// From (2), we get  s* = yc*/x, so
 // |x|^2 |s|^2 = |y|^2 |c|^2 = |y|^2 (1 - |s|^2)
 //
 // |s| = |y|/sqrt(|x|^2+|y|^2)  and |c| = |x|/sqrt(|x|^2+|y|^2)
@@ -87,15 +87,15 @@
 // Choice 3: a = q-p, b = 0, t = q
 //
 // Similar to choice 2, but s is real:
-// 
+//
 // c = (y/|y|)x*/|r|  s = |y|/|r|  r = (y/|y|)|r|
 //
-// 
-// The speed of calculation is usually more important than the 
+//
+// The speed of calculation is usually more important than the
 // convenience of a rotating to a real value, so choice 2 or 3
-// is preferred.  
-// Choice 2 is a bit better when |y|<|x|, since we prefer to 
-// calculate sqrt(1+|y/x|^2), and the calculations for 2 work 
+// is preferred.
+// Choice 2 is a bit better when |y|<|x|, since we prefer to
+// calculate sqrt(1+|y/x|^2), and the calculations for 2 work
 // better in this case.
 // Since this is more common than |x|<|y|, we always use choice 2.
 //
@@ -111,18 +111,18 @@ namespace tmv {
 
     // For complex, this is quicker than the real abs and works just
     // as well for the purpose here.
-    template <class T> 
+    template <typename T>
     inline T TMV_MAXABS(T x)
     { return TMV_ABS(x); }
 
-    template <class T> 
+    template <typename T>
     inline T TMV_MAXABS(std::complex<T> x)
     { return TMV_MAX(TMV_ABS(TMV_REAL(x)),TMV_ABS(TMV_IMAG(x))); }
 
-    template <class T> 
+    template <typename T>
     class Givens;
     // Defined in TMV_Givens.cpp
-    template <class T> 
+    template <typename T>
     Givens<T> GivensRotate(T& x, T& y);
     // Use a givens matrix G to rotate the vector so y = 0:
     // G [ x ] = [ r ]
@@ -131,33 +131,33 @@ namespace tmv {
 
     // Do: [ x ] <- [  c   s ] [ x ]
     //     [ y ]    [ -s*  c ] [ y ]
-    template <class Tg, class T> 
+    template <typename Tg, typename T>
     void GivensMult(TMV_RealType(Tg) c, Tg s, T& x, T& y);
-    template <class Tg, class T> 
+    template <typename Tg, typename T>
     inline void GivensMult(
         TMV_RealType(Tg) c, Tg s, ConjRef<T> x, ConjRef<T> y)
     { GivensMult(c,TMV_CONJ(s),x.getRef(),y.getRef()); }
-    template <class Tg, class T> 
+    template <typename Tg, typename T>
     inline void GivensMult(
         TMV_RealType(Tg) c, Tg s, VarConjRef<T> x, VarConjRef<T> y)
     { GivensMult(c,TMV_CONJ(s),x.getRef(),y.getRef()); }
 
-    template <class Tg, class T> 
+    template <typename Tg, typename T>
     void GivensMult(
         TMV_RealType(Tg) c, Tg s, VectorView<T> v0, VectorView<T> v1);
 
     // Do: [ d0 e0* ] <- [  c  s ] [ d0 e0* ] [ c  -s ]
     //     [ e0 d1  ]    [ -s* c ] [ e0 d1  ] [ s*  c ]
-    template <class Tg, class T> 
+    template <typename Tg, typename T>
     void GivensHermMult(TMV_RealType(Tg) c, Tg s, T& d0, T& d1, T& e0);
 
     // Do: [ d0 e0 ] <- [  c  s ] [ d0 e0 ] [ c -s* ]
     //     [ e0 d1 ]    [ -s* c ] [ e0 d1 ] [ s  c  ]
-    template <class Tg, class T> 
+    template <typename Tg, typename T>
     void GivensSymMult(TMV_RealType(Tg) c, Tg s, T& d0, T& d1, T& e0);
 
-    template <class T> 
-    class Givens 
+    template <typename T>
+    class Givens
     {
 
     public:
@@ -168,60 +168,60 @@ namespace tmv {
         inline ~Givens() {}
         // Use default copy, op=
 
-        inline Givens<T> transpose() const 
+        inline Givens<T> transpose() const
         { return Givens<T>(c,-TMV_CONJ(s)); }
 
-        inline Givens<T> conjugate() const 
+        inline Givens<T> conjugate() const
         { return Givens<T>(c,TMV_CONJ(s)); }
 
-        inline Givens<T> adjoint() const 
+        inline Givens<T> adjoint() const
         { return Givens<T>(c,-s); }
 
-        template <class T2> 
-        inline void mult(T2& x, T2& y) const 
+        template <typename T2>
+        inline void mult(T2& x, T2& y) const
         { GivensMult(c,s,x,y); }
-        template <class T2> 
-        inline void conjMult(T2& x, T2& y) const 
+        template <typename T2>
+        inline void conjMult(T2& x, T2& y) const
         { GivensMult(c,TMV_CONJ(s),x,y); }
 
-        template <class T2> 
-        inline void mult(ConjRef<T2> x, ConjRef<T2> y) const 
+        template <typename T2>
+        inline void mult(ConjRef<T2> x, ConjRef<T2> y) const
         { GivensMult(c,s,x,y); }
-        template <class T2> 
-        inline void conjMult(ConjRef<T2> x, ConjRef<T2> y) const 
+        template <typename T2>
+        inline void conjMult(ConjRef<T2> x, ConjRef<T2> y) const
         { GivensMult(c,TMV_CONJ(s),x,y); }
-        template <class T2> 
-        inline void mult(VarConjRef<T2> x, VarConjRef<T2> y) const 
+        template <typename T2>
+        inline void mult(VarConjRef<T2> x, VarConjRef<T2> y) const
         { GivensMult(c,s,x,y); }
-        template <class T2> 
-        inline void conjMult(VarConjRef<T2> x, VarConjRef<T2> y) const 
+        template <typename T2>
+        inline void conjMult(VarConjRef<T2> x, VarConjRef<T2> y) const
         { GivensMult(c,TMV_CONJ(s),x,y); }
 
-        template <class T2> 
+        template <typename T2>
         inline void mult(VectorView<T2> v) const
         { TMVAssert(v.size()==2); GivensMult(c,s,v(0),v(1)); }
-        template <class T2> 
+        template <typename T2>
         inline void conjMult(VectorView<T2> v) const
         { TMVAssert(v.size()==2); GivensMult(c,TMV_CONJ(s),v(0),v(1)); }
 
-        template <class T2> 
+        template <typename T2>
         inline void mult(MatrixView<T2> m) const
-        { 
+        {
             TMVAssert(m.colsize()==2);
             GivensMult(c,s,m.row(0),m.row(1));
         }
-        template <class T2> 
+        template <typename T2>
         inline void conjMult(MatrixView<T2> m) const
-        { 
+        {
             TMVAssert(m.colsize()==2);
             GivensMult(c,TMV_CONJ(s),m.row(0),m.row(1));
         }
 
-        template <class T2> 
-        inline void hermMult(T2& d0, T2& d1, T2& e0) const 
+        template <typename T2>
+        inline void hermMult(T2& d0, T2& d1, T2& e0) const
         { GivensHermMult(c,s,d0,d1,e0); }
-        template <class T2> 
-        inline void symMult(T2& d0, T2& d1, T2& e0) const 
+        template <typename T2>
+        inline void symMult(T2& d0, T2& d1, T2& e0) const
         { GivensSymMult(c,s,d0,d1,e0); }
 
     private:

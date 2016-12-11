@@ -24,13 +24,13 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T> 
     T IntegerDet(const GenMatrix<T>& A);
-    template <class T> 
+    template <typename T> 
     T IntegerDet(const GenBandMatrix<T>& A);
-    template <class T> 
+    template <typename T> 
     T IntegerDet(const GenSymMatrix<T>& A);
-    template <class T> 
+    template <typename T> 
     T IntegerDet(const GenSymBandMatrix<T>& A);
 
 } // namespace tmv

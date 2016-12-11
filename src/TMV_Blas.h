@@ -195,10 +195,10 @@ extern "C" {
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T> 
     inline T* FBLAS_ConvertP(T* x) { return x; }
 
-    template <class T> 
+    template <typename T> 
     inline const T* FBLAS_ConvertP(const T* x) { return x; }
 
     inline cdouble* FBLAS_ConvertP(std::complex<double>* ptr)
@@ -257,10 +257,10 @@ namespace tmv {
 namespace tmv {
 
 
-    template <class T> 
+    template <typename T> 
     inline T* MKL_ConvertP(T* x) { return x; }
 
-    template <class T> 
+    template <typename T> 
     inline T* MKL_ConvertP(const T* x) 
     { return MKL_ConvertP(const_cast<T*>(x)); }
 
@@ -315,10 +315,10 @@ namespace tmv {
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T> 
     inline T* ACML_ConvertP(T* x) { return x; }
 
-    template <class T> 
+    template <typename T> 
     inline T* ACML_ConvertP(const T* x) 
     { return const_cast<T*>(x); }
 
@@ -424,10 +424,10 @@ extern "C" {
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T> 
     inline T* CLAPACK_ConvertP(T* x) { return x; }
 
-    template <class T> 
+    template <typename T> 
     inline T* CLAPACK_ConvertP(const T* x) 
     { return const_cast<T*>(x); }
 
@@ -477,10 +477,10 @@ extern "C" {
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T> 
     inline T* FLAPACK_ConvertP(T* x) { return x; }
 
-    template <class T> 
+    template <typename T> 
     inline const T* FLAPACK_ConvertP(const T* x) { return x; }
 
     inline cdouble* FLAPACK_ConvertP(std::complex<double>* ptr)
@@ -716,12 +716,12 @@ namespace tmv {
     void LAP_Results(
         int Lap_info, int lwork_opt, int m, int n, int lwork, const char* fn);
 
-    template <class T> class GenMatrix;
-    template <class T> class GenUpperTriMatrix;
-    template <class T> class GenLowerTriMatrix;
-    template <class T> class GenBandMatrix;
+    template <typename T> class GenMatrix;
+    template <typename T> class GenUpperTriMatrix;
+    template <typename T> class GenLowerTriMatrix;
+    template <typename T> class GenBandMatrix;
 
-    template <class T>
+    template <typename T>
     static inline bool BlasIsRM(const GenMatrix<T>& m)
     {
 #ifdef BLAS
@@ -731,7 +731,7 @@ namespace tmv {
 #endif
     }
 
-    template <class T>
+    template <typename T>
     static inline bool BlasIsCM(const GenMatrix<T>& m)
     {
 #ifdef BLAS
@@ -741,7 +741,7 @@ namespace tmv {
 #endif
     }
 
-    template <class T>
+    template <typename T>
     static inline bool BlasIsRM(const GenUpperTriMatrix<T>& m)
     {
 #ifdef BLAS
@@ -751,7 +751,7 @@ namespace tmv {
 #endif
     }
 
-    template <class T>
+    template <typename T>
     static inline bool BlasIsCM(const GenUpperTriMatrix<T>& m)
     {
 #ifdef BLAS
@@ -761,7 +761,7 @@ namespace tmv {
 #endif
     }
 
-    template <class T>
+    template <typename T>
     static inline bool BlasIsRM(const GenLowerTriMatrix<T>& m)
     {
 #ifdef BLAS
@@ -771,7 +771,7 @@ namespace tmv {
 #endif
     }
 
-    template <class T>
+    template <typename T>
     static inline bool BlasIsCM(const GenLowerTriMatrix<T>& m)
     {
 #ifdef BLAS
@@ -782,7 +782,7 @@ namespace tmv {
     }
 
 
-    template <class T>
+    template <typename T>
     static inline bool BlasIsRM(const GenBandMatrix<T>& m)
     {
 #ifdef BLAS
@@ -792,7 +792,7 @@ namespace tmv {
 #endif
     }
 
-    template <class T>
+    template <typename T>
     static inline bool BlasIsCM(const GenBandMatrix<T>& m)
     {
 #ifdef BLAS

@@ -26,17 +26,17 @@
 
 namespace tmv {
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void CH_LDivEq(const GenSymMatrix<T1>& L, MatrixView<T> m);
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void CH_RDivEq(const GenSymMatrix<T1>& L, MatrixView<T> m);
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void CH_Inverse(const GenSymMatrix<T1>& LLx, SymMatrixView<T> sinv);
 
 #ifndef NOTHROW
-    template <class T> 
+    template <typename T> 
     class NonPosDefHermMatrix : public NonPosDef
     {
     public:
@@ -57,7 +57,7 @@ namespace tmv {
         }
     };
 
-    template <class T> 
+    template <typename T> 
     class NonPosDefHermMatrix2 : public NonPosDefHermMatrix<T>
     {
     public:
@@ -81,15 +81,15 @@ namespace tmv {
     // Specialize disallowed complex combinations:
 #define CT std::complex<T>
 
-    template <class T>
+    template <typename T>
     inline void CH_LDivEq(const GenSymMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T>
+    template <typename T>
     inline void CH_RDivEq(const GenSymMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T>
+    template <typename T>
     inline void CH_Inverse(const GenSymMatrix<CT>& , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 

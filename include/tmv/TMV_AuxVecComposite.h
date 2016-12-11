@@ -20,11 +20,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-// This file sets up the Composite classes for all operations with a 
+// This file sets up the Composite classes for all operations with a
 // (sparse) matrix that returns a vector
 //
 // Need to define the following with #define statements.
-// (The given definition is for a Band Matrix.  Modify as 
+// (The given definition is for a Band Matrix.  Modify as
 // appropriate for the various other matrices.)
 //
 // #define GENMATRIX GenBandMatrix
@@ -36,7 +36,7 @@
 // Matrix * Vector
 //
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 class PRODMV : public VectorComposite<T>
 {
 public:
@@ -65,28 +65,28 @@ private:
     const GenVector<T2>& v;
 };
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 inline VectorView<T> operator+=(
     VectorView<T> v, const PRODMV<T,T1,T2>& pmv)
 { MultMV<true>(pmv.getX(),pmv.getM(),pmv.getV(),v); return v; }
 
-template <class T> 
+template <typename T>
 inline VectorView<CT> operator+=(
     VectorView<CT> v, const PRODMV<T,T,T>& pmv)
 { MultMV<true>(CT(pmv.getX()),pmv.getM(),pmv.getV(),v); return v; }
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 inline VectorView<T> operator-=(
     VectorView<T> v, const PRODMV<T,T1,T2>& pmv)
 { MultMV<true>(-pmv.getX(), pmv.getM(), pmv.getV(), v); return v; }
 
-template <class T> 
+template <typename T>
 inline VectorView<CT> operator-=(
     VectorView<CT> v, const PRODMV<T,T,T>& pmv)
 { MultMV<true>(CT(-pmv.getX()),pmv.getM(),pmv.getV(),v); return v; }
 
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 class PRODVM : public VectorComposite<T>
 {
 public:
@@ -115,32 +115,32 @@ private:
     const GENMATRIX<T2>& m;
 };
 
-template <class T> 
+template <typename T>
 inline VectorView<T> operator*=(
     VectorView<T> v, const GENMATRIX<T>& m)
 { MultMV<false>(T(1),m.transpose(),v,v); return v; }
 
-template <class T> 
+template <typename T>
 inline VectorView<CT> operator*=(
     VectorView<CT> v, const GENMATRIX<T>& m)
 { MultMV<false>(T(1),m.transpose(),v,v); return v; }
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 inline VectorView<T> operator+=(
     VectorView<T> v, const PRODVM<T,T1,T2>& pmv)
 { MultMV<true>(pmv.getX(),pmv.getM().transpose(),pmv.getV(),v); return v; }
 
-template <class T> 
+template <typename T>
 inline VectorView<CT> operator+=(
     VectorView<CT> v, const PRODVM<T,T,T>& pmv)
 { MultMV<true>(pmv.getX(),pmv.getM().transpose(),pmv.getV(),v); return v; }
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 inline VectorView<T> operator-=(
     VectorView<T> v, const PRODVM<T,T1,T2>& pmv)
 { MultMV<true>(-pmv.getX(), pmv.getM().transpose(), pmv.getV(), v); return v; }
 
-template <class T> 
+template <typename T>
 inline VectorView<CT> operator-=(
     VectorView<CT> v, const PRODVM<T,T,T>& pmv)
 { MultMV<true>(-pmv.getX(),pmv.getM().transpose(),pmv.getV(),v); return v; }
@@ -180,13 +180,13 @@ inline VectorView<CT> operator-=(
 #undef PRODXM2
 
 //
-// Vector / % Matrix 
+// Vector / % Matrix
 // v/m is the solution (x) of mx = v
 // ie. / is really division from the left: x = m^-1 v
 // Use % if you want division from the right (v m^-1)
 //
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 class QUOTVM : public VectorComposite<T>
 {
 public:
@@ -217,7 +217,7 @@ private:
     const GENMATRIX<T2>& m;
 };
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 class RQUOTVM : public VectorComposite<T>
 {
 public:
@@ -248,66 +248,66 @@ private:
     const GENMATRIX<T2>& m;
 };
 
-template <class T> 
+template <typename T>
 inline VectorView<T> operator/=(
     VectorView<T> v, const GENMATRIX<T>& m)
-{ 
+{
     TMVAssert(m.isSquare());
     TMVAssert(m.rowsize() == v.size());
-    m.LDivEq(v); 
-    return v; 
+    m.LDivEq(v);
+    return v;
 }
 
-template <class T> 
+template <typename T>
 inline VectorView<CT> operator/=(
     VectorView<CT> v, const GENMATRIX<T>& m)
 {
     TMVAssert(m.isSquare());
     TMVAssert(m.rowsize() == v.size());
-    m.LDivEq(v); 
-    return v; 
+    m.LDivEq(v);
+    return v;
 }
 
-template <class T> 
+template <typename T>
 inline VectorView<T> operator%=(
     VectorView<T> v, const GENMATRIX<T>& m)
 {
     TMVAssert(m.isSquare());
     TMVAssert(m.rowsize() == v.size());
-    m.RDivEq(v); 
-    return v; 
+    m.RDivEq(v);
+    return v;
 }
 
-template <class T> 
+template <typename T>
 inline VectorView<CT> operator%=(
     VectorView<CT> v, const GENMATRIX<T>& m)
-{ 
+{
     TMVAssert(m.isSquare());
     TMVAssert(m.rowsize() == v.size());
-    m.RDivEq(v); 
-    return v; 
+    m.RDivEq(v);
+    return v;
 }
 
-template <class T, class Tm> 
+template <typename T, typename Tm>
 inline VectorView<T> operator*=(
     VectorView<T> v, const QUOTXM<T,Tm>& qxm)
 {
     TMVAssert(qxm.getM().isSquare());
     TMVAssert(qxm.getM().rowsize() == v.size());
-    qxm.getM().RDivEq(v); 
-    v *= qxm.getX(); 
-    return v; 
+    qxm.getM().RDivEq(v);
+    v *= qxm.getX();
+    return v;
 }
 
-template <class T> 
+template <typename T>
 inline VectorView<CT> operator*=(
     VectorView<CT> v, const QUOTXM<T,T>& qxm)
 {
     TMVAssert(qxm.getM().isSquare());
     TMVAssert(qxm.getM().rowsize() == v.size());
-    qxm.getM().RDivEq(v); 
-    v *= qxm.getX(); 
-    return v; 
+    qxm.getM().RDivEq(v);
+    v *= qxm.getX();
+    return v;
 }
 
 #define GENMATRIX1 GenVector

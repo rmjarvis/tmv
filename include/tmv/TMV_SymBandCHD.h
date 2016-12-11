@@ -22,9 +22,9 @@
 
 //---------------------------------------------------------------------------
 //
-// This file contains the code for doing division using 
+// This file contains the code for doing division using
 // Cholesky Decomposition.
-// 
+//
 // The algorithm is much like the LU decomposition, but we don't do
 // any pivoting, and since the source matrix is symmetric, L = LT
 // (or for Hermition, L = Lt).
@@ -42,32 +42,32 @@ namespace tmv {
 
     // Decompose A into L*Lt.
     // On output, L = A.lowerBand().
-    template <class T> 
+    template <typename T>
     void CH_Decompose(SymBandMatrixView<T> A);
 
     // Decompose Tridiagonal A into L D Lt
-    template <class T> 
+    template <typename T>
     void LDL_Decompose(SymBandMatrixView<T> A);
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void CH_Decompose(HermBandMatrix<T,A1>& A)
     { CH_Decompose(A.view()); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void CH_Decompose(SymBandMatrix<T,A1>& A)
     { CH_Decompose(A.view()); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void LDL_Decompose(HermBandMatrix<T,A1>& A)
     { LDL_Decompose(A.view()); }
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void LDL_Decompose(SymBandMatrix<T,A1>& A)
     { LDL_Decompose(A.view()); }
 
 
-    template <class T> 
-    class HermBandCHDiv : public SymDivider<T> 
+    template <typename T>
+    class HermBandCHDiv : public SymDivider<T>
     {
 
     public :
@@ -83,13 +83,13 @@ namespace tmv {
         // Divider Versions of DivEq and Div
         //
 
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(MatrixView<T1> m) const;
-        template <class T1> 
+        template <typename T1>
         void doRDivEq(MatrixView<T1> m) const;
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doLDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const;
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doRDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const;
 
         //
@@ -98,9 +98,9 @@ namespace tmv {
 
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(MatrixView<T1> minv) const;
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(SymMatrixView<T1> minv) const;
         inline void makeInverse(SymMatrixView<TMV_RealType(T)> sinv) const
         {

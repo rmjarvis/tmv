@@ -28,37 +28,37 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T>
     class GenSymBandMatrix;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class ConstSymBandMatrixView;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class SymBandMatrixView;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class SymBandMatrix;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class HermBandMatrix;
 
-    template <class T> 
+    template <typename T>
     class HermBandCHDiv;
 
-    template <class T> 
+    template <typename T>
     class HermBandSVDiv;
 
-    template <class T> 
+    template <typename T>
     class SymBandSVDiv;
 
-    template <class T, class Tm> 
+    template <typename T, typename Tm>
     class QuotXsB;
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdBB;
 
-    template <class T> 
+    template <typename T>
     struct AssignableToSymBandMatrix :
         virtual public AssignableToSymMatrix<T>,
         virtual public AssignableToBandMatrix<T>
@@ -71,34 +71,34 @@ namespace tmv {
     };
 
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const SymBandMatrix<T,A>& )
     {
         return std::string("SymBandMatrix<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const HermBandMatrix<T,A>& )
     {
         return std::string("HermBandMatrix<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T> 
+    template <typename T>
     inline std::string TMV_Text(const GenSymBandMatrix<T>& )
     {
         return std::string("GenSymBandMatrix<") + TMV_Text(T()) + ">";
     }
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const ConstSymBandMatrixView<T,A>& )
     {
         return std::string("ConstSymBandMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const SymBandMatrixView<T,A>& )
     {
         return std::string("SymBandMatrixView<") +

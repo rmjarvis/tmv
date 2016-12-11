@@ -24,10 +24,10 @@
 //
 // This file defines the TMV Permutation class.
 //
-// A Permutation is an operator that rearranges the elements of 
-// a Vector or the rows/columns of a matrix.  
+// A Permutation is an operator that rearranges the elements of
+// a Vector or the rows/columns of a matrix.
 //
-// When viewed as a matrix each row and column has exactly one 1 and the 
+// When viewed as a matrix each row and column has exactly one 1 and the
 // rest of the elements are 0.
 //
 // However, internally, this is not how a Permutation is stored.  It is
@@ -35,26 +35,26 @@
 // it is very fast to apply a permutation in this form to a matrix.
 //
 // There are only two ways to create a Permutation object.  The first
-// constructor creates an identity permutation of a given size. 
+// constructor creates an identity permutation of a given size.
 // This can be passed to some functions which are able to modify it.
 // Or, you can create one from a vector of int's with the indices
-// of the interchanges.  Probably most users won't ever use this 
+// of the interchanges.  Probably most users won't ever use this
 // constructor, but it is public to allow that possibility.
 //
-// This class is primarily designed to make it easier to use the 
-// permutations that various TMV algorithms calculate.  
+// This class is primarily designed to make it easier to use the
+// permutations that various TMV algorithms calculate.
 // (e.g. LU decomposition, QRP decomposition, and vector sort.)
 //
 // The copy semantics are similar to matrix Views.  The copies do not
-// own their data.  However, if you perform a mutable action on the 
+// own their data.  However, if you perform a mutable action on the
 // Permutation, then it will allocate memory and take ownership of its values
-// at that point. 
+// at that point.
 //
 // Note that Transpose(P) x P = I, so P is an orthogonal Matrix.
-// Thus, inverse() and transpose() are the same thing.  Both return a 
+// Thus, inverse() and transpose() are the same thing.  Both return a
 // new permutation that knows to apply the permutations in the reverse
-// order.  As with copies, the indices are not copied.  It just passes 
-// a pointer to the same data that the first one uses.  So writing 
+// order.  As with copies, the indices are not copied.  It just passes
+// a pointer to the same data that the first one uses.  So writing
 // something like m = p.inverse() * m is efficient.
 //
 // Constructors:
@@ -64,7 +64,7 @@
 //
 //    Permutation(int n, const int* pp, bool isinv)
 //        Make a Permutation P from array pp.
-//        If isinv = false, then the swaps are applied in order from the 
+//        If isinv = false, then the swaps are applied in order from the
 //        left to the rows of m.  If isinv = true, then in reverse order.
 //
 // Access Functions
@@ -72,7 +72,7 @@
 //    int size() const
 //    int colsize() const
 //    int rowsize() const
-//        Return the size of the Permutation.  
+//        Return the size of the Permutation.
 //        Since P is a square matrix, all three of these return the same value.
 //
 //    const int* getValues() const
@@ -98,11 +98,11 @@
 //
 //    p.det() const
 //       This is also O(N) to calculate.
-//    
+//
 //
 // Mutable functions
 //
-//    p.setToIdentity() 
+//    p.setToIdentity()
 //        Make p the identity permutation.
 //
 //    p.transposeSelf()
@@ -114,10 +114,10 @@
 //
 //    p.inverse() const
 //    p.transpose() const
-//        Returns the inverse Permutation of p 
+//        Returns the inverse Permutation of p
 //
 //
-// I/O: 
+// I/O:
 //
 //    os << p
 //        Write p as a Matrix<int>
@@ -160,15 +160,15 @@
 
 namespace tmv {
 
-    // Any friend functions with default arguments have to have their default argument 
+    // Any friend functions with default arguments have to have their default argument
     // declared outside of the class declaration.  So we need to declare these here.
     // The definitions will be below after the class declaration.
 
     class Permutation;
-    template <class T>
+    template <typename T>
     inline void QRP_Decompose(
         MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& p, bool strict=false);
-    template <class T>
+    template <typename T>
     inline void QRP_Decompose(
         MatrixView<T> QRx, VectorView<T> beta, Permutation& p, T& signdet, bool strict=false);
 
@@ -184,7 +184,7 @@ namespace tmv {
             itsn(n), itsmem(n), itsp(itsmem.get()), isinv(false)
         {
             TMVAssert(n >= 0);
-            for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = i; 
+            for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = i;
         }
 
         Permutation(ptrdiff_t n, const ptrdiff_t* p, bool _isinv=false) :
@@ -196,7 +196,7 @@ namespace tmv {
 
         ~Permutation() {}
 
-        Permutation& operator=(const Permutation& rhs) 
+        Permutation& operator=(const Permutation& rhs)
         {
             itsmem.resize(0); // also deallocates the memory
             itsn = rhs.itsn;
@@ -207,7 +207,7 @@ namespace tmv {
 
 
         //
-        // Access 
+        // Access
         //
 
         inline ptrdiff_t size() const { return itsn; }
@@ -230,7 +230,7 @@ namespace tmv {
             //             = e_i.reversePermute(p)
             //    P(i,j) = e_i.reversePermute(p)(j)
             //           = e_i.reversePermute(p,0,i+1)(j)
-            // 
+            //
             // If isinv = true, these two options become:
             // 1) P(i,j) = e_j.reversePermute(p,0,j+1)(i)
             // 2) P(i,j) = e_i.permute(p,0,j+1)(j)
@@ -238,12 +238,12 @@ namespace tmv {
             // (and using the other algorithm).
             //
             // The two options use the same number of permutations.
-            // However, with the forward permutation, it is easy 
+            // However, with the forward permutation, it is easy
             // to see where we can stop the loop early.  Specifically,
             // once the location of the 1 is smaller than k,
             // it cannot be modified further, since itsp[k] >= k.
             // So we choose to use the forward loop option.
-            
+
             if (isinv) TMV_SWAP(i,j);
             ptrdiff_t temp = j;
             for(ptrdiff_t k=0;k<=i && k<=temp;++k) if (itsp[k]!=k) {
@@ -272,8 +272,8 @@ namespace tmv {
 
         inline int det() const
         {
-            int d = 1; 
-            for(ptrdiff_t i=0;i<itsn;++i) if (itsp[i] != i) d = -d; 
+            int d = 1;
+            for(ptrdiff_t i=0;i<itsn;++i) if (itsp[i] != i) d = -d;
             return d;
         }
 
@@ -365,8 +365,8 @@ namespace tmv {
         //
         // Create matrix version
         //
-        
-        template <class T2>
+
+        template <typename T2>
         inline void assignToM(MatrixView<T2> m2) const
         { m2.setToIdentity(); applyOnLeft(m2); }
 
@@ -374,12 +374,12 @@ namespace tmv {
         // MakeInverse
         //
 
-        template <class T2>
+        template <typename T2>
         inline void makeInverse(MatrixView<T2> minv) const
         { inverse().assignToM(minv); }
 
         // (PtP)^-1 = P^-1 Pt^-1 = Pt P = I
-        template <class T2>
+        template <typename T2>
         inline void makeInverseATA(MatrixView<T2> ata) const
         { ata.setToIdentity(); }
 
@@ -429,7 +429,7 @@ namespace tmv {
         // Apply permutation to a vector
         //
 
-        template <class T2>
+        template <typename T2>
         inline void apply(VectorView<T2> v2) const
         {
             if (isinv) v2.reversePermute(itsp);
@@ -440,14 +440,14 @@ namespace tmv {
         // Apply permutation to a matrix
         //
 
-        template <class T2>
+        template <typename T2>
         inline void applyOnLeft(MatrixView<T2> m2) const
         {
             if (isinv) m2.reversePermuteRows(itsp);
             else m2.permuteRows(itsp);
         }
 
-        template <class T2>
+        template <typename T2>
         inline void applyOnRight(MatrixView<T2> m2) const
         {
             if (isinv) m2.permuteCols(itsp);
@@ -461,36 +461,36 @@ namespace tmv {
 
         friend inline void Swap(Permutation& p1, Permutation& p2);
 
-        template <class T>
+        template <typename T>
         friend inline void LU_Decompose(MatrixView<T> m, Permutation& p);
 
-        template <class T>
+        template <typename T>
         friend inline void QRP_Decompose(
             MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& p, bool strict);
 
-        template <class T>
+        template <typename T>
         friend inline void QRP_Decompose(
             MatrixView<T> QRx, VectorView<T> beta, Permutation& p, T& signdet, bool strict);
 
-        template <class T> 
+        template <typename T>
         friend inline void LU_Decompose(
             const GenBandMatrix<T>& m, LowerTriMatrixView<T> L, BandMatrixView<T> U, Permutation& p);
 
-        template <class T> 
+        template <typename T>
         friend inline void LU_Decompose(BandMatrixView<T> m, Permutation& p, ptrdiff_t nhi);
 
-        template <class T>
+        template <typename T>
         friend inline void LDL_Decompose(SymMatrixView<T> m, SymBandMatrixView<T> D, Permutation& p);
 
-        template <class T>
+        template <typename T>
         friend inline void LDL_Decompose(
             SymMatrixView<T> m, VectorView<T> xD,
             Permutation& p, TMV_RealType(T)& logdet, T& signdet);
 
-        template <class T, int A>
+        template <typename T, int A>
         inline VectorView<T,A>& sort(Permutation& p, ADType ad, CompType comp);
 
-        template <class T, int A>
+        template <typename T, int A>
         friend inline void DoVectorSort(VectorView<T,A> v, Permutation& p, ADType ad, CompType comp);
 
         //
@@ -528,20 +528,20 @@ namespace tmv {
         {
             for(ptrdiff_t k=0;k<itsn;++k) index[k] = k;
             if (isinv) {
-                for(ptrdiff_t k=itsn-1;k>=0;--k) 
+                for(ptrdiff_t k=itsn-1;k>=0;--k)
                     if (itsp[k]!=k) TMV_SWAP(index[k],index[itsp[k]]);
             } else {
-                for(ptrdiff_t k=0;k<itsn;++k) 
+                for(ptrdiff_t k=0;k<itsn;++k)
                     if (itsp[k]!=k) TMV_SWAP(index[k],index[itsp[k]]);
             }
         }
 
-        // 
+        //
         // Helper functions for mutable actions.
         //
 
         inline void allocateMem()
-        { 
+        {
             if (!itsmem.get()) {
                 itsmem.resize(itsn);
                 itsp = itsmem.get();
@@ -549,7 +549,7 @@ namespace tmv {
         }
 
         inline void saveToMem()
-        { 
+        {
             if (!itsmem.get()) {
                 itsmem.resize(itsn);
                 for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = itsp[i];
@@ -558,7 +558,7 @@ namespace tmv {
         }
 
         inline void makeCopyOf(const Permutation& orig)
-        { 
+        {
             itsn = orig.itsn;
             itsmem.resize(itsn);
             for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = orig.itsp[i];
@@ -566,8 +566,8 @@ namespace tmv {
             isinv = orig.isinv;
         }
 
-        inline ptrdiff_t* getMem() 
-        { 
+        inline ptrdiff_t* getMem()
+        {
             // Make sure P owns its memory:
             TMVAssert(itsn==0 || itsmem.get());
             // This next one shoudl be true if the previous one passes.
@@ -807,10 +807,10 @@ namespace tmv {
     { return is >> IOStyle() >> p; }
 
 
-    // 
+    //
     // Permutation's friends
     //
-    
+
     inline void Swap(Permutation& p1, Permutation& p2)
     {
         TMVAssert(p1.size() == p2.size());
@@ -819,7 +819,7 @@ namespace tmv {
         TMV_SWAP(p1.isinv,p2.isinv);
     }
 
-    template <class T, int A>
+    template <typename T, int A>
     inline VectorView<T,A>& VectorView<T,A>::sort(
         Permutation& p, ADType ad, CompType comp)
     {
@@ -828,7 +828,7 @@ namespace tmv {
     }
 
 
-    template <class T>
+    template <typename T>
     inline void LU_Decompose(
         MatrixView<T> m, Permutation& p)
     {
@@ -838,27 +838,27 @@ namespace tmv {
         p.isinv = true;
     }
 
-    template <class T>
+    template <typename T>
     inline void QRP_Decompose(
         MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& p, bool strict)
     {
         p.resize(Q.rowsize());
         p.allocateMem();
         QRP_Decompose(Q,R,p.getMem(),strict);
-        p.isinv = false; 
+        p.isinv = false;
     }
 
-    template <class T>
+    template <typename T>
     inline void QRP_Decompose(
         MatrixView<T> QRx, VectorView<T> beta, Permutation& p, T& signdet, bool strict)
     {
         p.resize(QRx.rowsize());
         p.allocateMem();
         QRP_Decompose(QRx,beta,p.getMem(),signdet,strict);
-        p.isinv = false; 
+        p.isinv = false;
     }
 
-    template <class T> 
+    template <typename T>
     inline void LU_Decompose(
         const GenBandMatrix<T>& m, LowerTriMatrixView<T> L,
         BandMatrixView<T> U, Permutation& p)
@@ -869,7 +869,7 @@ namespace tmv {
         p.isinv = true;
     }
 
-    template <class T> 
+    template <typename T>
     inline void LU_Decompose(
         BandMatrixView<T> m, Permutation& p, ptrdiff_t nhi)
     {
@@ -879,17 +879,17 @@ namespace tmv {
         p.isinv = true;
     }
 
-    template <class T>
+    template <typename T>
     inline void LDL_Decompose(
         SymMatrixView<T> m, SymBandMatrixView<T> D, Permutation& p)
-    { 
+    {
         p.resize(m.colsize());
         p.allocateMem();
         LDL_Decompose(m,D,p.getMem());
         p.isinv = true;
     }
 
-    template <class T>
+    template <typename T>
     inline void LDL_Decompose(
         SymMatrixView<T> m, VectorView<T> xD,
         Permutation& p, TMV_RealType(T)& logdet, T& signdet)
@@ -900,7 +900,7 @@ namespace tmv {
         p.isinv = true;
     }
 
-    template <class T, int A>
+    template <typename T, int A>
     inline void DoVectorSort(
         VectorView<T,A> v, Permutation& p, ADType ad, CompType comp)
     {
@@ -943,11 +943,11 @@ namespace tmv {
     //
     // TMV_Text
     //
-    
+
     inline std::string TMV_Text(const Permutation& )
     { return "Permutation"; }
 
- 
+
 } // namespace mv
 
 

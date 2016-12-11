@@ -34,50 +34,50 @@
 
 namespace tmv {
 
-    template <class T, class Tv> 
+    template <typename T, typename Tv>
     class ProdXV;
 
-    template <class T, class Tv> 
+    template <typename T, typename Tv>
     class ProdXM;
 
-    template <class T, int A, class Tx>
-    inline SymBandMatrix<T,A>& operator+=(SymBandMatrix<T,A>& m, const Tx& x) 
+    template <typename T, int A, typename Tx>
+    inline SymBandMatrix<T,A>& operator+=(SymBandMatrix<T,A>& m, const Tx& x)
     { m.view() += x; return m; }
 
-    template <class T, int A, class Tx>
-    inline SymBandMatrix<T,A>& operator-=(SymBandMatrix<T,A>& m, const Tx& x) 
+    template <typename T, int A, typename Tx>
+    inline SymBandMatrix<T,A>& operator-=(SymBandMatrix<T,A>& m, const Tx& x)
     { m.view() -= x; return m; }
 
-    template <class T, int A, class Tx>
-    inline SymBandMatrix<T,A>& operator*=(SymBandMatrix<T,A>& m, const Tx& x) 
+    template <typename T, int A, typename Tx>
+    inline SymBandMatrix<T,A>& operator*=(SymBandMatrix<T,A>& m, const Tx& x)
     { m.view() *= x; return m; }
 
-    template <class T, int A, class Tx>
-    inline SymBandMatrix<T,A>& operator/=(SymBandMatrix<T,A>& m, const Tx& x) 
+    template <typename T, int A, typename Tx>
+    inline SymBandMatrix<T,A>& operator/=(SymBandMatrix<T,A>& m, const Tx& x)
     { m.view() /= x; return m; }
 
-    template <class T, int A, class Tx>
-    inline SymBandMatrix<T,A>& operator%=(SymBandMatrix<T,A>& m, const Tx& x) 
+    template <typename T, int A, typename Tx>
+    inline SymBandMatrix<T,A>& operator%=(SymBandMatrix<T,A>& m, const Tx& x)
     { m.view() %= x; return m; }
 
-    template <class T, int A, class Tx>
-    inline HermBandMatrix<T,A>& operator+=(HermBandMatrix<T,A>& m, const Tx& x) 
+    template <typename T, int A, typename Tx>
+    inline HermBandMatrix<T,A>& operator+=(HermBandMatrix<T,A>& m, const Tx& x)
     { m.view() += x; return m; }
 
-    template <class T, int A, class Tx>
-    inline HermBandMatrix<T,A>& operator-=(HermBandMatrix<T,A>& m, const Tx& x) 
+    template <typename T, int A, typename Tx>
+    inline HermBandMatrix<T,A>& operator-=(HermBandMatrix<T,A>& m, const Tx& x)
     { m.view() -= x; return m; }
 
-    template <class T, int A, class Tx>
-    inline HermBandMatrix<T,A>& operator*=(HermBandMatrix<T,A>& m, const Tx& x) 
+    template <typename T, int A, typename Tx>
+    inline HermBandMatrix<T,A>& operator*=(HermBandMatrix<T,A>& m, const Tx& x)
     { m.view() *= x; return m; }
 
-    template <class T, int A, class Tx>
-    inline HermBandMatrix<T,A>& operator/=(HermBandMatrix<T,A>& m, const Tx& x) 
+    template <typename T, int A, typename Tx>
+    inline HermBandMatrix<T,A>& operator/=(HermBandMatrix<T,A>& m, const Tx& x)
     { m.view() /= x; return m; }
 
-    template <class T, int A, class Tx>
-    inline HermBandMatrix<T,A>& operator%=(HermBandMatrix<T,A>& m, const Tx& x) 
+    template <typename T, int A, typename Tx>
+    inline HermBandMatrix<T,A>& operator%=(HermBandMatrix<T,A>& m, const Tx& x)
     { m.view() %= x; return m; }
 
 
@@ -85,8 +85,8 @@ namespace tmv {
     // Scalar * SymBandMatrix
     //
 
-    template <class T, class Tm> 
-    class ProdXsB : public SymBandMatrixComposite<T> 
+    template <typename T, typename Tm>
+    class ProdXsB : public SymBandMatrixComposite<T>
     {
     public:
         typedef typename Traits<T>::real_type real_type;
@@ -125,7 +125,7 @@ namespace tmv {
         inline void assignTosB(SymBandMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
-            TMVAssert(m.issym() || TMV_IMAG(x)==real_type(0) ); 
+            TMVAssert(m.issym() || TMV_IMAG(x)==real_type(0) );
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nlo() >= nlo());
             TMVAssert(isReal(Tm()) || m0.issym() == m.issym());
@@ -133,7 +133,7 @@ namespace tmv {
         }
         inline void assignTosB(SymBandMatrixView<complex_type> m0) const
         {
-            TMVAssert(m.issym() || TMV_IMAG(x)==real_type(0) ); 
+            TMVAssert(m.issym() || TMV_IMAG(x)==real_type(0) );
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nlo() >= nlo());
             TMVAssert(isReal(Tm()) || m0.issym() == m.issym());
@@ -145,72 +145,72 @@ namespace tmv {
     };
 
     // m*=x
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<T> operator*=(
-        SymBandMatrixView<T> m, T x) 
-    { 
+        SymBandMatrixView<T> m, T x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(x,m);
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator*=(
-        SymBandMatrixView<CT> m, T x) 
-    { 
+        SymBandMatrixView<CT> m, T x)
+    {
         MultXM(x,m);
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator*=(
-        SymBandMatrixView<CT> m, CCT x) 
-    { 
+        SymBandMatrixView<CT> m, CCT x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(CT(x),m);
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator*=(
-        SymBandMatrixView<CT> m, VCT x) 
-    { 
+        SymBandMatrixView<CT> m, VCT x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(CT(x),m);
         return m;
     }
 
     // m/=x
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<T> operator/=(
-        SymBandMatrixView<T> m, T x) 
-    { 
+        SymBandMatrixView<T> m, T x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(TMV_InverseOf(x),m);
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator/=(
-        SymBandMatrixView<CT> m, T x) 
-    { 
+        SymBandMatrixView<CT> m, T x)
+    {
         MultXM(TMV_InverseOf(x),m);
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator/=(
-        SymBandMatrixView<CT> m, CCT x) 
-    { 
+        SymBandMatrixView<CT> m, CCT x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(TMV_InverseOf(CT(x)),m);
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator/=(
-        SymBandMatrixView<CT> m, VCT x) 
-    { 
+        SymBandMatrixView<CT> m, VCT x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(TMV_InverseOf(CT(x)),m);
         return m;
@@ -226,7 +226,7 @@ namespace tmv {
     // SymBandMatrix + Scalar
     //
 
-    template <class T, class Tm> 
+    template <typename T, typename Tm>
     class SumsBX : public SymBandMatrixComposite<T>
     {
     public:
@@ -242,7 +242,7 @@ namespace tmv {
         inline const GenSymBandMatrix<Tm>& getM() const { return m; }
         inline T getX2() const { return x2; }
         inline void assignToB(BandMatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
@@ -250,18 +250,18 @@ namespace tmv {
             TMVAssert(m0.nhi() >= nlo());
             MultXM(x1,m0=m);
             m0.diag().addToAll(TMV_REAL(x2));
-        } 
+        }
         inline void assignToB(BandMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             TMVAssert(m0.nlo() >= nlo());
             TMVAssert(m0.nhi() >= nlo());
             MultXM(x1,m0=m);
             m0.diag().addToAll(complex_type(x2));
-        } 
+        }
         inline void assignTosB(SymBandMatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(isReal(Tm()) || m0.issym() == m.issym());
             TMVAssert(m.issym() || TMV_IMAG(x1)==real_type(0));
@@ -272,7 +272,7 @@ namespace tmv {
             m0.diag().addToAll(TMV_REAL(x2));
         }
         inline void assignTosB(SymBandMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(isReal(Tm()) || m0.issym() == m.issym());
             TMVAssert(m.issym() || TMV_IMAG(x1)==real_type(0));
             TMVAssert(m.issym() || TMV_IMAG(x2)==real_type(0));
@@ -288,82 +288,82 @@ namespace tmv {
     };
 
     // m+=x
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<T> operator+=(
-        SymBandMatrixView<T> m, T x) 
-    { 
+        SymBandMatrixView<T> m, T x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         m.diag().addToAll(x);
-        return m; 
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator+=(
-        SymBandMatrixView<CT> m, T x) 
-    { 
+        SymBandMatrixView<CT> m, T x)
+    {
         m.diag().addToAll(CT(x));
-        return m; 
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator+=(
-        SymBandMatrixView<CT> m, CCT x) 
-    { 
+        SymBandMatrixView<CT> m, CCT x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == T(0));
         m.diag().addToAll(CT(x));
-        return m; 
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator+=(
-        SymBandMatrixView<CT> m, VCT x) 
-    { 
+        SymBandMatrixView<CT> m, VCT x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == T(0));
         m.diag().addToAll(CT(x));
-        return m; 
+        return m;
     }
 
     // m-=x
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<T> operator-=(
-        SymBandMatrixView<T> m, T x) 
-    { 
+        SymBandMatrixView<T> m, T x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         m.diag().addToAll(-x);
-        return m; 
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator-=(
-        SymBandMatrixView<CT> m, T x) 
-    { 
+        SymBandMatrixView<CT> m, T x)
+    {
         m.diag().addToAll(CT(-x));
-        return m; 
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator-=(
-        SymBandMatrixView<CT> m, CCT x) 
-    { 
+        SymBandMatrixView<CT> m, CCT x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == T(0));
         m.diag().addToAll(-CT(x));
-        return m; 
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator-=(
-        SymBandMatrixView<CT> m, VCT x) 
-    { 
+        SymBandMatrixView<CT> m, VCT x)
+    {
         TMVAssert(m.issym() || TMV_IMAG(x) == T(0));
         m.diag().addToAll(-CT(x));
-        return m; 
+        return m;
     }
 
 #define SUMMX SumsBX
 #define GENMATRIX GenSymBandMatrix
 #define PRODXM ProdXsB
 #include "tmv/TMV_AuxSumMX.h"
-#undef SUMMX 
+#undef SUMMX
 #undef GENMATRIX
 #undef PRODXM
 
@@ -371,21 +371,21 @@ namespace tmv {
     // SymBandMatrix + SymBandMatrix
     //
 
-    template <class T, class T1, class T2> 
-    class SumsBsB : public SymBandMatrixComposite<T> 
+    template <typename T, typename T1, typename T2>
+    class SumsBsB : public SymBandMatrixComposite<T>
     {
     public:
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
         inline SumsBsB(
-            T _x1, const GenSymBandMatrix<T1>& _m1, 
+            T _x1, const GenSymBandMatrix<T1>& _m1,
             T _x2, const GenSymBandMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline ptrdiff_t size() const { return m1.size(); }
         inline ptrdiff_t nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
-        inline SymType sym() const 
+        inline SymType sym() const
         { return isReal(T1()) ? m2.sym() : m1.sym(); }
         inline T getX1() const { return x1; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
@@ -399,17 +399,17 @@ namespace tmv {
             TMVAssert(m0.nlo() >= nlo());
             TMVAssert(m0.nhi() >= nlo());
             AddMM(x1,m1,x2,m2,m0);
-        } 
+        }
         inline void assignToB(BandMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             TMVAssert(m0.nlo() >= nlo());
             TMVAssert(m0.nhi() >= nlo());
             AddMM(x1,m1,x2,m2,m0);
-        } 
+        }
         inline void assignTosB(SymBandMatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
             TMVAssert(m0.size() == size());
@@ -421,7 +421,7 @@ namespace tmv {
             AddMM(x1,m1,x2,m2,m0);
         }
         inline void assignTosB(SymBandMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nlo() >= nlo());
@@ -438,45 +438,45 @@ namespace tmv {
         const GenSymBandMatrix<T2>& m2;
     };
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<T> operator+=(
-        SymBandMatrixView<T> m1, const GenSymBandMatrix<T>& m2) 
-    { 
+        SymBandMatrixView<T> m1, const GenSymBandMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.nlo() >= m2.nlo());
         TMVAssert(isReal(T()) || m1.sym() == m2.sym());
-        AddMM(T(1),m2,m1); return m1; 
+        AddMM(T(1),m2,m1); return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator+=(
-        SymBandMatrixView<CT> m1, const GenSymBandMatrix<T>& m2) 
-    { 
+        SymBandMatrixView<CT> m1, const GenSymBandMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.nlo() >= m2.nlo());
-        AddMM(T(1),m2,m1); return m1; 
+        AddMM(T(1),m2,m1); return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<T> operator-=(
-        SymBandMatrixView<T> m1, const GenSymBandMatrix<T>& m2) 
-    { 
+        SymBandMatrixView<T> m1, const GenSymBandMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.nlo() >= m2.nlo());
         TMVAssert(isReal(T()) || m1.sym() == m2.sym());
-        AddMM(T(-1),m2,m1); return m1; 
+        AddMM(T(-1),m2,m1); return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator-=(
-        SymBandMatrixView<CT> m1, const GenSymBandMatrix<T>& m2) 
-    { 
+        SymBandMatrixView<CT> m1, const GenSymBandMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.nlo() >= m2.nlo());
-        AddMM(T(-1),m2,m1); return m1; 
+        AddMM(T(-1),m2,m1); return m1;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline SymBandMatrixView<T> operator+=(
         SymBandMatrixView<T> m, const ProdXsB<T,T2>& pxm)
     {
@@ -488,7 +488,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator+=(
         SymBandMatrixView<CT> m, const ProdXsB<T,T>& pxm)
     {
@@ -498,7 +498,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline SymBandMatrixView<T> operator-=(
         SymBandMatrixView<T> m, const ProdXsB<T,T2>& pxm)
     {
@@ -510,7 +510,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator-=(
         SymBandMatrixView<CT> m, const ProdXsB<T,T>& pxm)
     {
@@ -537,7 +537,7 @@ namespace tmv {
     // SymBandMatrix * SymBandMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdsBsB : public BandMatrixComposite<T>
     {
     public:
@@ -551,9 +551,9 @@ namespace tmv {
         { TMVAssert(m1.size() == m2.size()); }
         inline ptrdiff_t colsize() const { return m1.size(); }
         inline ptrdiff_t rowsize() const { return m1.size(); }
-        inline ptrdiff_t nlo() const 
+        inline ptrdiff_t nlo() const
         { return TMV_MIN(colsize()-1,m1.nlo()+m2.nlo()); }
-        inline ptrdiff_t nhi() const 
+        inline ptrdiff_t nhi() const
         { return TMV_MIN(rowsize()-1,m1.nhi()+m2.nhi()); }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
@@ -581,7 +581,7 @@ namespace tmv {
         const GenSymBandMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     inline BandMatrixView<T> operator+=(
         BandMatrixView<T> m, const ProdsBsB<T,T1,T2>& pmm)
     {
@@ -589,11 +589,11 @@ namespace tmv {
         TMVAssert(m.rowsize() == pmm.rowsize());
         TMVAssert(m.nlo() >= pmm.nlo());;
         TMVAssert(m.nhi() >= pmm.nhi());;
-        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline BandMatrixView<CT> operator+=(
         BandMatrixView<CT> m, const ProdsBsB<T,T,T>& pmm)
     {
@@ -601,55 +601,55 @@ namespace tmv {
         TMVAssert(m.rowsize() == pmm.rowsize());
         TMVAssert(m.nlo() >= pmm.nlo());;
         TMVAssert(m.nhi() >= pmm.nhi());;
-        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     inline BandMatrixView<T> operator-=(
         BandMatrixView<T> m, const ProdsBsB<T,T1,T2>& pmm)
-    { 
+    {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
         TMVAssert(m.nlo() >= pmm.nlo());;
         TMVAssert(m.nhi() >= pmm.nhi());;
-        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline BandMatrixView<CT> operator-=(
         BandMatrixView<CT> m, const ProdsBsB<T,T,T>& pmm)
-    { 
+    {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
         TMVAssert(m.nlo() >= pmm.nlo());;
         TMVAssert(m.nhi() >= pmm.nhi());;
-        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
+        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m);
+        return m;
     }
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     inline MatrixView<T> operator+=(
         MatrixView<T> m, const ProdsBsB<T,T1,T2>& pmm)
-    { 
+    {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
-        BandMatrixViewOf(m,pmm.nlo(),pmm.nhi()) += pmm; 
+        BandMatrixViewOf(m,pmm.nlo(),pmm.nhi()) += pmm;
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<CT> operator+=(
         MatrixView<CT> m, const ProdsBsB<T,T,T>& pmm)
-    { 
+    {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
-        BandMatrixViewOf(m,pmm.nlo(),pmm.nhi()) += pmm; 
+        BandMatrixViewOf(m,pmm.nlo(),pmm.nhi()) += pmm;
         return m;
     }
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     inline MatrixView<T> operator-=(
         MatrixView<T> m, const ProdsBsB<T,T1,T2>& pmm)
     {
@@ -659,13 +659,13 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<CT> operator-=(
         MatrixView<CT> m, const ProdsBsB<T,T,T>& pmm)
     {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
-        BandMatrixViewOf(m,pmm.nlo(),pmm.nhi()) -= pmm; 
+        BandMatrixViewOf(m,pmm.nlo(),pmm.nhi()) -= pmm;
         return m;
     }
 
@@ -688,7 +688,7 @@ namespace tmv {
     // Element Product SymBandMatrix * SymBandMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ElemProdsBsB : public SymBandMatrixComposite<T>
     {
     public:
@@ -699,22 +699,22 @@ namespace tmv {
             T _x, const GenSymBandMatrix<T1>& _m1,
             const GenSymBandMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
-        { 
-            TMVAssert(m1.size() == m2.size()); 
+        {
+            TMVAssert(m1.size() == m2.size());
             TMVAssert(m1.issym() == m2.issym());
             TMVAssert(m1.isherm() == m2.isherm());
         }
         inline ptrdiff_t size() const { return m1.size(); }
-        inline ptrdiff_t nlo() const 
+        inline ptrdiff_t nlo() const
         { return TMV_MIN(m1.nlo(),m2.nlo()); }
-        inline SymType sym() const 
+        inline SymType sym() const
         { return isReal(T1()) ? m2.sym() : m1.sym(); }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
 
         inline void assignToB(BandMatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
@@ -732,7 +732,7 @@ namespace tmv {
             }
         }
         inline void assignToB(BandMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             TMVAssert(m0.nlo() >= nlo());
@@ -747,7 +747,7 @@ namespace tmv {
                     m0.lowerBandOff().setZero();
                 }
             }
-        }        
+        }
         inline void assignTosB(SymBandMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
@@ -775,25 +775,25 @@ namespace tmv {
         const GenSymBandMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     inline SymBandMatrixView<T> operator+=(
         SymBandMatrixView<T> m, const ElemProdsBsB<T,T1,T2>& pmm)
     {
-        TMVAssert(isReal(T1()) || isReal(T2()) || 
+        TMVAssert(isReal(T1()) || isReal(T2()) ||
                   pmm.getM1().sym() == pmm.getM2().sym());
         TMVAssert(m.size() == pmm.size());
         TMVAssert(m.nlo() >= pmm.nlo());
         TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
         TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
-        TMVAssert(m.issym() || 
+        TMVAssert(m.issym() ||
                   TMV_IMAG(pmm.getX()) == typename Traits<T>::real_type(0));
         ElemMultMM<true>(
             pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
-            m.upperBand()); 
-        return m; 
+            m.upperBand());
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator+=(
         SymBandMatrixView<CT> m, const ElemProdsBsB<T,T,T>& pmm)
     {
@@ -802,29 +802,29 @@ namespace tmv {
         TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == T(0));
         ElemMultMM<true>(
             pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
-            m.upperBand()); 
-        return m; 
+            m.upperBand());
+        return m;
     }
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     inline SymBandMatrixView<T> operator-=(
         SymBandMatrixView<T> m, const ElemProdsBsB<T,T1,T2>& pmm)
     {
-        TMVAssert(isReal(T1()) || isReal(T2()) || 
+        TMVAssert(isReal(T1()) || isReal(T2()) ||
                   pmm.getM1().sym() == pmm.getM2().sym());
         TMVAssert(m.size() == pmm.size());
         TMVAssert(m.nlo() >= pmm.nlo());
         TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
         TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
-        TMVAssert(m.issym() || 
+        TMVAssert(m.issym() ||
                   TMV_IMAG(pmm.getX()) == typename Traits<T>::real_type(0));
         ElemMultMM<true>(
             -pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
-            m.upperBand()); 
-        return m; 
+            m.upperBand());
+        return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator-=(
         SymBandMatrixView<CT> m, const ElemProdsBsB<T,T,T>& pmm)
     {
@@ -833,8 +833,8 @@ namespace tmv {
         TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == T(0));
         ElemMultMM<true>(
             -pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
-            m.upperBand()); 
-        return m; 
+            m.upperBand());
+        return m;
     }
 
 #define PRODMM ElemProdsBsB

@@ -43,7 +43,7 @@
 // by calling m.setDiv().
 //
 // You can also query whether the Divider class is already set up.
-// This will only be true, if it was previously set up, _and_ the 
+// This will only be true, if it was previously set up, _and_ the
 // Matrix hasn't been modified since then.
 //
 // If you want access to the various Divider functions directly,
@@ -55,10 +55,10 @@
 // m.chd()
 //
 // The one of these that is probably most useful to access is svd(),
-// since it is generally a good idea to look for small 
+// since it is generally a good idea to look for small
 // singular values and zero them out before using SVD for division.
 //
-// To set to zero all singular value which are less than thresh * 
+// To set to zero all singular value which are less than thresh *
 // the largest singular value use:
 //
 // m.svd()->setThresh(thresh);
@@ -85,8 +85,8 @@
 
 namespace tmv {
 
-    template <class T> 
-    class Divider 
+    template <typename T>
+    class Divider
     {
 
         typedef TMV_RealType(T) RT;
@@ -103,15 +103,15 @@ namespace tmv {
         virtual RT logDet(T* sign) const =0;
         virtual void makeInverseATA(MatrixView<T> minv) const =0;
         virtual bool isSingular() const =0;
-        virtual inline RT norm2() const 
+        virtual inline RT norm2() const
         { TMVAssert(TMV_FALSE); return RT(0); }
-        virtual inline RT condition() const 
+        virtual inline RT condition() const
         { TMVAssert(TMV_FALSE); return RT(0); }
 
 #define DefDivEq(T) \
         virtual void LDivEq(MatrixView<T>) const =0; \
         virtual void RDivEq(MatrixView<T>) const =0; \
-        virtual void makeInverse(MatrixView<T> minv) const =0 
+        virtual void makeInverse(MatrixView<T> minv) const =0
 
         DefDivEq(RT);
         DefDivEq(CT);
@@ -119,7 +119,7 @@ namespace tmv {
 
 #define DefDiv(T1,T2) \
         virtual void LDiv(const GenMatrix<T1>& b, MatrixView<T2> x) const =0; \
-        virtual void RDiv(const GenMatrix<T1>& b, MatrixView<T2> x) const =0 
+        virtual void RDiv(const GenMatrix<T1>& b, MatrixView<T2> x) const =0
 
         DefDiv(RT,RT);
         DefDiv(RT,CT);
@@ -130,7 +130,7 @@ namespace tmv {
             const BaseMatrix<T>& m, std::ostream* fout) const=0;
     };
 
-    template <class T> 
+    template <typename T>
     inline std::string TMV_Text(const Divider<T>& d)
     { return std::string("Divider<")+TMV_Text(T())+">"; }
 

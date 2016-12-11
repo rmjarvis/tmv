@@ -31,17 +31,17 @@
 namespace tmv {
 
     // v *= x
-    template <class T> 
+    template <typename T>
     void MultXV(const T x, VectorView<T> v2);
     // v2 = x * v1
-    template <class T, class T1> 
+    template <typename T, typename T1>
     void MultXV(const T x, const GenVector<T1>& v1, VectorView<T> v2);
 
     // v2 += x * v1
-    template <class T, class T1> 
+    template <typename T, typename T1>
     void AddVV(const T x, const GenVector<T1>& v1, VectorView<T> v2);
     // v3 = x1 * v1 + x2 * v2
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     void AddVV(
         const T x1, const GenVector<T1>& v1,
         const T x2, const GenVector<T2>& v2, VectorView<T> v3);
@@ -49,15 +49,15 @@ namespace tmv {
     // v1 * v2 (dot product)
     // Note: the return type is the type of the first vector
     // This is important for mixing complex and real vectors
-    template <class T, class T2> 
+    template <typename T, typename T2>
     T MultVV(const GenVector<T>& v1, const GenVector<T2>& v2);
 
-    template <bool add, class T, class Tx, class Ty> 
+    template <bool add, typename T, typename Tx, typename Ty>
     void ElemMultVV(
         const T alpha, const GenVector<Tx>& x,
         const GenVector<Ty>& y, VectorView<T> z);
 
-    template <class T> 
+    template <typename T>
     class VectorComposite : public GenVector<T>
     {
     public:
@@ -76,59 +76,59 @@ namespace tmv {
     };
 
     // Specialize allowed complex combinations:
-    template <class T> 
+    template <typename T>
     inline void MultXV(const T x, VectorView<CT> v2)
     { MultXV(CT(x),v2); }
-    template <class T, class T1> 
+    template <typename T, typename T1>
     inline void MultXV(
         const T x, const GenVector<T1>& v1, VectorView<CT> v2)
     { MultXV(CT(x),v1,v2); }
 
-    template <class T, class T1> 
+    template <typename T, typename T1>
     inline void AddVV(
         const T x, const GenVector<T1>& v1, VectorView<CT> v2)
     { AddVV(CT(x),v1,v2); }
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     inline void AddVV(
         const T x1, const GenVector<T1>& v1,
         const T x2, const GenVector<T2>& v2, VectorView<CT> v3)
     { AddVV(CT(x1),v1,CT(x2),v2,v3); }
-    template <class T> 
+    template <typename T>
     inline void AddVV(
         const CT x1, const GenVector<CT>& v1,
         const CT x2, const GenVector<T>& v2, VectorView<CT> v3)
     { AddVV(x2,v2,x1,v1,v3); }
 
-    template <class T> 
+    template <typename T>
     inline CT MultVV(const GenVector<T>& v1, const GenVector<CT>& v2)
     { return MultVV(v2,v1); }
 
-    template <bool add, class T, class Tx, class Ty> 
+    template <bool add, typename T, typename Tx, typename Ty>
     inline void ElemMultVV(
         const T alpha, const GenVector<Tx>& x,
         const GenVector<Ty>& y, VectorView<CT> z)
     { ElemMultVV<add>(CT(alpha),x,y,z); }
 
     // Specialize disallowed complex combinations:
-    template <class T> 
+    template <typename T>
     inline void MultXV(const CT , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T, class Ta> 
+    template <typename T, typename Ta>
     inline void MultXV(
         const CT , const GenVector<Ta>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T, class T1> 
+    template <typename T, typename T1>
     inline void AddVV(
         const CT , const GenVector<T1>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T, class Ta, class Tb> 
+    template <typename T, typename Ta, typename Tb>
     inline void AddVV(
         const CT , const GenVector<Ta>& ,
         const CT , const GenVector<Tb>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <bool add, class T, class Ta, class Tb> 
+    template <bool add, typename T, typename Ta, typename Tb>
     inline void ElemMultVV(
         const CT , const GenVector<Ta>& , const GenVector<Tb>& ,
         VectorView<T> )
@@ -138,4 +138,4 @@ namespace tmv {
 
 #undef CT
 
-#endif 
+#endif

@@ -28,14 +28,14 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T>
     class PackedQ : public MatrixComposite<T>
     {
     public :
 
         inline PackedQ(
             const tmv::GenMatrix<T>& _Q, const tmv::GenVector<T>& _beta) :
-            Q(_Q), beta(_beta) 
+            Q(_Q), beta(_beta)
         { TMVAssert(beta.size() == Q.rowsize()); }
         inline ptrdiff_t colsize() const { return Q.colsize(); }
         inline ptrdiff_t rowsize() const { return Q.rowsize(); }
@@ -57,89 +57,89 @@ namespace tmv {
         }
 
         // v = Qt v
-        template <class T1> 
+        template <typename T1>
         void LDivEq(VectorView<T1> v) const;
 
         // v = v Qt
-        template <class T1> 
+        template <typename T1>
         void RDivEq(VectorView<T1> v) const;
 
         // x = Qt v
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void LDiv(const GenVector<T1>& v, VectorView<T2> x) const;
         // x = v Qt
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void RDiv(const GenVector<T1>& v, VectorView<T2> x) const;
 
         // m = Qt m
-        template <class T1> 
+        template <typename T1>
         void LDivEq(MatrixView<T1> m) const;
 
         // m = m Qt
-        template <class T1> 
+        template <typename T1>
         void RDivEq(MatrixView<T1> m) const;
 
         // x = Qt m
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void LDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         // x = m Qt
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void RDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         // v = Q v
-        template <class T1> 
+        template <typename T1>
         inline void LMultEq(VectorView<T1> v) const
         { RDivEq(v.conjugate()); }
 
         // v = v Q
-        template <class T1> 
+        template <typename T1>
         inline void RMultEq(VectorView<T1> v) const
         { LDivEq(v.conjugate()); }
 
         // x = Q v
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         inline void LMult(const GenVector<T1>& v, VectorView<T2> x) const
         { RDiv(v.conjugate(),x.conjugate()); }
 
         // x = v Q
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         inline void RMult(const GenVector<T1>& v, VectorView<T2> x) const
         { LDiv(v.conjugate(),x.conjugate()); }
 
         // m = Q m
-        template <class T1> 
+        template <typename T1>
         inline void LMultEq(MatrixView<T1> m) const
         { RDivEq(m.adjoint()); }
 
         // m = m Q
-        template <class T1> 
+        template <typename T1>
         inline void RMultEq(MatrixView<T1> m) const
         { LDivEq(m.adjoint()); }
 
         // x = Q m
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         inline void LMult(const GenMatrix<T1>& m, MatrixView<T2> x) const
         { RDiv(m.adjoint(),x.adjoint()); }
 
         // x = m Q
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         inline void RMult(const GenMatrix<T1>& m, MatrixView<T2> x) const
         { LDiv(m.adjoint(),x.adjoint()); }
 
-    private : 
+    private :
 
         const tmv::GenMatrix<T>& Q;
         const tmv::GenVector<T>& beta;
 
-        template <class T1> 
+        template <typename T1>
         void doAssignToM(MatrixView<T1> m0) const;
 
     };
 
 #define CT std::complex<T>
 
-    template <class T, class Tm> 
+    template <typename T, typename Tm>
     class ProdXpQ : public MatrixComposite<T>
     {
     public:
@@ -171,9 +171,9 @@ namespace tmv {
 #undef GENMATRIX
 #undef PRODXM
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdpQV : public VectorComposite<T>
-    {   
+    {
     public:
         inline ProdpQV(
             const T _x, const PackedQ<T1>& _q, const GenVector<T2>& _v) :
@@ -184,7 +184,7 @@ namespace tmv {
         inline const PackedQ<T1>& getQ() const { return q; }
         inline const GenVector<T2>& getV() const { return v; }
         inline void assignToV(VectorView<TMV_RealType(T)> v0) const
-        { 
+        {
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T()));
             q.LMult(v,v0);
@@ -200,9 +200,9 @@ namespace tmv {
         const GenVector<T2>& v;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdVpQ : public VectorComposite<T>
-    {   
+    {
     public:
         inline ProdVpQ(
             const T _x, const GenVector<T1>& _v, const PackedQ<T2>& _q) :
@@ -213,7 +213,7 @@ namespace tmv {
         inline const GenVector<T1>& getV() const { return v; }
         inline const PackedQ<T2>& getQ() const { return q; }
         inline void assignToV(VectorView<TMV_RealType(T)> v0) const
-        { 
+        {
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T()));
             q.RMult(v,v0);
@@ -229,7 +229,7 @@ namespace tmv {
         const PackedQ<T2>& q;
     };
 
-    template <class T> 
+    template <typename T>
     inline VectorView<T> operator*=(
         VectorView<T> v, const PackedQ<T>& m)
     {
@@ -238,7 +238,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T> 
+    template <typename T>
     inline VectorView<CT> operator*=(
         VectorView<CT> v, const PackedQ<T>& m)
     {
@@ -247,7 +247,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline VectorView<T> operator*=(
         VectorView<T> v, const ProdXpQ<T,T2>& pxq)
     {
@@ -258,7 +258,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T> 
+    template <typename T>
     inline VectorView<CT> operator*=(
         VectorView<CT> v, const ProdXpQ<T,T>& pxq)
     {
@@ -303,9 +303,9 @@ namespace tmv {
 #undef PRODMM
 
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdpQM : public MatrixComposite<T>
-    {   
+    {
     public:
         inline ProdpQM(
             const T _x, const PackedQ<T1>& _q, const GenMatrix<T2>& _m) :
@@ -318,7 +318,7 @@ namespace tmv {
         inline const PackedQ<T1>& getQ() const { return q; }
         inline const GenMatrix<T2>& getM() const { return m; }
         inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             TMVAssert(isReal(T()));
@@ -336,9 +336,9 @@ namespace tmv {
         const GenMatrix<T2>& m;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdMpQ : public MatrixComposite<T>
-    {   
+    {
     public:
         inline ProdMpQ(const T _x, const GenMatrix<T1>& _m,
                        const PackedQ<T2>& _q) : x(_x), m(_m), q(_q)
@@ -350,7 +350,7 @@ namespace tmv {
         inline const GenMatrix<T1>& getM() const { return m; }
         inline const PackedQ<T2>& getQ() const { return q; }
         inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
-        { 
+        {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             TMVAssert(isReal(T()));
@@ -368,7 +368,7 @@ namespace tmv {
         const PackedQ<T2>& q;
     };
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<T> operator*=(
         MatrixView<T> m, const PackedQ<T>& q)
     {
@@ -378,7 +378,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<CT> operator*=(
         MatrixView<CT> m, const PackedQ<T>& q)
     {
@@ -388,7 +388,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline MatrixView<T> operator*=(
         MatrixView<T> m, const ProdXpQ<T,T2>& pxq)
     {
@@ -399,7 +399,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<CT> operator*=(
         MatrixView<CT> m, const ProdXpQ<T,T>& pxq)
     {
@@ -443,7 +443,7 @@ namespace tmv {
 #undef PRODXM2
 #undef PRODMM
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class QuotVpQ : public VectorComposite<T>
     {
     public:
@@ -474,7 +474,7 @@ namespace tmv {
         const PackedQ<T2>& q;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class RQuotVpQ : public VectorComposite<T>
     {
     public:
@@ -505,7 +505,7 @@ namespace tmv {
         const PackedQ<T2>& q;
     };
 
-    template <class T> 
+    template <typename T>
     inline VectorView<T> operator/=(
         VectorView<T> v, const PackedQ<T>& q)
     {
@@ -515,7 +515,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T> 
+    template <typename T>
     inline VectorView<CT> operator/=(
         VectorView<CT> v, const PackedQ<T>& q)
     {
@@ -525,7 +525,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T> 
+    template <typename T>
     inline VectorView<T> operator%=(
         VectorView<T> v, const PackedQ<T>& q)
     {
@@ -535,7 +535,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T> 
+    template <typename T>
     inline VectorView<CT> operator%=(
         VectorView<CT> v, const PackedQ<T>& q)
     {
@@ -560,7 +560,7 @@ namespace tmv {
 #undef QUOTMM
 #undef RQUOTMM
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class QuotMpQ : public MatrixComposite<T>
     {
     public:
@@ -594,7 +594,7 @@ namespace tmv {
     };
 
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class RQuotMpQ : public MatrixComposite<T>
     {
     public:
@@ -627,7 +627,7 @@ namespace tmv {
         const PackedQ<T2>& q;
     };
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<T> operator/=(
         MatrixView<T> m, const PackedQ<T>& q)
     {
@@ -637,7 +637,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<CT> operator/=(
         MatrixView<CT> m, const PackedQ<T>& q)
     {
@@ -647,7 +647,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<T> operator%=(
         MatrixView<T> m, const PackedQ<T>& q)
     {
@@ -657,7 +657,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline MatrixView<CT> operator%=(
         MatrixView<CT> m, const PackedQ<T>& q)
     {

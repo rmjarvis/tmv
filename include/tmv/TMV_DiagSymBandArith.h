@@ -31,20 +31,20 @@ namespace tmv {
     // DiagMatrix + SymBandMatrix
     //
 
-    template <class T, class T1, class T2> 
-    class SumDsB : public SymBandMatrixComposite<T> 
+    template <typename T, typename T1, typename T2>
+    class SumDsB : public SymBandMatrixComposite<T>
     {
     public:
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
         inline SumDsB(
-            T _x1, const GenDiagMatrix<T1>& _m1, 
+            T _x1, const GenDiagMatrix<T1>& _m1,
             T _x2, const GenSymBandMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
-        { 
-            TMVAssert(m1.size() == m2.colsize()); 
-            TMVAssert(m1.size() == m2.rowsize()); 
+        {
+            TMVAssert(m1.size() == m2.colsize());
+            TMVAssert(m1.size() == m2.rowsize());
         }
         inline ptrdiff_t size() const { return m1.size(); }
         inline ptrdiff_t nlo() const { return m2.nlo(); }
@@ -54,7 +54,7 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
         inline void assignToB(BandMatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nhi() >= nlo());
@@ -62,26 +62,26 @@ namespace tmv {
             AddMM(
                 x1,BandMatrixViewOf(m1),x2,m2.upperBand(),
                 m0.diagRange(0,m0.nhi()+1));
-            if (m2.nlo() > 0) 
+            if (m2.nlo() > 0)
                 MultXM(x2,m0.diagRange(-m0.nlo(),0)=m2.lowerBandOff());
-            else if (m0.nlo() > 0) 
+            else if (m0.nlo() > 0)
                 m0.diagRange(-m0.nlo(),0).setZero();
         }
         inline void assignToB(BandMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nhi() >= nlo());
             TMVAssert(m0.nlo() >= nlo());
             AddMM(
                 x1,BandMatrixViewOf(m1),x2,m2.upperBand(),
                 m0.diagRange(0,m0.nhi()+1));
-            if (m2.nlo() > 0) 
+            if (m2.nlo() > 0)
                 MultXM(x2,m0.diagRange(-m0.nlo(),0)=m2.lowerBandOff());
-            else if (m0.nlo() > 0) 
+            else if (m0.nlo() > 0)
                 m0.diagRange(-m0.nlo(),0).setZero();
         }
         inline void assignTosB(SymBandMatrixView<real_type> m0) const
-        { 
+        {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nlo() >= nlo());
@@ -90,12 +90,12 @@ namespace tmv {
                   m0.diagRange(0,m0.nhi()+1));
         }
         inline void assignTosB(SymBandMatrixView<complex_type> m0) const
-        { 
+        {
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nlo() >= nlo());
             if (!m2.issym()) {
-                TMVAssert(isReal(T1()) && 
-                          TMV_IMAG(x1) == T1(0) && 
+                TMVAssert(isReal(T1()) &&
+                          TMV_IMAG(x1) == T1(0) &&
                           TMV_IMAG(x2) == T1(0));
             }
             AddMM(
@@ -109,45 +109,45 @@ namespace tmv {
         const GenSymBandMatrix<T2>& m2;
     };
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<T> operator+=(
-        SymBandMatrixView<T> m1, const GenDiagMatrix<T>& m2) 
+        SymBandMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.issym());
         AddVV(T(1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator+=(
-        SymBandMatrixView<CT> m1, const GenDiagMatrix<T>& m2) 
-    { 
+        SymBandMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         AddVV(T(1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<T> operator-=(
-        SymBandMatrixView<T> m1, const GenDiagMatrix<T>& m2) 
-    { 
+        SymBandMatrixView<T> m1, const GenDiagMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.issym());
         AddVV(T(-1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator-=(
-        SymBandMatrixView<CT> m1, const GenDiagMatrix<T>& m2) 
-    { 
+        SymBandMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         AddVV(T(-1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline SymBandMatrixView<T> operator+=(
         SymBandMatrixView<T> m, const ProdXD<T,T2>& pxm)
     {
@@ -157,7 +157,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator+=(
         SymBandMatrixView<CT> m, const ProdXD<T,T>& pxm)
     {
@@ -166,7 +166,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline SymBandMatrixView<T> operator-=(
         SymBandMatrixView<T> m, const ProdXD<T,T2>& pxm)
     {
@@ -176,7 +176,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline SymBandMatrixView<CT> operator-=(
         SymBandMatrixView<CT> m, const ProdXD<T,T>& pxm)
     {
@@ -185,47 +185,47 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<T> operator+=(
-        DiagMatrixView<T> m1, const GenSymBandMatrix<T>& m2) 
+        DiagMatrixView<T> m1, const GenSymBandMatrix<T>& m2)
     {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m2.nlo() == 0);
         AddVV(T(1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator+=(
-        DiagMatrixView<CT> m1, const GenSymBandMatrix<T>& m2) 
-    { 
+        DiagMatrixView<CT> m1, const GenSymBandMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m2.nlo() == 0);
         AddVV(T(1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<T> operator-=(
-        DiagMatrixView<T> m1, const GenSymBandMatrix<T>& m2) 
-    { 
+        DiagMatrixView<T> m1, const GenSymBandMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m2.nlo() == 0);
         AddVV(T(-1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator-=(
-        DiagMatrixView<CT> m1, const GenSymBandMatrix<T>& m2) 
-    { 
+        DiagMatrixView<CT> m1, const GenSymBandMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m2.nlo() == 0);
         AddVV(T(-1),m2.diag(),m1.diag());
-        return m1; 
+        return m1;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline DiagMatrixView<T> operator+=(
         DiagMatrixView<T> m, const ProdXsB<T,T2>& pxm)
     {
@@ -235,7 +235,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator+=(
         DiagMatrixView<CT> m, const ProdXsB<T,T>& pxm)
     {
@@ -245,7 +245,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline DiagMatrixView<T> operator-=(
         DiagMatrixView<T> m, const ProdXsB<T,T2>& pxm)
     {
@@ -255,7 +255,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator-=(
         DiagMatrixView<CT> m, const ProdXsB<T,T>& pxm)
     {
@@ -282,7 +282,7 @@ namespace tmv {
     // DiagMatrix * SymBandMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdDsB : public BandMatrixComposite<T>
     {
     public:
@@ -338,7 +338,7 @@ namespace tmv {
         const GenSymBandMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class ProdsBD : public BandMatrixComposite<T>
     {
     public:
@@ -394,27 +394,27 @@ namespace tmv {
         const GenDiagMatrix<T2>& m2;
     };
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<T> operator*=(
-        DiagMatrixView<T> m1, const GenSymBandMatrix<T>& m2) 
+        DiagMatrixView<T> m1, const GenSymBandMatrix<T>& m2)
     {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m2.nlo() == 0);
         MultMM<false>(T(1),m1,DiagMatrixViewOf(m2.diag()),m1);
-        return m1; 
+        return m1;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator*=(
-        DiagMatrixView<CT> m1, const GenSymBandMatrix<T>& m2) 
-    { 
+        DiagMatrixView<CT> m1, const GenSymBandMatrix<T>& m2)
+    {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m2.nlo() == 0);
         MultMM<false>(T(1),m1,DiagMatrixViewOf(m2.diag()),m1);
-        return m1; 
+        return m1;
     }
 
-    template <class T, class T2> 
+    template <typename T, typename T2>
     inline DiagMatrixView<T> operator*=(
         DiagMatrixView<T> m, const ProdXsB<T,T2>& pxm)
     {
@@ -424,7 +424,7 @@ namespace tmv {
         return m;
     }
 
-    template <class T> 
+    template <typename T>
     inline DiagMatrixView<CT> operator*=(
         DiagMatrixView<CT> m, const ProdXsB<T,T>& pxm)
     {
@@ -464,7 +464,7 @@ namespace tmv {
     // SymBandMatrix / % DiagMatrix
     //
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class QuotsBD : public BandMatrixComposite<T>
     {
     public:
@@ -508,7 +508,7 @@ namespace tmv {
         const GenDiagMatrix<T2>& m2;
     };
 
-    template <class T, class T1, class T2> 
+    template <typename T, typename T1, typename T2>
     class RQuotsBD : public BandMatrixComposite<T>
     {
     public:

@@ -27,28 +27,28 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T>
     class GenVector;
 
-    template <class T, int A=0> 
+    template <typename T, int A=0>
     class ConstVectorView;
 
-    template <class T, int A=0> 
+    template <typename T, int A=0>
     class VectorView;
 
-    template <class T, int A=0> 
+    template <typename T, int A=0>
     class Vector;
 
-    template <class T, ptrdiff_t N, int A=0> 
+    template <typename T, ptrdiff_t N, int A=0>
     class SmallVector;
 
-    template <class T, ptrdiff_t N> 
+    template <typename T, ptrdiff_t N>
     class SmallVectorComposite;
 
     // Things that inherit from this can be assigned to a Vector
     // and explicit constructed to a Vector.
     // But they are not implicitly converted to a Vector.
-    template <class T> 
+    template <typename T>
     struct AssignableToVector
     {
         virtual ptrdiff_t size() const = 0;
@@ -63,36 +63,36 @@ namespace tmv {
     { return ad == Ascend ? "Ascend" : "Descend"; }
 
     inline std::string TMV_Text(CompType comp)
-    { 
+    {
         return comp == RealComp ? "Real" : comp == AbsComp ? "Abs" :
-            comp == ImagComp ? "Imag" : "Arg"; 
+            comp == ImagComp ? "Imag" : "Arg";
     }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline std::string TMV_Text(const Vector<T,A>& )
     { return std::string("Vector<")+TMV_Text(T())+","+Attrib<A>::vtext()+">"; }
 
-    template <class T> 
+    template <typename T>
     inline std::string TMV_Text(const GenVector<T>& )
     { return std::string("GenVector<")+TMV_Text(T())+">"; }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline std::string TMV_Text(const ConstVectorView<T,A>& )
-    { 
+    {
         return std::string("ConstVectorView<")+TMV_Text(T())+","+
-            Attrib<A>::vtext()+">"; 
+            Attrib<A>::vtext()+">";
     }
 
-    template <class T, int A> 
+    template <typename T, int A>
     inline std::string TMV_Text(const VectorView<T,A>& )
-    { 
+    {
         return std::string("VectorView<")+TMV_Text(T())+","+
-            Attrib<A>::vtext()+">"; 
+            Attrib<A>::vtext()+">";
     }
 
-    template <class T, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t N, int A>
     inline std::string TMV_Text(const SmallVector<T,N,A>& )
-    { 
+    {
         std::ostringstream s;
         s << "SmallVector<"<<TMV_Text(T())<<","<<N<<","<<
             Attrib<A>::vtext()<<">";

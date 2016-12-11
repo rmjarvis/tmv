@@ -24,17 +24,17 @@
 //
 // This file defines the TMV SimpleMatrix class.
 //
-// It is used when I want some of the simpler functionality of 
+// It is used when I want some of the simpler functionality of
 // the Matrix class, but I want to make sure it works even if the
 // library doesn't have the template instantiations for that type.
 //
 // The main place that I use it so for is in the determinant calculation
-// for int (or complex<int>) matrices.  I do the calculation on a 
-// long double matrix.  But I don't want to require that the 
+// for int (or complex<int>) matrices.  I do the calculation on a
+// long double matrix.  But I don't want to require that the
 // Matrix<long double> class is compiled into the library.
 //
-// So this class is completely header-only.  It doesn't have any 
-// any of the arithmetic operations defined, so everything has to 
+// So this class is completely header-only.  It doesn't have any
+// any of the arithmetic operations defined, so everything has to
 // be done on the elements directly.  Similary, it doesn't have
 // all of the normal functions and methods.  Just a few that are easy
 // to implement inline.
@@ -65,8 +65,8 @@
 
 namespace tmv {
 
-    template <class T>
-    class SimpleMatrix 
+    template <typename T>
+    class SimpleMatrix
     {
         typedef SimpleMatrix<T> type;
         typedef T value_type;
@@ -83,8 +83,8 @@ namespace tmv {
         inline SimpleMatrix() : linsize(0), itsm(0), itscs(0), itsrs(0) {}
 
         inline SimpleMatrix(ptrdiff_t cs, ptrdiff_t rs) :
-            linsize((cs)*(rs)), 
-            itsm(linsize), itscs(cs), itsrs(rs) 
+            linsize((cs)*(rs)),
+            itsm(linsize), itscs(cs), itsrs(rs)
         {
             TMVAssert(cs >= 0 && rs >= 0);
 #ifdef TMV_EXTRA_DEBUG
@@ -95,16 +95,16 @@ namespace tmv {
         inline SimpleMatrix(const type& m2) :
             linsize(m2.linsize), itsm(linsize),
             itscs(m2.itscs), itsrs(m2.itsrs)
-        { 
+        {
             for(ptrdiff_t i=0;i<linsize;++i) itsm[i] = m2.itsm[i];
         }
 
         template <class M2>
         inline SimpleMatrix(const M2& m2) :
-            linsize((m2.colsize())*(m2.rowsize())), 
-            itsm(linsize), itscs(m2.colsize()), itsrs(m2.rowsize()) 
-        { 
-            for(ptrdiff_t i=0;i<itscs;++i) for(ptrdiff_t j=0;j<itsrs;++j) 
+            linsize((m2.colsize())*(m2.rowsize())),
+            itsm(linsize), itscs(m2.colsize()), itsrs(m2.rowsize())
+        {
+            for(ptrdiff_t i=0;i<itscs;++i) for(ptrdiff_t j=0;j<itsrs;++j)
                 ref(i,j) = m2.cref(i,j);
         }
 
@@ -121,20 +121,20 @@ namespace tmv {
         //
 
         inline type& operator=(const type& m2)
-        { 
+        {
             for(ptrdiff_t i=0;i<linsize;++i) itsm[i] = m2.itsm[i];
-            return *this; 
+            return *this;
         }
 
         template <class M2>
         inline type& operator=(const M2& m2)
-        { 
-            for(ptrdiff_t i=0;i<itscs;++i) for(ptrdiff_t j=0;j<itsrs;++j) 
+        {
+            for(ptrdiff_t i=0;i<itscs;++i) for(ptrdiff_t j=0;j<itsrs;++j)
                 ref(i,j) = m2.cref(i,j);
-            return *this; 
+            return *this;
         }
 
-        inline type& operator=(const T& x) 
+        inline type& operator=(const T& x)
         { return setToIdentity(x); }
 
 
@@ -143,14 +143,14 @@ namespace tmv {
         //
 
         inline T operator()(ptrdiff_t i,ptrdiff_t j) const
-        { 
+        {
             TMVAssert(i>=0 && i<itscs);
             TMVAssert(j>=0 && j<itsrs);
-            return cref(i,j); 
+            return cref(i,j);
         }
 
-        inline T& operator()(ptrdiff_t i,ptrdiff_t j) 
-        { 
+        inline T& operator()(ptrdiff_t i,ptrdiff_t j)
+        {
             TMVAssert(i>=0 && i<itscs);
             TMVAssert(j>=0 && j<itsrs);
             return ref(i,j);
@@ -161,7 +161,7 @@ namespace tmv {
         //
 
         inline T trace() const
-        { 
+        {
             TMVAssert(itscs == itsrs);
             T sum(0);
             for(ptrdiff_t i=0; i<itsrs; ++i) sum += cref(i,i);
@@ -189,17 +189,17 @@ namespace tmv {
             return sum;
         }
 
-        inline RT norm() const 
+        inline RT norm() const
         { return normF(); }
 
         inline RT normF() const
         {
             TMVAssert(!std::numeric_limits<T>::is_integer);
-            return TMV_SQRT(normSq()); 
+            return TMV_SQRT(normSq());
         }
 
         inline RT normSq(RT scale=RT(1)) const
-        { 
+        {
             RT sum(0);
             if (scale == RT(1))
                 for(ptrdiff_t i=0;i<linsize;++i) sum += TMV_NORM(itsm[i]);
@@ -258,40 +258,40 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& setZero() 
-        { 
+        inline type& setZero()
+        {
             for(ptrdiff_t i=0;i<linsize;++i) itsm[i] = T(0);
             return *this;
         }
 
         inline type& clip(RT thresh)
-        { 
-            for(ptrdiff_t i=0;i<linsize;++i) 
+        {
+            for(ptrdiff_t i=0;i<linsize;++i)
                 if (TMV_ABS(itsm[i]) < thresh) itsm[i] = T(0);
             return *this;
         }
 
-        inline type& setAllTo(const T& x) 
+        inline type& setAllTo(const T& x)
         {
             for(ptrdiff_t i=0;i<linsize;++i) itsm[i] = x;
             return *this;
         }
 
-        inline type& addToAll(const T& x) 
+        inline type& addToAll(const T& x)
         {
             for(ptrdiff_t i=0;i<linsize;++i) itsm[i] += x;
             return *this;
         }
 
-        inline type& transposeSelf() 
+        inline type& transposeSelf()
         {
             TMVAssert(itscs == itsrs);
-            for(ptrdiff_t i=1; i<itscs; ++i) 
+            for(ptrdiff_t i=1; i<itscs; ++i)
                 for(ptrdiff_t j=0; j<i; ++j) TMV_SWAP(ref(i,j),ref(j,i));
             return *this;
         }
 
-        inline type& conjugateSelf() 
+        inline type& conjugateSelf()
         {
             if (isComplex(T())) {
                 for(ptrdiff_t i=0;i<linsize;++i) itsm[i] = TMV_CONJ(itsm[i]);
@@ -299,8 +299,8 @@ namespace tmv {
             return *this;
         }
 
-        inline type& setToIdentity(const T& x=T(1)) 
-        { 
+        inline type& setToIdentity(const T& x=T(1))
+        {
             TMVAssert(itscs == itsrs);
             setZero();
             for(ptrdiff_t i=0; i<itsrs; ++i) ref(i,i) = T(1);
@@ -330,7 +330,7 @@ namespace tmv {
         //
 
         inline void write(std::ostream& os) const
-        { 
+        {
             os << itscs <<"  "<< itsrs <<std::endl;
             for(ptrdiff_t i=0;i<itscs;++i) {
                 os << "( ";
@@ -377,9 +377,9 @@ namespace tmv {
 
     }; // SimpleMatrix
 
-    template <class T>
+    template <typename T>
     inline std::string TMV_Text(const SimpleMatrix<T>& )
-    { 
+    {
         return std::string("SimpleMatrix<")+TMV_Text(T())+">";
     }
 

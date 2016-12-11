@@ -26,27 +26,27 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T> 
     void LDL_Decompose(SymBandMatrixView<T> A);
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void CH_LDivEq(const GenSymBandMatrix<T1>& L, MatrixView<T> m);
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void CH_RDivEq(const GenSymBandMatrix<T1>& L, MatrixView<T> m);
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void CH_Inverse(
         const GenSymBandMatrix<T1>& LLx, SymMatrixView<T> sinv);
 
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void LDL_LDivEq(const GenSymBandMatrix<T1>& L, MatrixView<T> m);
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void LDL_RDivEq(const GenSymBandMatrix<T1>& L, MatrixView<T> m);
-    template <class T, class T1> 
+    template <typename T, typename T1> 
     void LDL_Inverse(
         const GenSymBandMatrix<T1>& LLx, SymMatrixView<T> sinv);
 
 #ifndef NOTHROW
-    template <class T> 
+    template <typename T> 
     class NonPosDefHermBandMatrix : public NonPosDef
     {
     public:
@@ -66,7 +66,7 @@ namespace tmv {
         }
     };
 
-    template <class T> 
+    template <typename T> 
     class NonPosDefHermBandMatrix2 : public NonPosDefHermBandMatrix<T>
     {
     public:
@@ -87,7 +87,7 @@ namespace tmv {
         }
     };
 
-    template <class T> 
+    template <typename T> 
     class NonPosDefSymBandLDL : public NonPosDef
     {
     public:
@@ -106,7 +106,7 @@ namespace tmv {
         }
     };
 
-    template <class T> 
+    template <typename T> 
     class NonPosDefHermBandLDL : public NonPosDef
     {
     public:
@@ -129,26 +129,26 @@ namespace tmv {
     // Specialize disallowed complex combinations:
 #define CT std::complex<T>
 
-    template <class T>
+    template <typename T>
     inline void CH_LDivEq(const GenSymBandMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void CH_RDivEq(const GenSymBandMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void CH_Inverse(
         const GenSymBandMatrix<CT>& , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T>
+    template <typename T>
     inline void LDL_LDivEq(
         const GenSymBandMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void LDL_RDivEq(
         const GenSymBandMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
-    template <class T>
+    template <typename T>
     inline void LDL_Inverse(
         const GenSymBandMatrix<CT>& , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }

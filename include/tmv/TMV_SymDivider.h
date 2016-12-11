@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2016                                                 //
@@ -38,7 +38,7 @@ namespace tmv {
 #define RT TMV_RealType(T)
 #define CT TMV_ComplexType(T)
 
-    template <class T> 
+    template <typename T>
     class SymDivider : public Divider<T>
     {
 
@@ -52,7 +52,7 @@ namespace tmv {
         virtual void makeInverse(SymMatrixView<CT> sinv) const =0;
     };
 
-    template <class T> 
+    template <typename T>
     inline std::string TMV_Text(const SymDivider<T>& d)
     { return std::string("SymDivider<")+tmv::TMV_Text(T())+">"; }
 

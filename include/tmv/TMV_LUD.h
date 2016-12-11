@@ -22,19 +22,19 @@
 
 //---------------------------------------------------------------------------
 //
-// This file contains the code for doing division using 
+// This file contains the code for doing division using
 // LU Decomposition.
 //
 // The name LU Decomposition is traditional, but somewhat
 // annoying.  Usually U represents a unitary matrix, not an
 // upper traiangular matrix.  The latter are usually represented
-// with R.  (for "Right Triangular")  
+// with R.  (for "Right Triangular")
 // For example, in a QR decomposition, the R is an upper
 // trianular matrix.  (Q also typically represents unitary matrices.)
-// However, I will use U rather than R here, since that is 
+// However, I will use U rather than R here, since that is
 // the usual representation in this context.
 //
-// The basic idea of an LU decomposition is that any 
+// The basic idea of an LU decomposition is that any
 // square matrix A can be decomposed into a lower triangular
 // matrix time an upper triangular matrix.
 //
@@ -43,7 +43,7 @@
 //
 // A = P L U
 //
-// Only one of L or U needs a non-unit diagonal, so we choose L to 
+// Only one of L or U needs a non-unit diagonal, so we choose L to
 // have unit diagonal, and U to have the non-unit diagonal.
 //
 // This means that we can store L and U both in a square matrix
@@ -56,9 +56,9 @@
 // det(P) * det(A) = det(L) * det(U)
 // +-1 * det(A) = 1 * det(U)
 // As we calculate the decomposition, we keep track of whether
-// det(P) is +-1 
+// det(P) is +-1
 // The determinant of U is just the product of the diagonal elements.
-// So the determinant of A is just det(P) times the diagonal elements 
+// So the determinant of A is just det(P) times the diagonal elements
 // of U.
 //
 
@@ -75,20 +75,20 @@ namespace tmv {
     // Decompose A into P * L * U
     // L is returned as A.lowerTri(UnitDiag).
     // U is returned as A.upperTri(NonUnitDiag).
-    template <class T> 
+    template <typename T>
     void LU_Decompose(MatrixView<T> A, ptrdiff_t* P);
 
     class Permutation;
 
-    template <class T> 
+    template <typename T>
     void LU_Decompose(MatrixView<T> A, Permutation& P);
 
-    template <class T, int A1> 
+    template <typename T, int A1>
     inline void LU_Decompose(Matrix<T,A1>& A, Permutation& P)
     { LU_Decompose(A.view(),P); }
 
-    template <class T> 
-    class LUDiv : public Divider<T> 
+    template <typename T>
+    class LUDiv : public Divider<T>
     {
 
     public :
@@ -104,16 +104,16 @@ namespace tmv {
         // Divider Versions of DivEq and Div
         //
 
-        template <class T1> 
+        template <typename T1>
         void doLDivEq(MatrixView<T1> m) const;
 
-        template <class T1> 
+        template <typename T1>
         void doRDivEq(MatrixView<T1> m) const;
 
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doLDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const;
 
-        template <class T1, class T2> 
+        template <typename T1, typename T2>
         void doRDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const;
 
 #include "tmv/TMV_AuxAllDiv.h"
@@ -126,7 +126,7 @@ namespace tmv {
 
         TMV_RealType(T) logDet(T* sign) const;
 
-        template <class T1> 
+        template <typename T1>
         void doMakeInverse(MatrixView<T1> minv) const;
 
         void doMakeInverseATA(MatrixView<T> minv) const;

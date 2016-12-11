@@ -20,13 +20,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-// This file sets up the Composite classes for all operations with a 
+// This file sets up the Composite classes for all operations with a
 // (sparse) matrix that returns a Matrix and is of the form:
 // (S) op (M)
 // (ie. the second operand is the normal Matrix.)
 //
 // Need to define the following with #define statements.
-// (The given definition is for a Band Matrix.  Modify as 
+// (The given definition is for a Band Matrix.  Modify as
 // appropriate for the various other matrices.)
 //
 // #define GENMATRIX1 GenBandMatrix
@@ -38,7 +38,7 @@
 // Matrix * Matrix
 //
 
-template <class T, class T1, class T2> 
+template <typename T, typename T1, typename T2>
 class PRODMM : public MatrixComposite<T>
 {
 public:
@@ -68,7 +68,7 @@ private:
     const GenMatrix<T2>& m2;
 };
 
-template <class T, class T2, class T3> 
+template <typename T, typename T2, typename T3>
 inline MatrixView<T> operator+=(
     MatrixView<T> m, const PRODMM<T,T2,T3>& pmm)
 {
@@ -78,7 +78,7 @@ inline MatrixView<T> operator+=(
     return m;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator+=(
     MatrixView<CT> m, const PRODMM<T,T,T>& pmm)
 {
@@ -88,7 +88,7 @@ inline MatrixView<CT> operator+=(
     return m;
 }
 
-template <class T, class T2, class T3> 
+template <typename T, typename T2, typename T3>
 inline MatrixView<T> operator-=(
     MatrixView<T> m, const PRODMM<T,T2,T3>& pmm)
 {
@@ -98,7 +98,7 @@ inline MatrixView<T> operator-=(
     return m;
 }
 
-template <class T> 
+template <typename T>
 inline MatrixView<CT> operator-=(
     MatrixView<CT> m, const PRODMM<T,T,T>& pmm)
 {

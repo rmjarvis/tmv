@@ -27,22 +27,22 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T>
     class GenDiagMatrix;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class ConstDiagMatrixView;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class DiagMatrixView;
 
-    template <class T, int A=0>
+    template <typename T, int A=0>
     class DiagMatrix;
 
-    template <class T, class Tm> 
+    template <typename T, typename Tm>
     class QuotXD;
 
-    template <class T> 
+    template <typename T>
     struct AssignableToDiagMatrix :
         virtual public AssignableToMatrix<T>
     {
@@ -54,27 +54,27 @@ namespace tmv {
         virtual inline ~AssignableToDiagMatrix() {}
     };
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const DiagMatrix<T,A>& )
     {
         return std::string("DiagMatrix<") +
             TMV_Text(T()) + "," + Attrib<A>::vtext() + ">";
     }
 
-    template <class T> 
+    template <typename T>
     inline std::string TMV_Text(const GenDiagMatrix<T>& )
     {
         return std::string("GenDiagMatrix<") + TMV_Text(T()) + ">";
     }
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const ConstDiagMatrixView<T,A>& )
     {
         return std::string("ConstDiagMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::vtext() + ">";
     }
 
-    template <class T, int A>
+    template <typename T, int A>
     inline std::string TMV_Text(const DiagMatrixView<T,A>& )
     {
         return std::string("DiagMatrixView<") +

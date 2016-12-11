@@ -27,7 +27,7 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <typename T> 
     void SV_Decompose(
         const GenBandMatrix<T>& A,
         MatrixView<T> U, DiagMatrixView<TMV_RealType(T)> S, MatrixView<T> Vt, 

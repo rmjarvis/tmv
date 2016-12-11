@@ -54,34 +54,34 @@
 
 namespace tmv {
 
-    template <class T1, class T2, ptrdiff_t M, ptrdiff_t N, int A1, int A2>
+    template <typename T1, typename T2, ptrdiff_t M, ptrdiff_t N, int A1, int A2>
     inline void Copy(
         const SmallMatrix<T1,M,N,A1>& m1, SmallMatrix<T2,M,N,A2>& m2);
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A1, int A2>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A1, int A2>
     inline void Copy(
         const SmallMatrix<std::complex<T>,M,N,A1>& , SmallMatrix<T,M,N,A2>& )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T, class Tm, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, typename Tm, ptrdiff_t M, ptrdiff_t N, int A>
     class QuotXm_1;
 
-    template <class T, ptrdiff_t M, ptrdiff_t N> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N>
     class SmallMatrixComposite;
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline T DoDet(const SmallMatrix<T,M,N,A>& m);
 
-    template <class T, class T2, ptrdiff_t M, ptrdiff_t N, int A, int A2>
+    template <typename T, typename T2, ptrdiff_t M, ptrdiff_t N, int A, int A2>
     inline void DoInverse(
         const SmallMatrix<T,M,N,A>& m, SmallMatrix<T2,N,M,A2>& minv);
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A, int A2>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A, int A2>
     inline void DoInverseATA(
         const SmallMatrix<T,M,N,A>& m, SmallMatrix<T,N,N,A2>& ata);
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
-    class SmallMatrix 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
+    class SmallMatrix
     {
     public:
 
@@ -114,13 +114,13 @@ namespace tmv {
         typedef LowerTriMatrixView<T,I> lowertri_type;
         typedef MatrixView<RT,I> realpart_type;
         typedef T& reference;
-        typedef typename MatrixIterHelper<S,type>::rowmajor_iterator 
+        typedef typename MatrixIterHelper<S,type>::rowmajor_iterator
             rowmajor_iterator;
-        typedef typename MatrixIterHelper<S,type>::const_rowmajor_iterator 
+        typedef typename MatrixIterHelper<S,type>::const_rowmajor_iterator
             const_rowmajor_iterator;
-        typedef typename MatrixIterHelper<S,type>::colmajor_iterator 
+        typedef typename MatrixIterHelper<S,type>::colmajor_iterator
             colmajor_iterator;
-        typedef typename MatrixIterHelper<S,type>::const_colmajor_iterator 
+        typedef typename MatrixIterHelper<S,type>::const_colmajor_iterator
             const_colmajor_iterator;
 
 
@@ -128,7 +128,7 @@ namespace tmv {
         // Constructors
         //
 
-        inline SmallMatrix() 
+        inline SmallMatrix()
         {
             TMVAssert(M>0);
             TMVAssert(N>0);
@@ -138,8 +138,8 @@ namespace tmv {
 #endif
         }
 
-        explicit inline SmallMatrix(const T& x) 
-        { 
+        explicit inline SmallMatrix(const T& x)
+        {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(Attrib<A>::matrixok);
@@ -147,17 +147,17 @@ namespace tmv {
             else setAllTo(x);
         }
 
-        inline SmallMatrix(const type& m2) 
-        { 
+        inline SmallMatrix(const type& m2)
+        {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(Attrib<A>::matrixok);
             for(ptrdiff_t i=0;i<M*N;++i) itsm[i] = m2.itsm[i];
         }
 
-        template <class T2, int A2> 
-        inline SmallMatrix(const SmallMatrix<T2,M,N,A2>& m2) 
-        { 
+        template <typename T2, int A2>
+        inline SmallMatrix(const SmallMatrix<T2,M,N,A2>& m2)
+        {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(Attrib<A>::matrixok);
@@ -165,8 +165,8 @@ namespace tmv {
             Copy(m2,*this);
         }
 
-        inline SmallMatrix(const GenMatrix<T>& m2) 
-        { 
+        inline SmallMatrix(const GenMatrix<T>& m2)
+        {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(Attrib<A>::matrixok);
@@ -175,9 +175,9 @@ namespace tmv {
             view() = m2;
         }
 
-        template <class T2> 
-        inline SmallMatrix(const GenMatrix<T2>& m2) 
-        { 
+        template <typename T2>
+        inline SmallMatrix(const GenMatrix<T2>& m2)
+        {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(Attrib<A>::matrixok);
@@ -187,8 +187,8 @@ namespace tmv {
             view() = m2;
         }
 
-        inline SmallMatrix(const AssignableToMatrix<RT>& m2) 
-        { 
+        inline SmallMatrix(const AssignableToMatrix<RT>& m2)
+        {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(Attrib<A>::matrixok);
@@ -197,8 +197,8 @@ namespace tmv {
             view() = m2;
         }
 
-        inline SmallMatrix(const AssignableToMatrix<CT>& m2) 
-        { 
+        inline SmallMatrix(const AssignableToMatrix<CT>& m2)
+        {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(Attrib<A>::matrixok);
@@ -208,16 +208,16 @@ namespace tmv {
             view() = m2;
         }
 
-        inline SmallMatrix(const SmallMatrixComposite<RT,M,N>& m2) 
-        { 
+        inline SmallMatrix(const SmallMatrixComposite<RT,M,N>& m2)
+        {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(Attrib<A>::matrixok);
             m2.assignTom(*this);
         }
 
-        inline SmallMatrix(const SmallMatrixComposite<CT,M,N>& m2) 
-        { 
+        inline SmallMatrix(const SmallMatrixComposite<CT,M,N>& m2)
+        {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(Attrib<A>::matrixok);
@@ -237,23 +237,23 @@ namespace tmv {
         //
 
         inline type& operator=(const type& m2)
-        { 
+        {
             if (&m2 != this) Copy(m2,*this);
-            return *this; 
+            return *this;
         }
 
-        template <class T2, int A2> 
+        template <typename T2, int A2>
         inline type& operator=(const SmallMatrix<T2,M,N,A2>& m2)
-        { 
+        {
             TMVAssert(isComplex(T()) || isReal(T2()));
             Copy(m2,*this);
-            return *this; 
+            return *this;
         }
 
-        inline type& operator=(const T& x) 
+        inline type& operator=(const T& x)
         { return setToIdentity(x); }
 
-        template <class T2> 
+        template <typename T2>
         inline type& operator=(const GenMatrix<T2>& m2)
         {
             TMVAssert(m2.colsize() == M);
@@ -301,20 +301,20 @@ namespace tmv {
         //
 
         inline T operator()(ptrdiff_t i,ptrdiff_t j) const
-        { 
+        {
             if (I == int(CStyle)) {
                 TMVAssert(i>=0 && i<M);
                 TMVAssert(j>=0 && j<N);
-                return cref(i,j); 
+                return cref(i,j);
             } else {
                 TMVAssert(i>=1 && i<=M);
                 TMVAssert(j>=1 && j<=N);
-                return cref(i-1,j-1); 
+                return cref(i-1,j-1);
             }
         }
 
-        inline T& operator()(ptrdiff_t i,ptrdiff_t j) 
-        { 
+        inline T& operator()(ptrdiff_t i,ptrdiff_t j)
+        {
             if (I == int(CStyle)) {
                 TMVAssert(i>=0 && i<M);
                 TMVAssert(j>=0 && j<N);
@@ -326,10 +326,10 @@ namespace tmv {
             }
         }
 
-        inline const_vec_type row(ptrdiff_t i) const 
+        inline const_vec_type row(ptrdiff_t i) const
         { return view().row(i); }
 
-        inline const_vec_type row(ptrdiff_t i, ptrdiff_t j1, ptrdiff_t j2) const 
+        inline const_vec_type row(ptrdiff_t i, ptrdiff_t j1, ptrdiff_t j2) const
         { return view().row(i,j1,j2); }
 
         inline const_vec_type operator[](ptrdiff_t i) const
@@ -371,7 +371,7 @@ namespace tmv {
         inline vec_type diag(ptrdiff_t i)
         { return view().diag(i); }
 
-        inline vec_type diag(ptrdiff_t i, ptrdiff_t j1, ptrdiff_t j2) 
+        inline vec_type diag(ptrdiff_t i, ptrdiff_t j1, ptrdiff_t j2)
         { return view().diag(i,j1,j2); }
 
         //
@@ -379,7 +379,7 @@ namespace tmv {
         //
 
         inline T trace() const
-        { 
+        {
             TMVAssert(M == N);
             T sum(0);
             for(ptrdiff_t i=0; i<M*N; i+=M+1) sum += itsm[i];
@@ -407,7 +407,7 @@ namespace tmv {
             return sum;
         }
 
-        inline RT norm() const 
+        inline RT norm() const
         { return normF(); }
 
         inline RT normF() const
@@ -415,7 +415,7 @@ namespace tmv {
 
         // normF()^2
         inline RT normSq(RT scale=RT(1)) const
-        { 
+        {
             RT sum(0);
             if (scale == RT(1))
                 for(ptrdiff_t i=0;i<M*N; ++i) sum += TMV_NORM(itsm[i]);
@@ -501,7 +501,7 @@ namespace tmv {
         inline RT doCondition() const
         { return view().doCondition(); }
 
-        // 
+        //
         // Division Control
         //
 
@@ -511,26 +511,26 @@ namespace tmv {
         inline void makeInverse(MatrixView<T> minv) const
         { view().makeInverse(minv); }
 
-        template <class T1> 
+        template <typename T1>
         inline void makeInverse(MatrixView<T1> minv) const
         { view().makeInverse(minv); }
 
-        template <class T2, int A2> 
+        template <typename T2, int A2>
         inline void makeInverse(Matrix<T2,A2>& minv) const
         { view().makeInverse(minv); }
 
         inline void makeInverseATA(MatrixView<T> ata) const
         { view().makeInverseATA(ata); }
 
-        template <int A2> 
+        template <int A2>
         inline void makeInverseATA(Matrix<T,A2>& ata) const
         { view().makeInverseATA(ata); }
 
-        template <class T2, int A2> 
+        template <typename T2, int A2>
         inline void makeInverse(SmallMatrix<T2,N,M,A2>& minv) const
         { DoInverse(*this,minv); }
 
-        template <class T2, int A2> 
+        template <typename T2, int A2>
         inline void makeInverseATA(SmallMatrix<T2,N,N,A2>& ata) const
         { DoInverseATA(*this,ata); }
 
@@ -538,37 +538,37 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& setZero() 
+        inline type& setZero()
         { for(ptrdiff_t i=0;i<M*N;++i) itsm[i] = T(0); return *this; }
 
         inline type& clip(RT thresh)
-        { 
+        {
             for(ptrdiff_t i=0; i<M*N; ++i)
                 if (TMV_ABS(itsm[i]) < thresh) itsm[i] = T(0);
             return *this;
         }
 
-        inline type& setAllTo(const T& x) 
+        inline type& setAllTo(const T& x)
         {
             for(ptrdiff_t i=0; i<M*N; ++i) itsm[i] = x;
             return *this;
         }
 
-        inline type& addToAll(const T& x) 
+        inline type& addToAll(const T& x)
         {
             for(ptrdiff_t i=0; i<M*N; ++i) itsm[i] += x;
             return *this;
         }
 
-        inline type& transposeSelf() 
+        inline type& transposeSelf()
         {
             TMVAssert(M == N);
-            for(ptrdiff_t i=1; i<M; ++i) 
+            for(ptrdiff_t i=1; i<M; ++i)
                 for(ptrdiff_t j=0; j<i; ++j) TMV_SWAP(ref(i,j),ref(j,i));
             return *this;
         }
 
-        inline type& conjugateSelf() 
+        inline type& conjugateSelf()
         {
             if (isComplex(T())) {
                 RT* itsmi = reinterpret_cast<RT*>(ptr())+1;
@@ -577,8 +577,8 @@ namespace tmv {
             return *this;
         }
 
-        inline type& setToIdentity(const T& x=T(1)) 
-        { 
+        inline type& setToIdentity(const T& x=T(1))
+        {
             TMVAssert(M == N);
             setZero();
             for(ptrdiff_t i=0; i<M*N; i+=M+1) itsm[i] = x;
@@ -728,35 +728,35 @@ namespace tmv {
         { return view().subMatrix(i1,i2,j1,j2); }
 
         inline view_type cSubMatrix(
-            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) 
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep)
         { return view().cSubMatrix(i1,i2,j1,j2,istep,jstep); }
 
         inline view_type subMatrix(
-            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) 
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep)
         { return view().subMatrix(i1,i2,j1,j2,istep,jstep); }
 
-        inline vec_type cSubVector(ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t s) 
+        inline vec_type cSubVector(ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t s)
         { return view().cSubVector(i,j,istep,jstep,s); }
 
-        inline vec_type subVector(ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t s) 
+        inline vec_type subVector(ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t s)
         { return view().subVector(i,j,istep,jstep,s); }
 
-        inline view_type colPair(ptrdiff_t j1, ptrdiff_t j2) 
+        inline view_type colPair(ptrdiff_t j1, ptrdiff_t j2)
         { return view().colPair(j1,j2); }
 
-        inline view_type rowPair(ptrdiff_t i1, ptrdiff_t i2) 
+        inline view_type rowPair(ptrdiff_t i1, ptrdiff_t i2)
         { return view().rowPair(i1,i2); }
 
-        inline view_type colRange(ptrdiff_t j1, ptrdiff_t j2) 
+        inline view_type colRange(ptrdiff_t j1, ptrdiff_t j2)
         { return view().colRange(j1,j2); }
 
-        inline view_type rowRange(ptrdiff_t i1, ptrdiff_t i2) 
+        inline view_type rowRange(ptrdiff_t i1, ptrdiff_t i2)
         { return view().rowRange(i1,i2); }
 
-        inline realpart_type realPart() 
+        inline realpart_type realPart()
         { return view().realPart(); }
 
-        inline realpart_type imagPart() 
+        inline realpart_type imagPart()
         { return view().imagPart(); }
 
         //
@@ -768,19 +768,19 @@ namespace tmv {
 
         inline const_view_type transpose() const
         {
-            return const_view_type(cptr(),N,M,Sj,Si,NonConj,M*N); 
+            return const_view_type(cptr(),N,M,Sj,Si,NonConj,M*N);
         }
 
         inline const_view_type conjugate() const
         {
             return const_view_type(
-                cptr(),M,N,Si,Sj,isReal(T())?NonConj:Conj,M*N); 
+                cptr(),M,N,Si,Sj,isReal(T())?NonConj:Conj,M*N);
         }
 
         inline const_view_type adjoint() const
         {
             return const_view_type(
-                cptr(),N,M,Sj,Si,isReal(T())?NonConj:Conj,M*N); 
+                cptr(),N,M,Sj,Si,isReal(T())?NonConj:Conj,M*N);
         }
 
         inline const_uppertri_type upperTri(DiagType dt=NonUnitDiag) const
@@ -795,7 +795,7 @@ namespace tmv {
         inline view_type view()
         { return view_type(ptr(),M,N,Si,Sj,NonConj,M*N); }
 
-        inline view_type transpose() 
+        inline view_type transpose()
         { return view_type(ptr(),N,M,Sj,Si,NonConj,M*N); }
 
         inline view_type conjugate()
@@ -804,7 +804,7 @@ namespace tmv {
         inline view_type adjoint()
         { return view_type(ptr(),N,M,Sj,Si,isReal(T())?NonConj:Conj,M*N); }
 
-        inline uppertri_type upperTri(DiagType dt=NonUnitDiag) 
+        inline uppertri_type upperTri(DiagType dt=NonUnitDiag)
         { return uppertri_type(ptr(),N,Si,Sj,dt,NonConj); }
 
         inline lowertri_type lowerTri(DiagType dt=NonUnitDiag)
@@ -871,63 +871,63 @@ namespace tmv {
     // Copy Matrices
     //
 
-    template <ptrdiff_t M, ptrdiff_t N, StorageType S1, StorageType S2, class T1, class T2> 
+    template <ptrdiff_t M, ptrdiff_t N, StorageType S1, StorageType S2, typename T1, typename T2>
     struct DoCopym {};
-    template <ptrdiff_t M, ptrdiff_t N, StorageType S, class T1, class T2> 
+    template <ptrdiff_t M, ptrdiff_t N, StorageType S, typename T1, typename T2>
     struct DoCopym<M,N,S,S,T1,T2>
     {
         inline DoCopym(const T1* m1, T2* m2)
         { for(ptrdiff_t i=0;i<M*N;++i) m2[i] = m1[i]; }
     };
-    template <ptrdiff_t M, ptrdiff_t N, class T1, class T2> 
+    template <ptrdiff_t M, ptrdiff_t N, typename T1, typename T2>
     struct DoCopym<M,N,ColMajor,RowMajor,T1,T2>
     {
         inline DoCopym(const T1* m1, T2* m2)
         { for(ptrdiff_t i=0;i<M;++i) for(ptrdiff_t j=0;j<N;++j) m2[i*N+j] = m1[j*M+i]; }
     };
-    template <ptrdiff_t M, ptrdiff_t N, class T1, class T2> 
+    template <ptrdiff_t M, ptrdiff_t N, typename T1, typename T2>
     struct DoCopym<M,N,RowMajor,ColMajor,T1,T2>
     {
         inline DoCopym(const T1* m1, T2* m2)
         { for(ptrdiff_t i=0;i<M;++i) for(ptrdiff_t j=0;j<N;++j) m2[j*M+i] = m1[i*N+j]; }
     };
 
-    template <ptrdiff_t M, ptrdiff_t N, StorageType S, class T>
+    template <ptrdiff_t M, ptrdiff_t N, StorageType S, typename T>
     struct DoCopym<M,N,S,S,std::complex<T>,T>
     { inline DoCopym(const std::complex<T>*, T*) { TMVAssert(TMV_FALSE); } };
-    template <ptrdiff_t M, ptrdiff_t N, class T>
+    template <ptrdiff_t M, ptrdiff_t N, typename T>
     struct DoCopym<M,N,ColMajor,RowMajor,std::complex<T>,T>
     { inline DoCopym(const std::complex<T>*, T*) { TMVAssert(TMV_FALSE); } };
-    template <ptrdiff_t M, ptrdiff_t N, class T>
+    template <ptrdiff_t M, ptrdiff_t N, typename T>
     struct DoCopym<M,N,RowMajor,ColMajor,std::complex<T>,T>
     { inline DoCopym(const std::complex<T>*, T*) { TMVAssert(TMV_FALSE); } };
 
-    template <ptrdiff_t M, ptrdiff_t N, StorageType S1, StorageType S2, class T1, class T2>
+    template <ptrdiff_t M, ptrdiff_t N, StorageType S1, StorageType S2, typename T1, typename T2>
     inline void SmallMatrixCopy(const T1* m1, T2* m2)
     { DoCopym<M,N,S1,S2,T1,T2>(m1,m2); }
 
-    template <class T1, class T2, ptrdiff_t M, ptrdiff_t N, int A1, int A2> 
+    template <typename T1, typename T2, ptrdiff_t M, ptrdiff_t N, int A1, int A2>
     inline void Copy(
         const SmallMatrix<T1,M,N,A1>& m1, SmallMatrix<T2,M,N,A2>& m2)
-    { 
+    {
         TMVAssert(isComplex(T2()) || isReal(T1()));
         const StorageType S1 = static_cast<StorageType>(A1 & AllStorageType);
         const StorageType S2 = static_cast<StorageType>(A2 & AllStorageType);
-        SmallMatrixCopy<M,N,S1,S2>(m1.cptr(),m2.ptr()); 
+        SmallMatrixCopy<M,N,S1,S2>(m1.cptr(),m2.ptr());
     }
 
     //
     // Swap Matrices
     //
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A1, int A2> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A1, int A2>
     inline void Swap(
-        SmallMatrix<T,M,N,A1>& m1, SmallMatrix<T,M,N,A2>& m2) 
+        SmallMatrix<T,M,N,A1>& m1, SmallMatrix<T,M,N,A2>& m2)
     {
         if ((A1&AllStorageType)==(A2&AllStorageType))
             for(ptrdiff_t i=0;i<M*N;++i) TMV_SWAP(m1.ptr()[i],m2.ptr()[i]);
         else
-            for(ptrdiff_t i=0;i<M;++i) for(ptrdiff_t j=0;j<N;++j) 
+            for(ptrdiff_t i=0;i<M;++i) for(ptrdiff_t j=0;j<N;++j)
                 TMV_SWAP(m1.ref(i,j),m2.ref(i,j));
     }
 
@@ -935,78 +935,78 @@ namespace tmv {
     // Functions of Matrices:
     //
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline T Det(const SmallMatrix<T,M,N,A>& m)
     { return m.det(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline TMV_RealType(T) LogDet(const SmallMatrix<T,M,N,A>& m)
     { return m.logDet(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline T Trace(const SmallMatrix<T,M,N,A>& m)
     { return m.trace(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline TMV_RealType(T) Norm(const SmallMatrix<T,M,N,A>& m)
     { return m.norm(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline TMV_RealType(T) NormSq(const SmallMatrix<T,M,N,A>& m)
     { return m.normSq(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline TMV_RealType(T) NormF(const SmallMatrix<T,M,N,A>& m)
     { return m.normF(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline TMV_RealType(T) Norm1(const SmallMatrix<T,M,N,A>& m)
     { return m.norm1(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline TMV_RealType(T) Norm2(const SmallMatrix<T,M,N,A>& m)
     { return m.norm2(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline TMV_RealType(T) NormInf(const SmallMatrix<T,M,N,A>& m)
     { return m.normInf(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline TMV_RealType(T) MaxAbsElement(const SmallMatrix<T,M,N,A>& m)
     { return m.maxAbsElement(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline TMV_RealType(T) MaxAbs2Element(const SmallMatrix<T,M,N,A>& m)
     { return m.maxAbs2Element(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline ConstMatrixView<T,A&FortranStyle> Transpose(
         const SmallMatrix<T,M,N,A>& m)
     { return m.transpose(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline MatrixView<T,A&FortranStyle> Transpose(SmallMatrix<T,M,N,A>& m)
     { return m.transpose(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline ConstMatrixView<T,A&FortranStyle> Conjugate(
         const SmallMatrix<T,M,N,A>& m)
     { return m.conjugate(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline MatrixView<T,A&FortranStyle> Conjugate(SmallMatrix<T,M,N,A>& m)
     { return m.conjugate(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline ConstMatrixView<T,A&FortranStyle> Adjoint(
         const SmallMatrix<T,M,N,A>& m)
     { return m.adjoint(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline MatrixView<T,A&FortranStyle> Adjoint(SmallMatrix<T,M,N,A>& m)
     { return m.adjoint(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A>
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline QuotXm_1<T,T,M,N,A> Inverse(const SmallMatrix<T,M,N,A>& m)
     { return m.inverse(); }
 
@@ -1014,10 +1014,10 @@ namespace tmv {
     // Matrix ==, != Matrix
     //
 
-    template <class T1, class T2, ptrdiff_t M, ptrdiff_t N, int A1, int A2> 
+    template <typename T1, typename T2, ptrdiff_t M, ptrdiff_t N, int A1, int A2>
     inline bool operator==(
         const SmallMatrix<T1,M,N,A1>& m1, const SmallMatrix<T2,M,N,A2>& m2)
-    { 
+    {
         if ((A1&AllStorageType)==(A2&AllStorageType))
             for(ptrdiff_t i=0;i<M*N;++i) {
                 if (m1.cptr()[i] != m2.cptr()[i]) return false;
@@ -1029,27 +1029,27 @@ namespace tmv {
         return true;
     }
 
-    template <class T1, class T2, ptrdiff_t M, ptrdiff_t N, int A1, int A2> 
+    template <typename T1, typename T2, ptrdiff_t M, ptrdiff_t N, int A1, int A2>
     inline bool operator!=(
         const SmallMatrix<T1,M,N,A1>& m1, const SmallMatrix<T2,M,N,A2>& m2)
     { return !(m1 == m2); }
 
-    template <class T1, class T2, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T1, typename T2, ptrdiff_t M, ptrdiff_t N, int A>
     inline bool operator==(
         const GenMatrix<T1>& m1, const SmallMatrix<T2,M,N,A>& m2)
     { return m1 == m2.view(); }
 
-    template <class T1, class T2, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T1, typename T2, ptrdiff_t M, ptrdiff_t N, int A>
     inline bool operator==(
         const SmallMatrix<T1,M,N,A>& m1, const GenMatrix<T2>& m2)
     { return m1.view() == m2; }
 
-    template <class T1, class T2, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T1, typename T2, ptrdiff_t M, ptrdiff_t N, int A>
     inline bool operator!=(
         const GenMatrix<T1>& m1, const SmallMatrix<T2,M,N,A>& m2)
     { return m1 != m2.view(); }
 
-    template <class T1, class T2, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T1, typename T2, ptrdiff_t M, ptrdiff_t N, int A>
     inline bool operator!=(
         const SmallMatrix<T1,M,N,A>& m1, const GenMatrix<T2>& m2)
     { return m1.view() != m2; }
@@ -1060,29 +1060,29 @@ namespace tmv {
     // I/O
     //
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline std::ostream& operator<<(
         const TMV_Writer& writer, const SmallMatrix<T,M,N,A>& m)
     { m.view().write(writer); return writer.getos(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline std::ostream& operator<<(
         std::ostream& os, const SmallMatrix<T,M,N,A>& m)
     { return os << IOStyle() << m; }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline std::istream& operator>>(
         const TMV_Reader& reader, SmallMatrix<T,M,N,A>& m)
     { m.view().read(reader); return reader.getis(); }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline std::istream& operator>>(
         std::istream& is, SmallMatrix<T,M,N,A>& m)
     { return is >> IOStyle() >> m; }
 
-    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
+    template <typename T, ptrdiff_t M, ptrdiff_t N, int A>
     inline std::string TMV_Text(const SmallMatrix<T,M,N,A>& )
-    { 
+    {
         std::ostringstream s;
         s << std::string("SmallMatrix<")<<TMV_Text(T())<<','<<M<<','<<N;
         s <<','<<Attrib<A>::text()<<'>';

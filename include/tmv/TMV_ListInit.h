@@ -42,15 +42,15 @@ namespace tmv {
         }
     };
 
-    template <class T, class IT>
+    template <typename T, class IT>
     class ListAssigner
     {
     public:
         ListAssigner(IT ptr, ptrdiff_t nLeft) :
-            _ptr(ptr), _nLeft(nLeft), _isLast(true) 
+            _ptr(ptr), _nLeft(nLeft), _isLast(true)
         {}
 
-        ListAssigner(IT ptr, ptrdiff_t nLeft, const T& x) : 
+        ListAssigner(IT ptr, ptrdiff_t nLeft, const T& x) :
             _ptr(ptr), _nLeft(nLeft), _isLast(false)
         {
 #ifdef TMV_DEBUG
@@ -61,14 +61,14 @@ namespace tmv {
             --_nLeft;
         }
 
-        ListAssigner(const ListAssigner<T,IT>& rhs) : 
+        ListAssigner(const ListAssigner<T,IT>& rhs) :
             _ptr(rhs._ptr), _nLeft(rhs._nLeft), _isLast(true)
         { rhs._isLast = false; }
 
         ~ListAssigner()
-        { 
+        {
 #ifdef TMV_DEBUG
-            if (_nLeft > 0 && _isLast) throw ListReadError(_nLeft); 
+            if (_nLeft > 0 && _isLast) throw ListReadError(_nLeft);
 #endif
         }
 

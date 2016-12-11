@@ -21,7 +21,7 @@
 
 
 // Need to define the following with #define statements.
-// (The given definition is for a regular Matrix/Matrix.  Modify as 
+// (The given definition is for a regular Matrix/Matrix.  Modify as
 // appropriate for the various other matrices.)
 //
 // #define GENMATRIX1 GenMatrix
@@ -82,22 +82,22 @@
 
 // m/m
 #ifdef INTT2
-template <class T Y> 
+template <typename T Y>
 inline QUOTMM_1<T,T,int X3> operator/(
     const GENMATRIX1<T X1>& m1, const GENMATRIX2<int X2>& m2)
 { return QUOTMM_1<T,T,int X3>(T(1),m1,m2); }
 #else
-template <class T Y> 
+template <typename T Y>
 inline QUOTMM_1<T,T,T X3> operator/(
     const GENMATRIX1<T X1>& m1, const GENMATRIX2<T X2>& m2)
 { return QUOTMM_1<T,T,T X3>(T(1),m1,m2); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTMM_1<CT,CT,T X3> operator/(
     const GENMATRIX1<CT X1>& m1, const GENMATRIX2<T X2>& m2)
 { return QUOTMM_1<CT,CT,T X3>(CT(1),m1,m2); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTMM_1<CT,T,CT X3> operator/(
     const GENMATRIX1<T X1>& m1, const GENMATRIX2<CT X2>& m2)
 { return QUOTMM_1<CT,T,CT X3>(CT(1),m1,m2); }
@@ -105,22 +105,22 @@ inline QUOTMM_1<CT,T,CT X3> operator/(
 
 // m%m
 #ifdef INTT2
-template <class T Yb> 
+template <typename T Yb>
 inline RQUOTMM_1<T,T,int X3b> operator%(
     const GENMATRIX1<T X1b>& m1, const GENMATRIX2<int X2b>& m2)
 { return RQUOTMM_1<T,T,int X3b>(T(1),m1,m2); }
 #else
-template <class T Yb> 
+template <typename T Yb>
 inline RQUOTMM_1<T,T,T X3b> operator%(
     const GENMATRIX1<T X1b>& m1, const GENMATRIX2<T X2b>& m2)
 { return RQUOTMM_1<T,T,T X3b>(T(1),m1,m2); }
 
-template <class T Yb> 
+template <typename T Yb>
 inline RQUOTMM_1<CT,CT,T X3b> operator%(
     const GENMATRIX1<CT X1b>& m1, const GENMATRIX2<T X2b>& m2)
 { return RQUOTMM_1<CT,CT,T X3b>(CT(1),m1,m2); }
 
-template <class T Yb> 
+template <typename T Yb>
 inline RQUOTMM_1<CT,T,CT X3b> operator%(
     const GENMATRIX1<T X1b>& m1, const GENMATRIX2<CT X2b>& m2)
 { return RQUOTMM_1<CT,T,CT X3b>(CT(1),m1,m2); }
@@ -128,22 +128,22 @@ inline RQUOTMM_1<CT,T,CT X3b> operator%(
 
 // (x*m)/m
 #ifdef INTT2
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline QUOTMM<T,T1,int X3> operator/(
     const PRODXM1<T,T1 X1>& pxm, const GENMATRIX2<int X2>& m)
 { return QUOTMM<T,T1,int X3>(pxm.getX(),pxm GETM1,m); }
 #else
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline QUOTMM<T,T1,T X3> operator/(
     const PRODXM1<T,T1 X1>& pxm, const GENMATRIX2<T X2>& m)
 { return QUOTMM<T,T1,T X3>(pxm.getX(),pxm GETM1,m); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTMM<CT,T,CT X3> operator/(
     const PRODXM1<T,T X1>& pxm, const GENMATRIX2<CT X2>& m)
 { return QUOTMM<CT,T,CT X3>(CT(pxm.getX()),pxm GETM1,m); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline QUOTMM<CT,T1,T X3> operator/(
     const PRODXM1<CT,T1 X1>& pxm, const GENMATRIX2<T X2>& m)
 { return QUOTMM<CT,T1,T X3>(pxm.getX(),pxm GETM1,m); }
@@ -151,23 +151,23 @@ inline QUOTMM<CT,T1,T X3> operator/(
 
 // (x*m)%m
 #ifdef INTT2
-template <class T, class T1 Yb> 
+template <typename T, typename T1 Yb>
 inline RQUOTMM<T,T1,int X3b> operator%(
     const PRODXM1<T,T1 X1b>& pxm, const GENMATRIX2<int X2b>& m)
 { return RQUOTMM<T,T1,int X3b>(pxm.getX(),pxm GETM1,m); }
 #undef INTT2
 #else
-template <class T, class T1 Yb> 
+template <typename T, typename T1 Yb>
 inline RQUOTMM<T,T1,T X3b> operator%(
     const PRODXM1<T,T1 X1b>& pxm, const GENMATRIX2<T X2b>& m)
 { return RQUOTMM<T,T1,T X3b>(pxm.getX(),pxm GETM1,m); }
 
-template <class T Yb> 
+template <typename T Yb>
 inline RQUOTMM<CT,T,CT X3b> operator%(
     const PRODXM1<T,T X1b>& pxm, const GENMATRIX2<CT X2b>& m)
 { return RQUOTMM<CT,T,CT X3b>(CT(pxm.getX()),pxm GETM1,m); }
 
-template <class T, class T1 Yb> 
+template <typename T, typename T1 Yb>
 inline RQUOTMM<CT,T1,T X3b> operator%(
     const PRODXM1<CT,T1 X1b>& pxm, const GENMATRIX2<T X2b>& m)
 { return RQUOTMM<CT,T1,T X3b>(pxm.getX(),pxm GETM1,m); }
@@ -175,68 +175,68 @@ inline RQUOTMM<CT,T1,T X3b> operator%(
 
 // m/(x*m)
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTMM<T,T,T2 X3> operator/(
     const GENMATRIX1<T X1>& m, const PRODXM2<T,T2 X2>& pxm)
 { return QUOTMM<T,T,T2 X3>(TMV_InverseOf(pxm.getX()),m,pxm GETM2); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTMM<CT,CT,T X3> operator/(
     const GENMATRIX1<CT X1>& m, const PRODXM2<T,T X2>& pxm)
 { return QUOTMM<CT,CT,T X3>(TMV_InverseOf(pxm.getX()),m,pxm GETM2); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTMM<CT,T,T2 X3> operator/(
     const GENMATRIX1<T X1>& m, const PRODXM2<CT,T2 X2>& pxm)
 { return QUOTMM<CT,T,T2 X3>(TMV_InverseOf(pxm.getX()),m,pxm GETM2); }
 
 // m%(x*m)
 
-template <class T, class T2 Yb> 
+template <typename T, typename T2 Yb>
 inline RQUOTMM<T,T,T2 X3b> operator%(
     const GENMATRIX1<T X1b>& m, const PRODXM2<T,T2 X2b>& pxm)
 { return RQUOTMM<T,T,T2 X3b>(TMV_InverseOf(pxm.getX()),m,pxm GETM2); }
 
-template <class T Yb> 
+template <typename T Yb>
 inline RQUOTMM<CT,CT,T X3b> operator%(
     const GENMATRIX1<CT X1b>& m, const PRODXM2<T,T X2b>& pxm)
 { return RQUOTMM<CT,CT,T X3b>(TMV_InverseOf(pxm.getX()),m,pxm GETM2); }
 
-template <class T, class T2 Yb> 
+template <typename T, typename T2 Yb>
 inline RQUOTMM<CT,T,T2 X3b> operator%(
     const GENMATRIX1<T X1b>& m, const PRODXM2<CT,T2 X2b>& pxm)
 { return RQUOTMM<CT,T,T2 X3b>(TMV_InverseOf(pxm.getX()),m,pxm GETM2); }
 
 // (x*m)/(x*m)
 
-template <class T, class T1, class T2 Y> 
+template <typename T, typename T1, typename T2 Y>
 inline QUOTMM<T,T1,T2 X3> operator/(
     const PRODXM1<T,T1 X1>& pxm1, const PRODXM2<T,T2 X2>& pxm2)
 { return QUOTMM<T,T1,T2 X3>(TMV_Divide(pxm1.getX(),pxm2.getX()),pxm1 GETM1,pxm2 GETM2); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline QUOTMM<CT,T1,T X3> operator/(
     const PRODXM1<CT,T1 X1>& pxm1, const PRODXM2<T,T X2>& pxm2)
 { return QUOTMM<CT,T1,T X3>(TMV_Divide(pxm1.getX(),pxm2.getX()),pxm1 GETM1,pxm2 GETM2); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTMM<CT,T,T2 X3> operator/(
     const PRODXM1<T,T X1>& pxm1, const PRODXM2<CT,T2 X2>& pxm2)
 { return QUOTMM<CT,T,T2 X3>(TMV_Divide(pxm1.getX(),pxm2.getX()),pxm1 GETM1,pxm2 GETM2); }
 
 // (x*m)%(x*m)
 
-template <class T, class T1, class T2 Yb> 
+template <typename T, typename T1, typename T2 Yb>
 inline RQUOTMM<T,T1,T2 X3b> operator%(
     const PRODXM1<T,T1 X1b>& pxm1, const PRODXM2<T,T2 X2b>& pxm2)
 { return RQUOTMM<T,T1,T2 X3b>(TMV_Divide(pxm1.getX(),pxm2.getX()),pxm1 GETM1,pxm2 GETM2); }
 
-template <class T, class T1 Yb> 
+template <typename T, typename T1 Yb>
 inline RQUOTMM<CT,T1,T X3b> operator%(
     const PRODXM1<CT,T1 X1b>& pxm1, const PRODXM2<T,T X2b>& pxm2)
 { return RQUOTMM<CT,T1,T X3b>(TMV_Divide(pxm1.getX(),pxm2.getX()),pxm1 GETM1,pxm2 GETM2); }
 
-template <class T, class T2 Yb> 
+template <typename T, typename T2 Yb>
 inline RQUOTMM<CT,T,T2 X3b> operator%(
     const PRODXM1<T,T X1b>& pxm1, const PRODXM2<CT,T2 X2b>& pxm2)
 { return RQUOTMM<CT,T,T2 X3b>(TMV_Divide(pxm1.getX(),pxm2.getX()),pxm1 GETM1,pxm2 GETM2); }
@@ -244,68 +244,68 @@ inline RQUOTMM<CT,T,T2 X3b> operator%(
 #ifdef QUOTXM
 // (x/m)*m
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTMM<T,T,T2 X3> operator*(
     const QUOTXM<T,T2 X2>& qxm, const GENMATRIX1<T X1>& m)
 { return QUOTMM<T,T,T2 X3>(qxm.getX(),m,qxm.getM()); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTMM<CT,CT,T X3> operator*(
     const QUOTXM<T,T X2>& qxm, const GENMATRIX1<CT X1>& m)
 { return QUOTMM<CT,CT,T X3>(CT(qxm.getX()),m,qxm.getM()); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTMM<CT,T,T2 X3> operator*(
     const QUOTXM<CT,T2 X2>& qxm, const GENMATRIX1<T X1>& m)
 { return QUOTMM<CT,T,T2 X3>(qxm.getX(),m,qxm.getM()); }
 
 // m*(x/m)
 
-template <class T, class T2 Yb> 
+template <typename T, typename T2 Yb>
 inline RQUOTMM<T,T,T2 X3b> operator*(
     const GENMATRIX1<T X1b>& m, const QUOTXM<T,T2 X2b>& qxm)
 { return RQUOTMM<T,T,T2 X3b>(qxm.getX(),m,qxm.getM()); }
 
-template <class T Yb> 
+template <typename T Yb>
 inline RQUOTMM<CT,CT,T X3b> operator*(
     const GENMATRIX1<CT X1b>& m, const QUOTXM<T,T X2b>& qxm)
 { return RQUOTMM<CT,CT,T X3b>(CT(qxm.getX()),m,qxm.getM()); }
 
-template <class T, class T2 Yb> 
+template <typename T, typename T2 Yb>
 inline RQUOTMM<CT,T,T2 X3b> operator*(
     const GENMATRIX1<T X1b>& m, const QUOTXM<CT,T2 X2b>& qxm)
 { return RQUOTMM<CT,T,T2 X3b>(qxm.getX(),m,qxm.getM()); }
 
 // (x/m)*(x*m)
 
-template <class T, class T1, class T2 Y> 
+template <typename T, typename T1, typename T2 Y>
 inline QUOTMM<T,T,T2 X3> operator*(
     const QUOTXM<T,T2 X2>& qxm, const PRODXM1<T,T1 X1>& pxm)
 { return QUOTMM<T,T,T2 X3>(pxm.getX()*qxm.getX(),pxm GETM2,qxm.getM()); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline QUOTMM<CT,CT,T X3> operator*(
     const QUOTXM<T,T X2>& qxm, const PRODXM1<CT,T1 X1>& pxm)
 { return QUOTMM<CT,CT,T X3>(pxm.getX()*qxm.getX(),pxm GETM2,qxm.getM()); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTMM<CT,T,T2 X3> operator*(
     const QUOTXM<CT,T2 X2>& qxm, const PRODXM1<T,T X1>& pxm)
 { return QUOTMM<CT,T,T2 X3>(pxm.getX()*qxm.getX(),pxm GETM2,qxm.getM()); }
 
 // (x*m)*(x/m)
 
-template <class T, class T1, class T2 Yb> 
+template <typename T, typename T1, typename T2 Yb>
 inline RQUOTMM<T,T1,T2 X3b> operator*(
     const PRODXM1<T,T1 X1b>& pxm, const QUOTXM<T,T2 X2b>& qxm)
 { return RQUOTMM<T,T1,T2 X3b>(pxm.getX()*qxm.getX(),pxm GETM1,qxm.getM()); }
 
-template <class T, class T1 Yb> 
+template <typename T, typename T1 Yb>
 inline RQUOTMM<CT,T1,T X3b> operator*(
     const PRODXM1<CT,T1 X1b>& pxm, const QUOTXM<T,T X2b>& qxm)
 { return RQUOTMM<CT,T1,T X3b>(pxm.getX()*qxm.getX(),pxm GETM1,qxm.getM()); }
 
-template <class T, class T2 Yb> 
+template <typename T, typename T2 Yb>
 inline RQUOTMM<CT,T,T2 X3b> operator*(
     const PRODXM1<T,T X1b>& pxm, const QUOTXM<CT,T2 X2b>& qxm)
 { return RQUOTMM<CT,T,T2 X3b>(pxm.getX()*qxm.getX(),pxm GETM1,qxm.getM()); }
@@ -314,68 +314,68 @@ inline RQUOTMM<CT,T,T2 X3b> operator*(
 #ifdef QUOTXM_1
 // (1/m)*m
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTMM_1<T,T,T2 X3> operator*(
     const QUOTXM_1<T,T2 X2>& qxm, const GENMATRIX1<T X1>& m)
 { return QUOTMM_1<T,T,T2 X3>(T(1),m,qxm.getM()); }
 
-template <class T Y> 
+template <typename T Y>
 inline QUOTMM_1<CT,CT,T X3> operator*(
     const QUOTXM_1<T,T X2>& qxm, const GENMATRIX1<CT X1>& m)
 { return QUOTMM_1<CT,CT,T X3>(CT(1),m,qxm.getM()); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTMM_1<CT,T,T2 X3> operator*(
     const QUOTXM_1<CT,T2 X2>& qxm, const GENMATRIX1<T X1>& m)
 { return QUOTMM_1<CT,T,T2 X3>(CT(1),m,qxm.getM()); }
 
 // m*(1/m)
 
-template <class T, class T2 Yb> 
+template <typename T, typename T2 Yb>
 inline RQUOTMM_1<T,T,T2 X3b> operator*(
     const GENMATRIX1<T X1b>& m, const QUOTXM_1<T,T2 X2b>& qxm)
 { return RQUOTMM_1<T,T,T2 X3b>(T(1),m,qxm.getM()); }
 
-template <class T Yb> 
+template <typename T Yb>
 inline RQUOTMM_1<CT,CT,T X3b> operator*(
     const GENMATRIX1<CT X1b>& m, const QUOTXM_1<T,T X2b>& qxm)
 { return RQUOTMM_1<CT,CT,T X3b>(CT(1),m,qxm.getM()); }
 
-template <class T, class T2 Yb> 
+template <typename T, typename T2 Yb>
 inline RQUOTMM_1<CT,T,T2 X3b> operator*(
     const GENMATRIX1<T X1b>& m, const QUOTXM_1<CT,T2 X2b>& qxm)
 { return RQUOTMM_1<CT,T,T2 X3b>(CT(1),m,qxm.getM()); }
 
 // (1/m)*(x*m)
 
-template <class T, class T1, class T2 Y> 
+template <typename T, typename T1, typename T2 Y>
 inline QUOTMM<T,T,T2 X3> operator*(
     const QUOTXM_1<T,T2 X2>& qxm, const PRODXM1<T,T1 X1>& pxm)
 { return QUOTMM<T,T,T2 X3>(pxm.getX(),pxm GETM2,qxm.getM()); }
 
-template <class T, class T1 Y> 
+template <typename T, typename T1 Y>
 inline QUOTMM<CT,CT,T X3> operator*(
     const QUOTXM_1<T,T X2>& qxm, const PRODXM1<CT,T1 X1>& pxm)
 { return QUOTMM<CT,CT,T X3>(pxm.getX(),pxm GETM2,qxm.getM()); }
 
-template <class T, class T2 Y> 
+template <typename T, typename T2 Y>
 inline QUOTMM<CT,T,T2 X3> operator*(
     const QUOTXM_1<CT,T2 X2>& qxm, const PRODXM1<T,T X1>& pxm)
 { return QUOTMM<CT,T,T2 X3>(pxm.getX(),pxm GETM2,qxm.getM()); }
 
 // (x*m)*(1/m)
 
-template <class T, class T1, class T2 Yb> 
+template <typename T, typename T1, typename T2 Yb>
 inline RQUOTMM<T,T1,T2 X3b> operator*(
     const PRODXM1<T,T1 X1b>& pxm, const QUOTXM_1<T,T2 X2b>& qxm)
 { return RQUOTMM<T,T1,T2 X3b>(pxm.getX(),pxm GETM1,qxm.getM()); }
 
-template <class T, class T1 Yb> 
+template <typename T, typename T1 Yb>
 inline RQUOTMM<CT,T1,T X3b> operator*(
     const PRODXM1<CT,T1 X1b>& pxm, const QUOTXM_1<T,T X2b>& qxm)
 { return RQUOTMM<CT,T1,T X3b>(pxm.getX(),pxm GETM1,qxm.getM()); }
 
-template <class T, class T2 Yb> 
+template <typename T, typename T2 Yb>
 inline RQUOTMM<CT,T,T2 X3b> operator*(
     const PRODXM1<T,T X1b>& pxm, const QUOTXM_1<CT,T2 X2b>& qxm)
 { return RQUOTMM<CT,T,T2 X3b>(pxm.getX(),pxm GETM1,qxm.getM()); }
