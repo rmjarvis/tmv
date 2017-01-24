@@ -3201,8 +3201,7 @@ namespace tmv {
             return setToIdentity(x);
         }
 
-        inline type& operator=(
-            const AssignableToSymMatrix<RT>& m2)
+        inline type& operator=(const AssignableToSymMatrix<RT>& m2)
         {
             TMVAssert(size() == m2.colsize());
             TMVAssert(m2.isherm());
@@ -3210,8 +3209,7 @@ namespace tmv {
             return *this;
         }
 
-        inline type& operator=(
-            const AssignableToSymMatrix<CT>& m2)
+        inline type& operator=(const AssignableToSymMatrix<CT>& m2)
         {
             TMVAssert(isComplex(T()));
             TMVAssert(size() == m2.colsize());

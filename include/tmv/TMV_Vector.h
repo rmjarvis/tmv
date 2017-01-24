@@ -1553,7 +1553,7 @@ namespace tmv {
         // Op =
         //
 
-        inline type& operator=(type& v2)
+        inline type& operator=(const type& v2)
         {
             TMVAssert(v2.size() == size());
             if (&v2 != this)
@@ -1562,7 +1562,7 @@ namespace tmv {
         }
 
         template <int A2>
-        inline type& operator=(Vector<T,A2>& v2)
+        inline type& operator=(const Vector<T,A2>& v2)
         {
             TMVAssert(v2.size() == size());
             std::copy(v2.cptr(),v2.cptr()+_size,_v.get());

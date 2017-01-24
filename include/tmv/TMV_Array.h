@@ -272,7 +272,7 @@ namespace tmv
         ptrdiff_t _n;
 #endif
 
-        AlignedArray& operator=(AlignedArray& p2);
+        AlignedArray& operator=(const AlignedArray& p2);
         AlignedArray(const AlignedArray& p2);
     };
 
@@ -345,7 +345,7 @@ namespace tmv
         ptrdiff_t _n;
 #endif
 
-        AlignedArray& operator=(AlignedArray& p2);
+        AlignedArray& operator=(const AlignedArray& p2);
         AlignedArray(const AlignedArray& p2);
     };
 
@@ -540,7 +540,7 @@ namespace tmv
 
         StackArray2<T,N,bigN,smallN> p;
 
-        StackArray& operator=(StackArray& p2);
+        StackArray& operator=(const StackArray& p2);
         StackArray(const StackArray& p2);
     };
 
@@ -589,7 +589,7 @@ namespace tmv
 
         StackArray2<RT,(N<<1),bigN,smallN> p;
 
-        StackArray& operator=(StackArray& p2);
+        StackArray& operator=(const StackArray& p2);
         StackArray(const StackArray& p2);
     };
 

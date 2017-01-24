@@ -197,7 +197,7 @@ namespace tmv {
         // Op =
         //
 
-        inline type& operator=(type& v2)
+        inline type& operator=(const type& v2)
         {
             if (&v2 != this)
                 for(ptrdiff_t i=0;i<N;++i) itsv[i] = v2.cref(i);
@@ -205,7 +205,7 @@ namespace tmv {
         }
 
         template <int A2>
-        inline type& operator=(SmallVector<T,N,A2>& v2)
+        inline type& operator=(const SmallVector<T,N,A2>& v2)
         {
             if (&v2 != this)
                 for(ptrdiff_t i=0;i<N;++i) itsv[i] = v2.cref(i);
