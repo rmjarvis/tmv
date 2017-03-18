@@ -37,10 +37,12 @@ opts.Add('EXTRA_FLAGS','Extra flags to send to the compiler','')
 opts.Add(BoolVariable('DEBUG',
         'Turn on debugging statements in compilied library',False))
 opts.Add(PathVariable('PREFIX',
-        'prefix for installation',default_prefix, PathVariable.PathAccept))
+        'Prefix for installation',default_prefix, PathVariable.PathAccept))
 opts.Add(PathVariable('FINAL_PREFIX',
-        'final installation prefix if different from PREFIX','', PathVariable.PathAccept))
+        'Final installation prefix if different from PREFIX','', PathVariable.PathAccept))
 
+opts.Add(EnumVariable('OPT',
+        'Set the optimization level for TMV library', '2',allowed_values=('0','1','2','3')))
 opts.Add(BoolVariable('WITH_OPENMP',
         'Look for openmp and use if found.', True))
 opts.Add(BoolVariable('INST_FLOAT',
@@ -48,12 +50,19 @@ opts.Add(BoolVariable('INST_FLOAT',
 opts.Add(BoolVariable('INST_DOUBLE',
         'Instantiate <double> templates in compiled library', True))
 opts.Add(BoolVariable('INST_INT',
-        'Instantiate <int> templates in compiled library', True))
+        'Instantiate <int> templates in compiled library', False))
 opts.Add(BoolVariable('INST_LONGDOUBLE',
         'Instantiate <long double> templates in compiled library', False))
+opts.Add(BoolVariable('INST_COMPLEX',
+        'Instantiate complex<T> templates in compiled library', True))
+opts.Add(BoolVariable('INST_MIX',
+        'Instantiate functions that mix real with complex', True))
 opts.Add(BoolVariable('SHARED',
         'Build a shared library',True))
 
+opts.Add(EnumVariable('TEST_OPT',
+        'Set the optimization level for TMV test suite', '1',
+        allowed_values=('0','1','2','3')))
 opts.Add(BoolVariable('TEST_FLOAT',
         'Instantiate <float> in the test suite', True))
 opts.Add(BoolVariable('TEST_DOUBLE',
@@ -188,29 +197,29 @@ def BasicCCFlags(env):
         if compiler == 'g++':
             env.Replace(CCFLAGS=['-O2'])
             env.Append(CCFLAGS=['-fno-strict-aliasing'])
-            env['TEST_FLAGS'] = ['-O0']
+            env['TEST_FLAGS'] = ['-O1']
             if env['PROFILE']:
                 env.Append(CCFLAGS=['-pg'])
                 env['TEST_FLAGS'] += ['-pg']
             if env['WARN']:
-                env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror','-Wno-long-long'])
-                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror','-Wno-long-long']
+                env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
+                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
 
         elif compiler == 'clang++':
             env.Replace(CCFLAGS=['-O2'])
-            env['TEST_FLAGS'] = ['-O0']
+            env['TEST_FLAGS'] = ['-O1']
             if env['PROFILE']:
                 env.Append(CCFLAGS=['-pg'])
                 env['TEST_FLAGS'] += ['-pg']
             if env['WARN']:
-                env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror','-Wno-long-long'])
-                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror','-Wno-long-long']
+                env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
+                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
 
         elif compiler == 'icpc':
             env.Replace(CCFLAGS=['-O2'])
             if env['WITH_SSE']:
                 env.Append(CCFLAGS=['-msse2'])
-            env['TEST_FLAGS'] = ['-O0']
+            env['TEST_FLAGS'] = ['-O1']
             if version >= 10:
                 env.Append(CCFLAGS=['-vec-report0'])
                 env['TEST_FLAGS'] += ['-vec-report0']
@@ -345,7 +354,7 @@ def AddOpenMPFlag(env):
         return
 
     #print 'Adding openmp support:',flag
-    #print 'Using OpenMP'
+    print 'Using OpenMP'
     env['OMP_FLAGS'] = flag 
     env.AppendUnique(CCFLAGS=flag)
     env.AppendUnique(LINKFLAGS=ldflag)
@@ -472,7 +481,12 @@ def GetCompilerVersion(env):
     env['CXXVERSION_NUMERICAL'] = float(vnum)
 
 
-def AddPath(pathlist, newpath):
+def ExpandPath(path):
+    p=os.path.expanduser(path)
+    p=os.path.expandvars(p)
+    return p
+
+def AddPath(pathlist, newpath, prepend=False):
     """
     Add path(s) to a list of paths.  Check the path exists and that it is
     not already in the list
@@ -483,10 +497,14 @@ def AddPath(pathlist, newpath):
     else:
         # to deal with expansions and possible end / which 
         # messes up uniqueness test
-        p = os.path.abspath(newpath) 
+        p = ExpandPath(newpath)
+        p = os.path.abspath(p)
         if os.path.exists(p):
-            if pathlist.count(p) == 0:
-                pathlist.append(p)
+            if p not in pathlist:
+                if prepend:
+                    pathlist.insert(0, p)
+                else:
+                    pathlist.append(p)
 
 def AddExtraPaths(env):
     """
@@ -513,19 +531,25 @@ def AddExtraPaths(env):
     lib_paths2 = []
 
     # PREFIX directory
-    env['INSTALL_PREFIX'] = env['PREFIX']
+    # If none given, then don't add them to the -L and -I directories.
+    # But still use the default /usr/local for installation
+    if env['PREFIX'] == '':
+        env['INSTALL_PREFIX'] = default_prefix
+        env['FINAL_PREFIX'] = default_prefix
+    else:
+        env['INSTALL_PREFIX'] = env['PREFIX']
 
-    # FINAL_PREFIX is designed for installations like that done by fink where it installs
-    # everything into a temporary directory, and then once it finished successfully, it
-    # copies the resulting files to a final location.  This pretty much just matters for the
-    # tmv-link file to have the right -L flag.
-    if env['FINAL_PREFIX'] == '':
-        env['FINAL_PREFIX'] = env['PREFIX']
+        # FINAL_PREFIX is designed for installations like that done by fink where it installs
+        # everything into a temporary directory, and then once it finished successfully, it
+        # copies the resulting files to a final location.  This pretty much just matters for the
+        # tmv-link file to have the right -L flag.
+        if env['FINAL_PREFIX'] == '':
+            env['FINAL_PREFIX'] = env['PREFIX']
 
-    if env['IMPORT_PREFIX']:
-        AddPath(bin_paths, os.path.join(env['PREFIX'],'bin'))
-        AddPath(cpp_paths, os.path.join(env['PREFIX'],'include'))
-        AddPath(lib_paths1, os.path.join(env['PREFIX'],'lib'))
+        if env['IMPORT_PREFIX']:
+            AddPath(bin_paths, os.path.join(env['PREFIX'], 'bin'))
+            AddPath(cpp_paths, os.path.join(env['PREFIX'], 'include'))
+            AddPath(lib_paths1, os.path.join(env['PREFIX'], 'lib'))
 
     # Paths specified in EXTRA_*
     bin_paths += env['EXTRA_PATH'].split(':')
@@ -776,7 +800,7 @@ int main()
         if not result and context.env['FORCE_CLAMD']:
             print 'WARNING: Forced use of clAmdBlas even though link test failed.'
             print "         The compiled library will not have the correct linking commands"
-            print "         set up for your CLAMD version."
+            print "         set up for your clAmdBlas version."
             print "         You should figure out what libraries you need to link with"
             print "         and add them explicitly with the LIBS option in SCons."
             result = 1
@@ -795,7 +819,7 @@ int main()
 def CheckGOTO(context):
     fblas_source_file = """
 extern "C" {
-#include "../src/fblas.h"
+#include "util/fblas.h"
 }
 int main()
 {
@@ -833,7 +857,7 @@ int main()
         if not result and context.env['FORCE_GOTO']:
             print 'WARNING: Forced use of GOTO even though link test failed.'
             print "         The compiled library will not have the correct linking commands"
-            print "         set up for your GOTOBLAS version."
+            print "         set up for your GOTO BLAS version."
             print "         You should figure out what libraries you need to link with"
             print "         and add them explicitly with the LIBS option in SCons."
             result = 1
@@ -949,7 +973,7 @@ int main()
 def CheckFBLAS(context):
     fblas_source_file = """
 extern "C" {
-#include "../src/fblas.h"
+#include "util/fblas.h"
 }
 int main()
 {
@@ -1126,7 +1150,7 @@ int main()
 def CheckFLAPACK(context):
     flapack_source_file = """
 extern "C" {
-#include "../src/flapack.h"
+#include "util/flapack.h"
 }
 int main()
 {
@@ -1229,7 +1253,7 @@ def DoLibraryAndHeaderChecks(config):
             #config.CheckCLAMD()
             #config.env.Append(CPPDEFINES=['CLAMD'])
             #print 'Using clAmdBlas'
- 
+
         elif config.env['FORCE_GOTO']:
             config.CheckGOTO()
             config.env.Append(CPPDEFINES=['FBLAS'])
@@ -1400,6 +1424,7 @@ def DoConfig(env):
     BasicCCFlags(env)
 
     # Some extra flags depending on the options:
+    env.Append(CPPDEFINES=['TMV_OPT=' + env['OPT']])
     if not env['DEBUG']:
         print 'Debugging turned off'
         env.Append(CPPDEFINES=['TMV_NDEBUG'])
@@ -1414,6 +1439,20 @@ def DoConfig(env):
             env.Append(LINKFLAGS=['-Bstatic'])
         else:
             env.Append(LINKFLAGS=['-static'])
+
+    # Define which types are in library:
+    if not env['INST_DOUBLE']:
+        env.Append(CPPDEFINES=['TMV_NO_INST_DOUBLE'])
+    if not env['INST_FLOAT']:
+        env.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
+    if env['INST_INT']:
+        env.Append(CPPDEFINES=['TMV_INST_INT'])
+    if env['INST_LONGDOUBLE']:
+        env.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
+    if not env['INST_MIX']:
+        env.Append(CPPDEFINES=['TMV_NO_INST_MIX'])
+    if not env['INST_COMPLEX']:
+        env.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
 
     import SCons.SConf
 

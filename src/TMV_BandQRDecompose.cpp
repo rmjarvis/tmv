@@ -1,21 +1,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2016                                                 //
-// All rights reserved                                                       //
+// Copyright (C) 1998 - 2009                                                 //
 //                                                                           //
-// The project is hosted at https://code.google.com/p/tmv-cpp/               //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
 // where you can find the current version and current documention.           //
 //                                                                           //
 // For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis17 [at] gmail.                                                 //
+// mike_jarvis@users.sourceforge.net                                         //
 //                                                                           //
-// This software is licensed under a FreeBSD license.  The file              //
-// TMV_LICENSE should have bee included with this distribution.              //
-// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
 //                                                                           //
-// Essentially, you can use this software however you want provided that     //
-// you include the TMV_LICENSE file in any distribution that uses it.        //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -26,7 +36,7 @@
 #include "TMV_BandQRDiv.h"
 #include "tmv/TMV_BandQRD.h"
 #include "tmv/TMV_BandMatrix.h"
-#include "tmv/TMV_Householder.h"
+#include "TMV_Householder.h"
 
 #ifdef XDEBUG
 #include "tmv/TMV_MatrixArith.h"
@@ -41,7 +51,8 @@ namespace tmv {
 
     template <class T> 
     void QR_Decompose(
-        BandMatrixView<T> QRx, VectorView<T> Qbeta, T& det)
+        const BandMatrixView<T>& QRx,
+        const VectorView<T>& Qbeta, T& det)
     {
         // Decompose A (input as QRx) into A = Q R 
         // where Q is unitary, and R is upper triangular
@@ -69,8 +80,8 @@ namespace tmv {
             for(ptrdiff_t j=0;j<N;++j,++Qbj) {
                 // Apply the Householder Reflection for this column
 #ifdef TMVFLDEBUG
-                TMVAssert(Qbj >= Qbeta._first);
-                TMVAssert(Qbj < Qbeta._last);
+                TMVAssert(Qbj >= Qbeta.first);
+                TMVAssert(Qbj < Qbeta.last);
 #endif
                 *Qbj = HouseholderReflect(QRx.subMatrix(j,endcol,j,endrow),det);
                 if (endcol < M) ++endcol;
@@ -106,7 +117,7 @@ namespace tmv {
     template <class T> 
     void QR_Decompose(
         const GenBandMatrix<T>& A,
-        MatrixView<T> Q, BandMatrixView<T> R)
+        const MatrixView<T>& Q, const BandMatrixView<T>& R)
     {
         // Decompose A = Q R 
         // where Q is unitary and R is upper banded
@@ -140,7 +151,7 @@ namespace tmv {
 
     template <class T> 
     void QR_Decompose(
-        const GenBandMatrix<T>& A, BandMatrixView<T> R)
+        const GenBandMatrix<T>& A, const BandMatrixView<T>& R)
     {
         // Decompose A = Q R 
         // where Q is unitary and R is upper banded
@@ -149,8 +160,7 @@ namespace tmv {
         TMVAssert(R.colsize() == A.rowsize());
         TMVAssert(R.rowsize() == A.rowsize());
         TMVAssert(R.nlo() >= 0);
-        TMVAssert(R.nhi() == R.rowsize()-1 || 
-                  R.nhi() >= A.nlo() + A.nhi());
+        TMVAssert(R.nhi() == R.rowsize()-1 || R.nhi() >= A.nlo() + A.nhi());
 
         Vector<T> beta(A.rowsize());
         T d(0);

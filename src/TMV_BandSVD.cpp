@@ -1,21 +1,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2016                                                 //
-// All rights reserved                                                       //
+// Copyright (C) 1998 - 2009                                                 //
 //                                                                           //
-// The project is hosted at https://code.google.com/p/tmv-cpp/               //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
 // where you can find the current version and current documention.           //
 //                                                                           //
 // For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis17 [at] gmail.                                                 //
+// mike_jarvis@users.sourceforge.net                                         //
 //                                                                           //
-// This software is licensed under a FreeBSD license.  The file              //
-// TMV_LICENSE should have bee included with this distribution.              //
-// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
 //                                                                           //
-// Essentially, you can use this software however you want provided that     //
-// you include the TMV_LICENSE file in any distribution that uses it.        //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +54,7 @@ namespace tmv {
         const bool istrans;
         Matrix<T,ColMajor> U;
         DiagMatrix<RT> S;
-        Matrix<T,ColMajor> Vt;
+        Matrix<T,ColMajor> V;
         RT logdet;
         T signdet;
         mutable ptrdiff_t kmax;
@@ -57,7 +67,7 @@ namespace tmv {
     BandSVDiv<T>::BandSVDiv_Impl::BandSVDiv_Impl(
         const GenBandMatrix<T>& A) :
         istrans(A.colsize() < A.rowsize()),
-        U(M,N), S(N), Vt(N,N), logdet(0), signdet(1), kmax(0) {}
+        U(M,N), S(N), V(N,N), logdet(0), signdet(1), kmax(0) {}
 
 #undef M
 #undef N
@@ -68,7 +78,7 @@ namespace tmv {
     {
         SV_Decompose<T>(
             pimpl->istrans ? A.transpose() : A.view(),
-            pimpl->U.view(),pimpl->S.view(),pimpl->Vt.view(),
+            pimpl->U.view(),pimpl->S.view(),pimpl->V.view(),
             pimpl->logdet,pimpl->signdet);
         thresh(TMV_Epsilon<T>());
     }
@@ -77,55 +87,55 @@ namespace tmv {
     BandSVDiv<T>::~BandSVDiv() {}
 
     template <class T> template <class T1> 
-    void BandSVDiv<T>::doLDivEq(MatrixView<T1> m) const
+    void BandSVDiv<T>::doLDivEq(const MatrixView<T1>& m) const
     {
         TMVAssert(m.colsize() == rowsize());
         TMVAssert(m.colsize() == colsize());
         if (pimpl->istrans) 
             CallSV_RDiv(
-                T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
+                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
                 m.transpose(),m.transpose());
-        else CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,m);
+        else CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1> 
-    void BandSVDiv<T>::doRDivEq(MatrixView<T1> m) const
+    void BandSVDiv<T>::doRDivEq(const MatrixView<T1>& m) const
     {
         TMVAssert(m.rowsize() == rowsize());
         TMVAssert(m.rowsize() == colsize());
         if (pimpl->istrans) 
             CallSV_LDiv(
-                T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
+                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
                 m.transpose(),m.transpose());
-        else CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,m);
+        else CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1, class T2> 
     void BandSVDiv<T>::doLDiv(
-        const GenMatrix<T1>& m, MatrixView<T2> x) const
+        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
     {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == colsize());
         TMVAssert(x.colsize() == rowsize());
         if (pimpl->istrans) 
             CallSV_RDiv(
-                T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
+                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
                 m.transpose(),x.transpose());
-        else CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,x);
+        else CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
     }
 
     template <class T> template <class T1, class T2> 
     void BandSVDiv<T>::doRDiv(
-        const GenMatrix<T1>& m, MatrixView<T2> x) const
+        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
     {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == rowsize());
         TMVAssert(x.rowsize() == colsize());
         if (pimpl->istrans) 
             CallSV_LDiv(
-                T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
+                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
                 m.transpose(),x.transpose());
-        else CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,x);
+        else CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
     }
 
     template <class T> 
@@ -143,31 +153,31 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void BandSVDiv<T>::doMakeInverse(MatrixView<T1> minv) const
+    void BandSVDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
     { 
         if (pimpl->istrans) {
-            Matrix<T,ColMajor> SinvVt = 
-                pimpl->Vt.conjugate().rowRange(0,pimpl->kmax) /
+            Matrix<T,ColMajor> SinvV = 
+                pimpl->V.conjugate().rowRange(0,pimpl->kmax) /
                 pimpl->S.subDiagMatrix(0,pimpl->kmax);
-            minv = pimpl->U.conjugate().colRange(0,pimpl->kmax) * SinvVt;
+            minv = pimpl->U.conjugate().colRange(0,pimpl->kmax) * SinvV;
         } else  {
             Matrix<T,ColMajor> SinvUt = 
                 pimpl->U.adjoint().rowRange(0,pimpl->kmax) /
                 pimpl->S.subDiagMatrix(0,pimpl->kmax);
-            minv = pimpl->Vt.adjoint().colRange(0,pimpl->kmax) * SinvUt;
+            minv = pimpl->V.adjoint().colRange(0,pimpl->kmax) * SinvUt;
         }
     }
 
     template <class T> 
-    void BandSVDiv<T>::doMakeInverseATA(MatrixView<T> minv) const
+    void BandSVDiv<T>::doMakeInverseATA(const MatrixView<T>& minv) const
     {
-        Matrix<T,ColMajor> SinvVt = 
-            pimpl->Vt.rowRange(0,pimpl->kmax) /
+        Matrix<T,ColMajor> SinvV = 
+            pimpl->V.rowRange(0,pimpl->kmax) /
             pimpl->S.subDiagMatrix(0,pimpl->kmax);
         if (pimpl->istrans)
-            minv = SinvVt.transpose() * SinvVt.conjugate();
+            minv = SinvV.transpose() * SinvV.conjugate();
         else
-            minv = SinvVt.adjoint() * SinvVt;
+            minv = SinvV.adjoint() * SinvV;
     }
 
     template <class T> 
@@ -224,17 +234,17 @@ namespace tmv {
 
     template <class T> ConstMatrixView<T> BandSVDiv<T>::getU() const
     {
-        if (pimpl->istrans) return pimpl->Vt.transpose(); 
+        if (pimpl->istrans) return pimpl->V.transpose(); 
         else return pimpl->U.view(); 
     }
 
     template <class T> ConstDiagMatrixView<RT> BandSVDiv<T>::getS() const
     { return pimpl->S.view(); }
 
-    template <class T> ConstMatrixView<T> BandSVDiv<T>::getVt() const
+    template <class T> ConstMatrixView<T> BandSVDiv<T>::getV() const
     {
         if (pimpl->istrans) return pimpl->U.transpose(); 
-        else return pimpl->Vt.view();
+        else return pimpl->V.view();
     }
 
     template <class T> 
@@ -247,16 +257,16 @@ namespace tmv {
             *fout << "M = "<<m<<std::endl;
             *fout << "U = "<<getU()<<std::endl;
             *fout << "S = "<<getS()<<std::endl;
-            *fout << "Vt = "<<getVt()<<std::endl;
+            *fout << "V = "<<getV()<<std::endl;
         }
-        Matrix<T> usv = getU()*getS()*getVt();
+        Matrix<T> usv = getU()*getS()*getV();
         RT nm = Norm(usv-mm);
-        nm /= Norm(getU())*Norm(getS())*Norm(getVt());
+        nm /= Norm(getU())*Norm(getS())*Norm(getV());
         RT cond = getS()(0) / getS()(getKMax()-1);
         if (fout) {
-            *fout << "USVt = "<<usv<<std::endl;
-            *fout << "Norm(M-USVt) = "<<Norm(mm-usv)<<std::endl;
-            *fout << "Norm(M-USVt)/Norm(USVt) = "<<nm<<std::endl;
+            *fout << "USV = "<<usv<<std::endl;
+            *fout << "Norm(M-USV) = "<<Norm(mm-usv)<<std::endl;
+            *fout << "Norm(M-USV)/Norm(USV) = "<<nm<<std::endl;
         }
         return nm < cond*RT(mm.colsize())*TMV_Epsilon<T>();
     }

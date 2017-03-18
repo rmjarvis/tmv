@@ -1,60 +1,42 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2016                                                 //
-// All rights reserved                                                       //
-//                                                                           //
-// The project is hosted at https://code.google.com/p/tmv-cpp/               //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis17 [at] gmail.                                                 //
-//                                                                           //
-// This software is licensed under a FreeBSD license.  The file              //
-// TMV_LICENSE should have bee included with this distribution.              //
-// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
-//                                                                           //
-// Essentially, you can use this software however you want provided that     //
-// you include the TMV_LICENSE file in any distribution that uses it.        //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
-
-
 //---------------------------------------------------------------------------
 //
 // This file defines the TMV Permutation class.
 //
-// A Permutation is an operator that rearranges the elements of
-// a Vector or the rows/columns of a matrix.
+// A Permutation is an operator that rearranges the elements of 
+// a Vector or the rows/columns of a matrix.  
 //
-// When viewed as a matrix each row and column has exactly one 1 and the
+// When viewed as a matrix each row and column has exactly one 1 and the 
 // rest of the elements are 0.
 //
 // However, internally, this is not how a Permutation is stored.  It is
 // stored as an ordered set of pairwise interchanges.  This is because
 // it is very fast to apply a permutation in this form to a matrix.
 //
+// As a result, Permutation is derived from BaseMatrix, rather than
+// BaseMatrix_Calc, since it takes a bit of calculation to figure out
+// the values in matrix form.
+//
 // There are only two ways to create a Permutation object.  The first
-// constructor creates an identity permutation of a given size.
+// constructor creates an identity permutation of a given size. 
 // This can be passed to some functions which are able to modify it.
 // Or, you can create one from a vector of int's with the indices
-// of the interchanges.  Probably most users won't ever use this
+// of the interchanges.  Probably most users won't ever use this 
 // constructor, but it is public to allow that possibility.
 //
-// This class is primarily designed to make it easier to use the
-// permutations that various TMV algorithms calculate.
+// This class is primarily designed to make it easier to use the 
+// permutations that various TMV algorithms calculate.  
 // (e.g. LU decomposition, QRP decomposition, and vector sort.)
 //
 // The copy semantics are similar to matrix Views.  The copies do not
 // own their data.  However, if you perform a mutable action on the
-// Permutation, then it will allocate memory and take ownership of its values
-// at that point.
+// Permutation, then it will allocate memory and take ownership of 
+// its values at that point.
 //
 // Note that Transpose(P) x P = I, so P is an orthogonal Matrix.
-// Thus, inverse() and transpose() are the same thing.  Both return a
+// Thus, inverse() and transpose() are the same thing.  Both return a 
 // new permutation that knows to apply the permutations in the reverse
-// order.  As with copies, the indices are not copied.  It just passes
-// a pointer to the same data that the first one uses.  So writing
+// order.  As with copies, the indices are not copied.  It just passes 
+// a pointer to the same data that the first one uses.  So writing 
 // something like m = p.inverse() * m is efficient.
 //
 // Constructors:
@@ -64,7 +46,7 @@
 //
 //    Permutation(int n, const int* pp, bool isinv)
 //        Make a Permutation P from array pp.
-//        If isinv = false, then the swaps are applied in order from the
+//        If isinv = false, then the swaps are applied in order from the 
 //        left to the rows of m.  If isinv = true, then in reverse order.
 //
 // Access Functions
@@ -72,7 +54,7 @@
 //    int size() const
 //    int colsize() const
 //    int rowsize() const
-//        Return the size of the Permutation.
+//        Return the size of the Permutation.  
 //        Since P is a square matrix, all three of these return the same value.
 //
 //    const int* getValues() const
@@ -97,34 +79,39 @@
 //       to figure out.  O(N).
 //
 //    p.det() const
-//       This is also O(N) to calculate.
-//
+//       This is also O(N) to calculate
+//    
 //
 // Mutable functions
 //
-//    p.setToIdentity()
-//        Make p the identity permutation.
-//
-//    p.transposeSelf()
-//    p.invertSelf()
-//        Make p into its inverse.
+//   p.setToIdentity() 
+//       Make p the identity permutation.
+//   
+//   p.transposeSelf()
+//   p.invertSelf()
+//       Make p into its inverse.
 //
 //
 // Inverse:
 //
 //    p.inverse() const
 //    p.transpose() const
-//        Returns the inverse Permutation of p
+//        Returns the inverse Permutation of p 
 //
 //
-// I/O:
+// I/O: 
 //
-//    os << p
-//        Write p as a Matrix<int>
+//    os << p;
+//        Write p in the same format as a Matrix<int>
 //
-//    os << CompactIO() << p
+//    os << tmv::CompactIO() << p;
 //        Writes p to ostream os in vector format:
-//          P size isinv ( p(0) p(1) p(2) ... p(n-1) )
+//          P size inv ( p(0) p(1) p(2) ... p(n-1) )
+//
+//    is >> tmv::CompactIO() >> p;
+//        Read p in the compact format.
+//        It is not possible to read in a permutation that was written
+//        using the normal format.
 //
 //
 // Operators:
@@ -133,13 +120,13 @@
 //
 //    p * v
 //    v * p
-//    v / p // = p^-1 * v
-//    v % p // = v * p^-1
+//    v / p  = p^-1 * v
+//    v % p  = v * p^-1
 //
 //    p * m
 //    m * p
-//    m / p // = p^-1 * m
-//    m % p // = m * p^-1
+//    m / p  = p^-1 * m
+//    m % p  = m * p^-1
 //
 //    p == p
 //    p != p
@@ -151,29 +138,51 @@
 #ifndef TMV_Permutation_H
 #define TMV_Permutation_H
 
-#include "TMV_Base.h"
-#include "TMV_BaseMatrix.h"
-#include "TMV_BaseBandMatrix.h"
-#include "TMV_BaseSymMatrix.h"
-#include "TMV_BaseSymBandMatrix.h"
-#include "TMV_Vector.h"
+#include "TMV_BaseMatrix_Rec.h"
+#include "TMV_BaseVector.h"
+#include "TMV_Array.h"
+#include "TMV_IOStyle.h"
 
 namespace tmv {
 
-    // Any friend functions with default arguments have to have their default argument
+    class Permutation;
+
+    template <>
+    struct Traits<Permutation>
+    {
+        typedef int value_type;
+        typedef int real_type;
+        typedef std::complex<int> complex_type;
+        enum { isreal = true };
+        enum { iscomplex = false };
+
+        typedef Permutation type;
+        typedef Matrix<int> copy_type;
+        typedef copy_type calc_type;
+        typedef copy_type eval_type;
+        typedef Permutation inverse_type;
+
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _nlo = Unknown };
+        enum { _nhi = Unknown };
+        enum { _shape = Rec };
+        enum { _fort = false };
+        enum { _calc = false };
+    };
+
+    // Any friend functions with default arguments have to have their default argument 
     // declared outside of the class declaration.  So we need to declare these here.
     // The definitions will be below after the class declaration.
-
-    class Permutation;
-    template <typename T>
+    template <class M, class V>
     inline void QRP_Decompose(
-        MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& p, bool strict=false);
-    template <typename T>
-    inline void QRP_Decompose(
-        MatrixView<T> QRx, VectorView<T> beta, Permutation& p, T& signdet, bool strict=false);
+        BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta,
+        Permutation& P, bool strict=false);
 
-    class Permutation
+    class Permutation : 
+        public BaseMatrix<Permutation>
     {
+
     public:
 
         //
@@ -181,10 +190,10 @@ namespace tmv {
         //
 
         explicit Permutation(ptrdiff_t n=0) :
-            itsn(n), itsmem(n), itsp(itsmem.get()), isinv(false)
+            itsn(n), itsmem(n), itsp(itsmem), isinv(false)
         {
             TMVAssert(n >= 0);
-            for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = i;
+            for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = i; 
         }
 
         Permutation(ptrdiff_t n, const ptrdiff_t* p, bool _isinv=false) :
@@ -198,25 +207,18 @@ namespace tmv {
 
         Permutation& operator=(const Permutation& rhs)
         {
+            TMVAssert(size() == rhs.size());
             itsmem.resize(0); // also deallocates the memory
-            itsn = rhs.itsn;
             itsp = rhs.itsp;
             isinv = rhs.isinv;
             return *this;
         }
 
-
         //
-        // Access
+        // Access 
         //
 
-        inline ptrdiff_t size() const { return itsn; }
-        inline ptrdiff_t colsize() const { return itsn; }
-        inline ptrdiff_t rowsize() const { return itsn; }
-        inline ptrdiff_t nrows() const { return itsn; }
-        inline ptrdiff_t ncols() const { return itsn; }
-
-        inline int cref(ptrdiff_t i, ptrdiff_t j) const
+        int cref(ptrdiff_t i, ptrdiff_t j) const
         {
             // Two options:
             // 1) P = P * I = I.permuteRows(p)
@@ -230,7 +232,7 @@ namespace tmv {
             //             = e_i.reversePermute(p)
             //    P(i,j) = e_i.reversePermute(p)(j)
             //           = e_i.reversePermute(p,0,i+1)(j)
-            //
+            // 
             // If isinv = true, these two options become:
             // 1) P(i,j) = e_j.reversePermute(p,0,j+1)(i)
             // 2) P(i,j) = e_i.permute(p,0,j+1)(j)
@@ -238,7 +240,7 @@ namespace tmv {
             // (and using the other algorithm).
             //
             // The two options use the same number of permutations.
-            // However, with the forward permutation, it is easy
+            // However, with the forward permutation, it is easy 
             // to see where we can stop the loop early.  Specifically,
             // once the location of the 1 is smaller than k,
             // it cannot be modified further, since itsp[k] >= k.
@@ -253,34 +255,28 @@ namespace tmv {
             return (temp == i) ? 1 : 0;
         }
 
-        inline int operator()(ptrdiff_t i, ptrdiff_t j) const
-        { return cref(i,j); }
-
-        inline const ptrdiff_t* getValues() const { return itsp; }
-
-        inline bool isInverse() const { return isinv; }
 
         //
         // Functions of Permutations
         //
 
-        inline Permutation inverse() const
+        TMV_INLINE Permutation inverse() const
         { return Permutation(itsn,itsp,!isinv); }
 
-        inline Permutation transpose() const
+        TMV_INLINE Permutation transpose() const
         { return inverse(); }
 
-        inline int det() const
+        TMV_INLINE int det() const
         {
-            int d = 1;
-            for(ptrdiff_t i=0;i<itsn;++i) if (itsp[i] != i) d = -d;
+            int d = 1; 
+            for(ptrdiff_t i=0;i<itsn;++i) if (itsp[i] != i) d = -d; 
             return d;
         }
 
-        inline int logDet(int* sign=0) const
-        { if(sign) *sign = det(); return 0; }
+        int logDet(int* sign=0) const
+        { if (sign) *sign = det(); return 0; }
 
-        inline int trace() const
+        int trace() const
         {
             // The trace of a permutation is the number of 1's on the diagonal.
             // This corresponds to the number of elements whose position
@@ -296,50 +292,81 @@ namespace tmv {
             return t;
         }
 
-        inline int sumElements() const
-        { return int(itsn); }
+        TMV_INLINE int sumElements() const
+        { return itsn; }
 
-        inline int sumAbsElements() const
-        { return int(itsn); }
+        TMV_INLINE int sumAbsElements() const
+        { return itsn; }
 
-        inline int maxAbsElement() const
+        TMV_INLINE int sumAbs2Elements() const
+        { return itsn; }
+
+        TMV_INLINE int maxAbsElement() const
         { return 1; }
 
-        inline int maxAbs2Element() const
+        TMV_INLINE int maxAbs2Element() const
         { return 1; }
 
-        inline int normSq() const
-        { return int(itsn); }
+        TMV_INLINE int normSq() const
+        { return itsn; }
 
-        inline double normSq(const double scale) const
+        int normSq(const int scale) const
         { return itsn * scale * scale; }
 
-        inline double normF() const
+        // Normally these two would return int, but since there is 
+        // a sqrt involved, better to upgrade to double.
+        double normF() const
         { return TMV_SQRT(double(itsn)); }
 
-        inline double norm() const
+        TMV_INLINE double norm() const
         { return normF(); }
 
-        inline int norm1() const
+        TMV_INLINE int norm1() const
         { return 1; }
 
-        inline int norm2() const
+        TMV_INLINE int norm2() const
         { return 1; }
 
-        inline int doNorm2() const
+        TMV_INLINE int normInf() const
         { return 1; }
 
-        inline int condition() const
+        TMV_INLINE int condition() const
         { return 1; }
 
-        inline int doCondition() const
-        { return 1; }
-
-        inline bool isSingular() const
+        TMV_INLINE bool isSinular() const
         { return false; }
 
-        inline int normInf() const
-        { return 1; }
+
+        //
+        // op==
+        //
+        friend inline bool operator==(
+            const Permutation& p1, const Permutation& p2)
+        {
+            TMVAssert(p1.size() == p2.size());
+            const ptrdiff_t n = p1.itsn;
+            if (p1.isinv == p2.isinv) {
+                for(ptrdiff_t i=0;i<n;++i) {
+                    if (p1.itsp[i] != p2.itsp[i]) return false;
+                }
+                return true;
+            } else {
+                // If not the same storage, then this requires a bit of work
+                // to see if they effect the same permutation.
+                AlignedArray<ptrdiff_t> temp1(n);
+                AlignedArray<ptrdiff_t> temp2(n);
+                p1.makeIndex(temp1.get());
+                p2.makeIndex(temp2.get());
+                for(ptrdiff_t i=0;i<n;++i) {
+                    if (temp1[i] != temp2[i]) return false;
+                }
+                return true;
+            }
+        }
+
+        friend inline bool operator!=(
+            const Permutation& p1, const Permutation& p2)
+        { return !(p1==p2); }
 
         //
         // Mutable Functions
@@ -347,7 +374,7 @@ namespace tmv {
         //  for permutations.)
         //
 
-        inline Permutation& setToIdentity()
+        Permutation& setToIdentity()
         {
             allocateMem();
             for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = i;
@@ -355,10 +382,10 @@ namespace tmv {
             return *this;
         }
 
-        inline Permutation& transposeSelf()
+        Permutation& transposeSelf()
         { isinv = !isinv; return *this; }
 
-        inline Permutation& invertSelf()
+        Permutation& invertSelf()
         { return transposeSelf(); }
 
 
@@ -366,31 +393,34 @@ namespace tmv {
         // Create matrix version
         //
 
-        template <typename T2>
-        inline void assignToM(MatrixView<T2> m2) const
-        { m2.setToIdentity(); applyOnLeft(m2); }
+        template <class M2>
+        void assignTo(BaseMatrix_Rec_Mutable<M2>& m2) const
+        {
+            m2.setToIdentity();
+            applyOnLeft(m2);
+        }
 
         //
         // MakeInverse
         //
 
-        template <typename T2>
-        inline void makeInverse(MatrixView<T2> minv) const
-        { inverse().assignToM(minv); }
+        template <class T2>
+        void makeInverse(BaseMatrix_Rec_Mutable<T2>& minv) const
+        { inverse().assignTo(minv); }
 
         // (PtP)^-1 = P^-1 Pt^-1 = Pt P = I
-        template <typename T2>
-        inline void makeInverseATA(MatrixView<T2> ata) const
+        template <class T2>
+        void makeInverseATA(BaseMatrix_Rec_Mutable<T2>& ata) const
         { ata.setToIdentity(); }
 
 
-        //
+        // 
         // I/O
         //
-
+    
         inline void write(const TMV_Writer& writer) const
         {
-            const ptrdiff_t  N = size();
+            const ptrdiff_t N = size();
             writer.begin();
             writer.writeCode("P");
             writer.writeSize(N);
@@ -428,84 +458,104 @@ namespace tmv {
         //
         // Apply permutation to a vector
         //
-
-        template <typename T2>
-        inline void apply(VectorView<T2> v2) const
+        
+        template <class V2>
+        void applyOnLeft(BaseVector_Mutable<V2>& v2) const
         {
             if (isinv) v2.reversePermute(itsp);
             else v2.permute(itsp);
+        }
+ 
+        template <class V2>
+        void applyOnRight(BaseVector_Mutable<V2>& v2) const
+        {
+            if (isinv) v2.permute(itsp);
+            else v2.reversePermute(itsp);
         }
 
         //
         // Apply permutation to a matrix
         //
 
-        template <typename T2>
-        inline void applyOnLeft(MatrixView<T2> m2) const
+        template <class M2>
+        void applyOnLeft(BaseMatrix_Rec_Mutable<M2>& m2) const
         {
             if (isinv) m2.reversePermuteRows(itsp);
             else m2.permuteRows(itsp);
         }
 
-        template <typename T2>
-        inline void applyOnRight(MatrixView<T2> m2) const
+        template <class M2>
+        void applyOnRight(BaseMatrix_Rec_Mutable<M2>& m2) const
         {
             if (isinv) m2.permuteCols(itsp);
             else m2.reversePermuteCols(itsp);
         }
 
-
         //
         // Friend functions that can act on a mutable Permutation.
         //
 
-        friend inline void Swap(Permutation& p1, Permutation& p2);
+        friend inline void Swap(Permutation& p1, Permutation& p2)
+        {
+            TMVAssert(p1.size() == p2.size());
+            p1.itsmem.swapWith(p2.itsmem);
+            TMV_SWAP(p1.itsp,p2.itsp);
+            TMV_SWAP(p1.isinv,p2.isinv);
+        }
 
-        template <typename T>
-        friend inline void LU_Decompose(MatrixView<T> m, Permutation& p);
+        // In TMV_LUDecompose.h
+        template <class M>
+        friend inline void LU_Decompose(BaseMatrix_Rec_Mutable<M>& m, Permutation& P);
 
-        template <typename T>
+        // In TMV_QRPDecompose.h
+        template <class M, class V>
         friend inline void QRP_Decompose(
-            MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& p, bool strict);
+            BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta,
+            Permutation& P, bool strict);
 
-        template <typename T>
-        friend inline void QRP_Decompose(
-            MatrixView<T> QRx, VectorView<T> beta, Permutation& p, T& signdet, bool strict);
+        // In TMV_BandLUDecompose.h
+        template <class M>
+        friend inline void BandLU_Decompose(BaseMatrix_Band_Mutable<M>& m, Permutation& P);
 
-        template <typename T>
-        friend inline void LU_Decompose(
-            const GenBandMatrix<T>& m, LowerTriMatrixView<T> L, BandMatrixView<T> U, Permutation& p);
-
-        template <typename T>
-        friend inline void LU_Decompose(BandMatrixView<T> m, Permutation& p, ptrdiff_t nhi);
-
-        template <typename T>
-        friend inline void LDL_Decompose(SymMatrixView<T> m, SymBandMatrixView<T> D, Permutation& p);
-
-        template <typename T>
+#if 0
+        template <class T>
         friend inline void LDL_Decompose(
-            SymMatrixView<T> m, VectorView<T> xD,
-            Permutation& p, TMV_RealType(T)& logdet, T& signdet);
+            const SymMatrixView<T>& A, const SymBandMatrixView<T>& D,
+            Permutation& P)
+        {
+            TMVAssert(P.size() == A.colsize());
+            P.allocateMem();
+            LDL_Decompose(A,D,P.getMem());
+            P.isinv = true;
+        }
 
-        template <typename T, int A>
-        inline VectorView<T,A>& sort(Permutation& p, ADType ad, CompType comp);
+        template <class T>
+        friend inline void LDL_Decompose(
+            const SymMatrixView<T>& A, const VectorView<T>& xD,
+            Permutation& P, TMV_RealType(T)& logdet, T& signdet)
+        {
+            TMVAssert(P.size() == A.size());
+            P.allocateMem();
+            LDL_Decompose(A,xD,P.getMem(),logdet,signdet);
+            P.isinv = true;
+        }
+#endif
 
-        template <typename T, int A>
-        friend inline void DoVectorSort(VectorView<T,A> v, Permutation& p, ADType ad, CompType comp);
+        template <class V>
+        friend inline void Sort(
+            BaseVector_Mutable<V>& v, Permutation& P, ADType ad, CompType comp)
+        {
+            TMVAssert(P.size() == v.size());
+            P.allocateMem();
+            tmv::Sort(v,P.getMem(),ad,comp);
+            P.isinv = false;
+        }
 
         //
-        // Op ==, !=
+        // Auxilliary functions
         //
 
-        friend inline bool operator==(const Permutation& p1, const Permutation& p2);
-        friend inline bool operator!=(const Permutation& p1, const Permutation& p2);
-
-
-        //
-        // resize
-        //
-
-        inline void resize(ptrdiff_t n)
+        void resize(ptrdiff_t n)
         {
             TMVAssert(n >= 0);
             if (n > itsn) {
@@ -515,6 +565,14 @@ namespace tmv {
             itsn = n;
             isinv = false;
         }
+
+        TMV_INLINE ptrdiff_t size() const { return itsn; }
+        TMV_INLINE ptrdiff_t colsize() const { return itsn; }
+        TMV_INLINE ptrdiff_t nlo() const { return TMV_MAX(itsn-1,ptrdiff_t(0)); }
+        TMV_INLINE ptrdiff_t nhi() const { return TMV_MAX(itsn-1,ptrdiff_t(0)); }
+        TMV_INLINE ptrdiff_t rowsize() const { return itsn; }
+        TMV_INLINE const ptrdiff_t* getValues() const { return itsp; }
+        TMV_INLINE bool isInverse() const { return isinv; }
 
 
     protected:
@@ -536,11 +594,11 @@ namespace tmv {
             }
         }
 
-        //
+        // 
         // Helper functions for mutable actions.
         //
 
-        inline void allocateMem()
+        void allocateMem()
         {
             if (!itsmem.get()) {
                 itsmem.resize(itsn);
@@ -548,7 +606,7 @@ namespace tmv {
             }
         }
 
-        inline void saveToMem()
+        void saveToMem()
         {
             if (!itsmem.get()) {
                 itsmem.resize(itsn);
@@ -557,7 +615,7 @@ namespace tmv {
             }
         }
 
-        inline void makeCopyOf(const Permutation& orig)
+        void makeCopyOf(const Permutation& orig)
         {
             itsn = orig.itsn;
             itsmem.resize(itsn);
@@ -566,57 +624,58 @@ namespace tmv {
             isinv = orig.isinv;
         }
 
-        inline ptrdiff_t* getMem()
+        TMV_INLINE_ND ptrdiff_t* getMem() 
         {
             // Make sure P owns its memory:
             TMVAssert(itsn==0 || itsmem.get());
             // This next one shoudl be true if the previous one passes.
             TMVAssert(itsmem.get() == itsp);
-            return itsmem.get();
+            return itsmem;
         }
 
-    };
+    }; // Permutation
 
-    inline Permutation Transpose(const Permutation& p)
-    { return p.transpose(); }
-    inline Permutation Adjoint(const Permutation& p)
-    { return p.transpose(); }
-    inline const Permutation& Conjugate(const Permutation& p)
-    { return p; }
-    inline Permutation Inverse(const Permutation& p)
-    { return p.transpose(); }
-    inline double Norm(const Permutation& p)
-    { return p.norm(); }
-    inline double NormF(const Permutation& p)
-    { return p.normF(); }
-    inline int NormSq(const Permutation& p)
-    { return p.normSq(); }
-    inline int Norm1(const Permutation& p)
-    { return p.norm1(); }
-    inline int Norm2(const Permutation& p)
-    { return p.norm2(); }
-    inline int NormInf(const Permutation& p)
-    { return p.normInf(); }
-    inline int MaxAbsElement(const Permutation& p)
-    { return p.maxAbsElement(); }
-    inline int MaxAbs2Element(const Permutation& p)
-    { return p.maxAbs2Element(); }
-    inline int Trace(const Permutation& p)
-    { return p.trace(); }
-    inline int Det(const Permutation& p)
-    { return p.det(); }
-    inline int LogDet(const Permutation& p)
-    { return p.logDet(); }
+    TMV_INLINE Permutation Transpose(const Permutation& m)
+    { return m.transpose(); }
+    TMV_INLINE Permutation Adjoint(const Permutation& m)
+    { return m.transpose(); }
+    TMV_INLINE const Permutation& Conjugate(const Permutation& m)
+    { return m; }
+    TMV_INLINE Permutation Inverse(const Permutation& m)
+    { return m.transpose(); }
+    TMV_INLINE double Norm(const Permutation& m)
+    { return m.norm(); }
+    TMV_INLINE double NormF(const Permutation& m)
+    { return m.normF(); }
+    TMV_INLINE int NormSq(const Permutation& m)
+    { return m.normSq(); }
+    TMV_INLINE int Norm1(const Permutation& m)
+    { return m.norm1(); }
+    TMV_INLINE int Norm2(const Permutation& m)
+    { return m.norm2(); }
+    TMV_INLINE int NormInf(const Permutation& m)
+    { return m.normInf(); }
+    TMV_INLINE int MaxAbsElement(const Permutation& m)
+    { return m.maxAbsElement(); }
+    TMV_INLINE int MaxAbs2Element(const Permutation& m)
+    { return m.maxAbs2Element(); }
+    TMV_INLINE int Trace(const Permutation& m)
+    { return m.trace(); }
+    TMV_INLINE int Det(const Permutation& m)
+    { return m.det(); }
+    TMV_INLINE int LogDet(const Permutation& m)
+    { return m.logDet(); }
 
-    inline std::ostream& operator<<(
-        const TMV_Writer& writer, const Permutation& p)
+    inline std::ostream& operator<<(const TMV_Writer& writer, const Permutation& p)
     { p.write(writer); return writer.getos(); }
 
     inline std::ostream& operator<<(std::ostream& os, const Permutation& p)
     { return os << IOStyle() << p; }
 
-#ifndef NOTHROW
-    class PermutationReadError : public ReadError
+
+#ifndef TMV_NO_THROWW
+    class PermutationReadError : 
+        public ReadError
     {
     public :
         Permutation m;
@@ -636,24 +695,25 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         PermutationReadError(
+            const Permutation& _m, std::istream& _is, ptrdiff_t _n) throw() :
+            ReadError("Permutation."),
+            m(_m), i(0), n(_n),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        PermutationReadError(
             ptrdiff_t _i, const Permutation& _m, std::istream& _is) throw() :
             ReadError("Permutation."),
-            m(_m), i(_i), n(m.size()),
+            m(_m), i(_i), n(_m.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(
             ptrdiff_t _i, const Permutation& _m, std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("Permutation."),
-            m(_m), i(_i), exp(_e), got(_g), n(m.size()),
+            m(_m), i(_i), exp(_e), got(_g), n(_m.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        PermutationReadError(
-            const Permutation& _m, std::istream& _is, ptrdiff_t _n) throw() :
-            ReadError("Permutation."),
-            m(_m), i(0), n(_n), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         PermutationReadError(const PermutationReadError& rhs) :
-            m(rhs.m), i(rhs.i), exp(rhs.exp), got(rhs.got),
-            n(rhs.n), is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
+            m(rhs.m), i(rhs.i), exp(rhs.exp), got(rhs.got), n(rhs.n),
+            is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
         ~PermutationReadError() throw() {}
 
         void write(std::ostream& os) const throw()
@@ -799,156 +859,21 @@ namespace tmv {
         }
     }
 
-    inline std::istream& operator>>(
-        const TMV_Reader& reader, Permutation& p)
+    inline std::istream& operator>>(const TMV_Reader& reader, Permutation& p)
     { p.read(reader); return reader.getis(); }
 
-    inline std::istream& operator>>(std::istream& is, Permutation& p)
-    { return is >> IOStyle() >> p; }
-
-
-    //
-    // Permutation's friends
-    //
-
-    inline void Swap(Permutation& p1, Permutation& p2)
-    {
-        TMVAssert(p1.size() == p2.size());
-        p1.itsmem.swapWith(p2.itsmem);
-        TMV_SWAP(p1.itsp,p2.itsp);
-        TMV_SWAP(p1.isinv,p2.isinv);
-    }
-
-    template <typename T, int A>
-    inline VectorView<T,A>& VectorView<T,A>::sort(
-        Permutation& p, ADType ad, CompType comp)
-    {
-        DoVectorSort(*this,p,ad,comp);
-        return *this;
-    }
-
-
-    template <typename T>
-    inline void LU_Decompose(
-        MatrixView<T> m, Permutation& p)
-    {
-        p.resize(m.colsize());
-        p.allocateMem();
-        LU_Decompose(m,p.getMem());
-        p.isinv = true;
-    }
-
-    template <typename T>
-    inline void QRP_Decompose(
-        MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& p, bool strict)
-    {
-        p.resize(Q.rowsize());
-        p.allocateMem();
-        QRP_Decompose(Q,R,p.getMem(),strict);
-        p.isinv = false;
-    }
-
-    template <typename T>
-    inline void QRP_Decompose(
-        MatrixView<T> QRx, VectorView<T> beta, Permutation& p, T& signdet, bool strict)
-    {
-        p.resize(QRx.rowsize());
-        p.allocateMem();
-        QRP_Decompose(QRx,beta,p.getMem(),signdet,strict);
-        p.isinv = false;
-    }
-
-    template <typename T>
-    inline void LU_Decompose(
-        const GenBandMatrix<T>& m, LowerTriMatrixView<T> L,
-        BandMatrixView<T> U, Permutation& p)
-    {
-        p.resize(m.colsize());
-        p.allocateMem();
-        LU_Decompose(m,L,U,p.getMem());
-        p.isinv = true;
-    }
-
-    template <typename T>
-    inline void LU_Decompose(
-        BandMatrixView<T> m, Permutation& p, ptrdiff_t nhi)
-    {
-        p.resize(m.colsize());
-        p.allocateMem();
-        LU_Decompose(m,p.getMem(),nhi);
-        p.isinv = true;
-    }
-
-    template <typename T>
-    inline void LDL_Decompose(
-        SymMatrixView<T> m, SymBandMatrixView<T> D, Permutation& p)
-    {
-        p.resize(m.colsize());
-        p.allocateMem();
-        LDL_Decompose(m,D,p.getMem());
-        p.isinv = true;
-    }
-
-    template <typename T>
-    inline void LDL_Decompose(
-        SymMatrixView<T> m, VectorView<T> xD,
-        Permutation& p, TMV_RealType(T)& logdet, T& signdet)
-    {
-        p.resize(m.size());
-        p.allocateMem();
-        LDL_Decompose(m,xD,p.getMem(),logdet,signdet);
-        p.isinv = true;
-    }
-
-    template <typename T, int A>
-    inline void DoVectorSort(
-        VectorView<T,A> v, Permutation& p, ADType ad, CompType comp)
-    {
-        p.resize(v.size());
-        p.allocateMem();
-        v.sort(p.getMem(),ad,comp);
-        p.isinv = false;
-    }
-
-    inline bool operator==(
-        const Permutation& p1, const Permutation& p2)
-    {
-        TMVAssert(p1.size() == p2.size());
-        const ptrdiff_t n = p1.itsn;
-        if (p1.isinv == p2.isinv) {
-            for(ptrdiff_t i=0;i<n;++i) {
-                if (p1.itsp[i] != p2.itsp[i]) return false;
-            }
-            return true;
-        } else {
-            // If not the same storage, then this requires a bit of work
-            // to see if they effect the same permutation.
-            AlignedArray<ptrdiff_t> temp1(n);
-            AlignedArray<ptrdiff_t> temp2(n);
-            p1.makeIndex(temp1.get());
-            p2.makeIndex(temp2.get());
-            for(ptrdiff_t i=0;i<n;++i) {
-                if (temp1[i] != temp2[i]) return false;
-            }
-            return true;
-        }
-    }
-
-    inline bool operator!=(
-        const Permutation& p1, const Permutation& p2)
-    { return !(p1==p2); }
-
+    inline std::istream& operator>>(std::istream& is, Permutation& m)
+    { return is >> IOStyle() >> m; }
 
 
     //
     // TMV_Text
     //
-
+    
     inline std::string TMV_Text(const Permutation& )
     { return "Permutation"; }
 
-
-} // namespace mv
-
+ 
+} // namespace tmv
 
 #endif

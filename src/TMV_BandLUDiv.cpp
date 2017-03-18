@@ -1,21 +1,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2016                                                 //
-// All rights reserved                                                       //
+// Copyright (C) 1998 - 2009                                                 //
 //                                                                           //
-// The project is hosted at https://code.google.com/p/tmv-cpp/               //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
 // where you can find the current version and current documention.           //
 //                                                                           //
 // For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis17 [at] gmail.                                                 //
+// mike_jarvis@users.sourceforge.net                                         //
 //                                                                           //
-// This software is licensed under a FreeBSD license.  The file              //
-// TMV_LICENSE should have bee included with this distribution.              //
-// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
 //                                                                           //
-// Essentially, you can use this software however you want provided that     //
-// you include the TMV_LICENSE file in any distribution that uses it.        //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +58,7 @@ namespace tmv {
     template <class T, class T1> 
     void LU_PackedPL_Unpack(
         const GenBandMatrix<T1>& LUx, const ptrdiff_t* p,
-        LowerTriMatrixView<T> L)
+        const LowerTriMatrixView<T>& L)
     {
         TMVAssert(L.isunit());
         TMVAssert(LUx.colsize() == L.size());
@@ -80,7 +90,7 @@ namespace tmv {
     template <class T, class T1> 
     void LU_PackedPL_LDivEq(
         const GenBandMatrix<T1>& LUx,
-        const ptrdiff_t* p, MatrixView<T> m) 
+        const ptrdiff_t* p, const MatrixView<T>& m) 
     {
 #ifdef XDEBUG
         Matrix<T> m0 = m;
@@ -138,7 +148,7 @@ namespace tmv {
     template <class T, class T1> 
     static void NonLapLU_LDivEq(
         const GenBandMatrix<T1>& LUx,
-        const ptrdiff_t* p, MatrixView<T> m) 
+        const ptrdiff_t* p, const MatrixView<T>& m) 
     { 
 #ifdef XDEBUG
         Matrix<T> m0 = m;
@@ -190,7 +200,7 @@ namespace tmv {
     template <class T, class T1> 
     void LU_PackedPL_RDivEq(
         const GenBandMatrix<T1>& LUx,
-        const ptrdiff_t* p, MatrixView<T> m) 
+        const ptrdiff_t* p, const MatrixView<T>& m) 
     {
 #ifdef XDEBUG
         Matrix<T> m0 = m;
@@ -244,7 +254,7 @@ namespace tmv {
     template <class T, class T1> 
     static void NonLapLU_RDivEq(
         const GenBandMatrix<T1>& LUx,
-        const ptrdiff_t* p, MatrixView<T> m) 
+        const ptrdiff_t* p, const MatrixView<T>& m) 
     { 
 #ifdef XDEBUG
         Matrix<T> m0 = m;
@@ -293,25 +303,25 @@ namespace tmv {
 #ifdef LAP
     template <class T, class T1> 
     static inline void LapLU_LDivEq(
-        const GenBandMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m)
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* P, const MatrixView<T>& m)
     { NonLapLU_LDivEq(LUx,P,m); }
     template <class T, class T1> 
     static inline void LapTriDiagLU_LDivEq(
-        const GenBandMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m)
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* P, const MatrixView<T>& m)
     { NonLapLU_LDivEq(LUx,P,m); }
     template <class T, class T1> 
     static inline void LapLU_RDivEq(
-        const GenBandMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m)
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* P, const MatrixView<T>& m)
     { NonLapLU_RDivEq(LUx,P,m); }
     template <class T, class T1> 
     static inline void LapTriDiagLU_RDivEq(
-        const GenBandMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m)
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* P, const MatrixView<T>& m)
     { NonLapLU_RDivEq(LUx,P,m); }
 #ifdef INST_DOUBLE
     template <> 
     void LapLU_LDivEq(
         const GenBandMatrix<double>& LUx,
-        const ptrdiff_t* P, MatrixView<double> m) 
+        const ptrdiff_t* P, const MatrixView<double>& m) 
     {
         TMVAssert(m.colsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -342,7 +352,7 @@ namespace tmv {
     template <> 
     void LapLU_LDivEq(
         const GenBandMatrix<std::complex<double> >& LUx,
-        const ptrdiff_t* P, MatrixView<std::complex<double> > m)
+        const ptrdiff_t* P, const MatrixView<std::complex<double> >& m)
     {
         TMVAssert(m.colsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -375,7 +385,7 @@ namespace tmv {
     template <> 
     void LapTriDiagLU_LDivEq(
         const GenBandMatrix<double>& LUx,
-        const ptrdiff_t* P, MatrixView<double> m) 
+        const ptrdiff_t* P, const MatrixView<double>& m) 
     {
         TMVAssert(m.colsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -404,7 +414,7 @@ namespace tmv {
     template <> 
     void LapTriDiagLU_LDivEq(
         const GenBandMatrix<std::complex<double> >& LUx,
-        const ptrdiff_t* P, MatrixView<std::complex<double> > m)
+        const ptrdiff_t* P, const MatrixView<std::complex<double> >& m)
     {
         TMVAssert(m.colsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -435,7 +445,7 @@ namespace tmv {
     template <> 
     void LapLU_RDivEq(
         const GenBandMatrix<double>& LUx,
-        const ptrdiff_t* P, MatrixView<double> m) 
+        const ptrdiff_t* P, const MatrixView<double>& m) 
     {
         TMVAssert(m.rowsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -466,7 +476,7 @@ namespace tmv {
     template <> 
     void LapLU_RDivEq(
         const GenBandMatrix<std::complex<double> >& LUx,
-        const ptrdiff_t* P, MatrixView<std::complex<double> > m)
+        const ptrdiff_t* P, const MatrixView<std::complex<double> >& m)
     {
         TMVAssert(m.rowsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -499,7 +509,7 @@ namespace tmv {
     template <> 
     void LapTriDiagLU_RDivEq(
         const GenBandMatrix<double>& LUx,
-        const ptrdiff_t* P, MatrixView<double> m) 
+        const ptrdiff_t* P, const MatrixView<double>& m) 
     {
         TMVAssert(m.rowsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -528,7 +538,7 @@ namespace tmv {
     template <> 
     void LapTriDiagLU_RDivEq(
         const GenBandMatrix<std::complex<double> >& LUx,
-        const ptrdiff_t* P, MatrixView<std::complex<double> > m)
+        const ptrdiff_t* P, const MatrixView<std::complex<double> >& m)
     {
         TMVAssert(m.rowsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -560,7 +570,7 @@ namespace tmv {
     template <> 
     void LapLU_LDivEq(
         const GenBandMatrix<float>& LUx,
-        const ptrdiff_t* P, MatrixView<float> m) 
+        const ptrdiff_t* P, const MatrixView<float>& m) 
     {
         TMVAssert(m.colsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -591,7 +601,7 @@ namespace tmv {
     template <> 
     void LapLU_LDivEq(
         const GenBandMatrix<std::complex<float> >& LUx,
-        const ptrdiff_t* P, MatrixView<std::complex<float> > m)
+        const ptrdiff_t* P, const MatrixView<std::complex<float> >& m)
     {
         TMVAssert(m.colsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -624,7 +634,7 @@ namespace tmv {
     template <> 
     void LapTriDiagLU_LDivEq(
         const GenBandMatrix<float>& LUx,
-        const ptrdiff_t* P, MatrixView<float> m) 
+        const ptrdiff_t* P, const MatrixView<float>& m) 
     {
         TMVAssert(m.colsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -653,7 +663,7 @@ namespace tmv {
     template <> 
     void LapTriDiagLU_LDivEq(
         const GenBandMatrix<std::complex<float> >& LUx,
-        const ptrdiff_t* P, MatrixView<std::complex<float> > m)
+        const ptrdiff_t* P, const MatrixView<std::complex<float> >& m)
     {
         TMVAssert(m.colsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -684,7 +694,7 @@ namespace tmv {
     template <> 
     void LapLU_RDivEq(
         const GenBandMatrix<float>& LUx,
-        const ptrdiff_t* P, MatrixView<float> m) 
+        const ptrdiff_t* P, const MatrixView<float>& m) 
     {
         TMVAssert(m.rowsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -715,7 +725,7 @@ namespace tmv {
     template <> 
     void LapLU_RDivEq(
         const GenBandMatrix<std::complex<float> >& LUx,
-        const ptrdiff_t* P, MatrixView<std::complex<float> > m)
+        const ptrdiff_t* P, const MatrixView<std::complex<float> >& m)
     {
         TMVAssert(m.rowsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -748,7 +758,7 @@ namespace tmv {
     template <> 
     void LapTriDiagLU_RDivEq(
         const GenBandMatrix<float>& LUx,
-        const ptrdiff_t* P, MatrixView<float> m) 
+        const ptrdiff_t* P, const MatrixView<float>& m) 
     {
         TMVAssert(m.rowsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -777,7 +787,7 @@ namespace tmv {
     template <> 
     void LapTriDiagLU_RDivEq(
         const GenBandMatrix<std::complex<float> >& LUx,
-        const ptrdiff_t* P, MatrixView<std::complex<float> > m)
+        const ptrdiff_t* P, const MatrixView<std::complex<float> >& m)
     {
         TMVAssert(m.rowsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -810,7 +820,7 @@ namespace tmv {
     template <class T, class T1> 
     void LU_LDivEq(
         const GenBandMatrix<T1>& LUx,
-        const ptrdiff_t* P, MatrixView<T> m) 
+        const ptrdiff_t* P, const MatrixView<T>& m) 
     {
         TMVAssert(m.colsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());
@@ -833,7 +843,7 @@ namespace tmv {
     template <class T, class T1> 
     void LU_RDivEq(
         const GenBandMatrix<T1>& LUx,
-        const ptrdiff_t* P, MatrixView<T> m) 
+        const ptrdiff_t* P, const MatrixView<T>& m) 
     {
         TMVAssert(m.rowsize() == LUx.colsize());
         TMVAssert(LUx.isSquare());

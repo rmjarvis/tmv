@@ -1,44 +1,30 @@
 
 #define CT std::complex<T>
 
-#define DefAdd(T,Ta)\
-  template void AddMM(const T alpha, const GenBandMatrix<Ta >& A, \
-      BandMatrixView<T > B); \
+#define Def1(T1,C1,T2,C2,T3)\
+  template void InstAddMM(\
+      const T3 x1, const ConstBandMatrixView<T1,C1>& m1, \
+      const T3 x2, const ConstBandMatrixView<T2,C2>& m2, \
+      BandMatrixView<T3 > m3); \
+  template void InstAliasAddMM(\
+      const T3 x1, const ConstBandMatrixView<T1,C1>& m1, \
+      const T3 x2, const ConstBandMatrixView<T2,C2>& m2, \
+      BandMatrixView<T3 > m3); \
 
-DefAdd(T,T)
-#ifdef INST_COMPLEX
-DefAdd(CT,T)
-DefAdd(CT,CT)
+Def1(T,NonConj,T,NonConj,T)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def1(T,NonConj,T,NonConj,CT)
+Def1(T,NonConj,CT,NonConj,CT)
+Def1(T,NonConj,CT,Conj,CT)
+Def1(CT,NonConj,T,NonConj,CT)
+Def1(CT,Conj,T,NonConj,CT)
+#endif
+Def1(CT,NonConj,CT,NonConj,CT)
+Def1(CT,Conj,CT,NonConj,CT)
+Def1(CT,NonConj,CT,Conj,CT)
+Def1(CT,Conj,CT,Conj,CT)
 #endif
 
-#undef DefAdd
-
-#define DefAdd(T,Ta,Tb)\
-  template void AddMM(const T alpha, const GenBandMatrix<Ta >& A, \
-      const T beta, const GenBandMatrix<Tb >& B, \
-      BandMatrixView<T > C); \
-
-DefAdd(T,T,T)
-#ifdef INST_COMPLEX
-DefAdd(CT,T,T)
-DefAdd(CT,T,CT)
-DefAdd(CT,CT,CT)
-#endif
-
-#undef DefAdd
-
-#define DefAdd(T,Ta,Tb)\
-  template void AddMM(const T alpha, const GenBandMatrix<Ta >& A, \
-      const T beta, const GenMatrix<Tb >& B, MatrixView<T > C); \
-
-DefAdd(T,T,T)
-#ifdef INST_COMPLEX
-DefAdd(CT,T,T)
-DefAdd(CT,CT,T)
-DefAdd(CT,T,CT)
-DefAdd(CT,CT,CT)
-#endif
-
-#undef DefAdd
-
+#undef Def1
 #undef CT

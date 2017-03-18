@@ -3,7 +3,7 @@
 
 #define DefDivEq(T,T1)\
 template void TriLDivEq(const GenBandMatrix<T1 >& A, \
-    VectorView<T > B, DiagType dt); \
+    const VectorView<T >& B, DiagType dt); \
 
 DefDivEq(T,T)
 #ifdef INST_COMPLEX

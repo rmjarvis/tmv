@@ -1,0 +1,29 @@
+
+#define Def1(ix, T) \
+  template void multmm_16_16_16( \
+      const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K, \
+      const Scaling<ix,T>& x, \
+      const T* A0, const T* B0, T* C0); \
+  template void multmm_M_16_16( \
+      const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K, \
+      const Scaling<ix,T>& x, \
+      const T* A, const T* B, T* C0); \
+  template void multmm_16_N_16( \
+      const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K, \
+      const Scaling<ix,T>& x, \
+      const T* A, const T* B, T* C0); \
+  template void multmm_16_16_K( \
+      const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K, \
+      const Scaling<ix,T>& x, \
+      const T* A, const T* B, T* C0); \
+  template void multmm_M_N_K( \
+      const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K, \
+      const Scaling<ix,T>& x, \
+      const T* A, const T* B, T* C0); \
+
+
+Def1(1,T)
+Def1(-1,T)
+
+#undef Def1
+

@@ -1,418 +1,271 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2016                                                 //
-// All rights reserved                                                       //
-//                                                                           //
-// The project is hosted at https://code.google.com/p/tmv-cpp/               //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis17 [at] gmail.                                                 //
-//                                                                           //
-// This software is licensed under a FreeBSD license.  The file              //
-// TMV_LICENSE should have bee included with this distribution.              //
-// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
-//                                                                           //
-// Essentially, you can use this software however you want provided that     //
-// you include the TMV_LICENSE file in any distribution that uses it.        //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
-
-//#define XDEBUG
-
+//#define PRINTALGO_LU
 
 #include "TMV_Blas.h"
-#include "TMV_LUDiv.h"
+#include "tmv/TMV_LUDiv.h"
 #include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_SmallMatrix.h"
+#include "tmv/TMV_Vector.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_TriMatrixArith.h"
-
-#ifdef XDEBUG
-#include "tmv/TMV_MatrixArith.h"
-#include <iostream>
-using std::cout;
-using std::cerr;
-using std::endl;
-#endif
+#include "tmv/TMV_CopyM.h"
+#include "tmv/TMV_CopyV.h"
+#include "tmv/TMV_DivVU.h"
+#include "tmv/TMV_DivMU.h"
+#include "tmv/TMV_PermuteM.h"
+#include "tmv/TMV_ScaleM.h"
 
 namespace tmv {
 
-    //
-    // LDivEq
-    //
-
-    template <class T, class T1> 
-    static void NonLapLULDivEq(
-        const GenMatrix<T1>& LUx, MatrixView<T> m)
+    template <bool trans>
+    struct NonLapLUSolve // trans == false here
     {
-        // Solve L U x = m:
-        TMVAssert(LUx.isSquare());
-        TMVAssert(LUx.rowsize() == m.colsize());
-        m /= LUx.lowerTri(UnitDiag);
-        m /= LUx.upperTri(NonUnitDiag);
-    }
-
+        template <class M1, class M2>
+        static void call(const M1& m1, const Permutation& P, M2& m2)
+        { InlineLU_SolveInPlace(m1,P,m2); }
+    };
+    template <>
+    struct NonLapLUSolve<true>
+    {
+        template <class M1, class M2>
+        static void call(const M1& m1, const Permutation& P, M2& m2)
+        { InlineLU_SolveTransposeInPlace(m1,P,m2); }
+    };
 
 #ifdef ALAP
     // ALAP, not LAP, since ATLAS has these routines
-    template <class T, class T1> 
-    static inline void LapLULDivEq(
-        const GenMatrix<T1>& LUx, MatrixView<T> m)
-    { NonLapLULDivEq(LUx,m); }
-#ifdef INST_DOUBLE
-    template <> 
-    void LapLULDivEq(
-        const GenMatrix<double>& LUx, MatrixView<double> m)
+    template <bool trans, class M1, class T2, class T1> 
+    static inline void LapLUSolve(
+        const M1& m1, const Permutation& P, MatrixView<T2> m2, T1)
+    { NonLapLUSolve<trans>::call(m1,P,m2); }
+    template <bool trans, class M1, class T2, class T1> 
+    static inline void LapLUSolve(
+        const M1& m1, const Permutation& P, VectorView<T2,Unit> v2, T1)
+    { NonLapLUSolve<trans>::call(m1,P,v2); }
+#ifdef TMV_INST_DOUBLE
+    template <bool trans, class M1> 
+    static void LapLUSolve(
+        const M1& m1, const Permutation& P, MatrixView<double> m2, double)
     {
-        TMVAssert(LUx.isSquare());
-        TMVAssert(LUx.rowsize() == m.colsize());
-        TMVAssert(LUx.iscm());
-        TMVAssert(m.iscm());
-        TMVAssert(LUx.ct()==NonConj);
-        TMVAssert(m.ct()==NonConj);
-
-        int n = LUx.colsize();
-        int nrhs = m.rowsize();
-        int lda = LUx.stepj();
-        int ldb = m.stepj();
-        AlignedArray<int> ipiv(n);
+        TMVAssert(P.isInverse());
+        int n = m1.colsize();
+        int nrhs = m2.rowsize();
+        int lda = m1.stepj();
+        int ldb = m2.stepj();
 #ifdef CLAP
-        for(int i=0;i<n;++i) ipiv[i] = i;
+        const int* ipiv = P.getValues();
 #else
-        for(int i=0;i<n;++i) ipiv[i] = i+1;
+        AlignedArray<int> ipiv1(n);
+        for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i] LAPPLUS1;
+        const int* ipiv = ipiv1.get();
 #endif
         int Lap_info=0;
         LAPNAME(dgetrs) (
-            LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
-            LAPP(LUx.cptr()),LAPV(lda),
-            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+            LAPCM trans?LAPCH_T:LAPCH_NT,
+            LAPV(n),LAPV(nrhs),LAPP(m1.cptr()),LAPV(lda),
+            LAPP(ipiv),LAPP(m2.ptr()),LAPV(ldb) LAPINFO LAP1);
         LAP_Results(Lap_info,"dgetrs");
     }
-    template <> 
-    void LapLULDivEq(
-        const GenMatrix<std::complex<double> >& LUx,
-        MatrixView<std::complex<double> > m)
+    template <bool trans, class M1> 
+    static void LapLUSolve(
+        const M1& m1, const Permutation& P,
+        MatrixView<std::complex<double> > m2, std::complex<double> )
     {
-        TMVAssert(LUx.isSquare());
-        TMVAssert(LUx.rowsize() == m.colsize());
-        TMVAssert(LUx.iscm());
-        TMVAssert(m.iscm());
-        TMVAssert(LUx.ct()==NonConj);
-        TMVAssert(m.ct()==NonConj);
-
-        int n = LUx.colsize();
-        int nrhs = m.rowsize();
-        int lda = LUx.stepj();
-        int ldb = m.stepj();
-        AlignedArray<int> ipiv(n);
+        TMVAssert(P.isInverse());
+        int n = m1.colsize();
+        int nrhs = m2.rowsize();
+        int lda = m1.stepj();
+        int ldb = m2.stepj();
 #ifdef CLAP
-        for(int i=0;i<n;++i) ipiv[i] = i;
+        const int* ipiv = P.getValues();
 #else
-        for(int i=0;i<n;++i) ipiv[i] = i+1;
+        AlignedArray<int> ipiv1(n);
+        for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i] LAPPLUS1;
+        const int* ipiv = ipiv1.get();
 #endif
+        if (!trans && m1.isconj()) m2.conjugateSelf();
         int Lap_info=0;
         LAPNAME(zgetrs) (
-            LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
-            LAPP(LUx.cptr()),LAPV(lda),
-            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+            LAPCM trans?(m1.isconj()?LAPCH_CT:LAPCH_T):LAPCH_NT,
+            LAPV(n),LAPV(nrhs),LAPP(m1.cptr()),LAPV(lda),
+            LAPP(ipiv),LAPP(m2.ptr()),LAPV(ldb) LAPINFO LAP1);
+        if (!trans && m1.isconj()) m2.conjugateSelf();
         LAP_Results(Lap_info,"zgetrs");
     }
-#endif
-#ifdef INST_FLOAT
-#ifndef MKL
-    template <> 
-    void LapLULDivEq(const GenMatrix<float>& LUx, MatrixView<float> m)
+    template <bool trans, class M1> 
+    static void LapLUSolve(
+        const M1& m1, const Permutation& P,
+        MatrixView<std::complex<double> > m2, double t1)
     {
-        TMVAssert(LUx.isSquare());
-        TMVAssert(LUx.rowsize() == m.colsize());
-        TMVAssert(LUx.iscm());
-        TMVAssert(m.iscm());
-        TMVAssert(LUx.ct()==NonConj);
-        TMVAssert(m.ct()==NonConj);
-
-        int n = LUx.colsize();
-        int nrhs = m.rowsize();
-        int lda = LUx.stepj();
-        int ldb = m.stepj();
-        AlignedArray<int> ipiv(n);
+        Matrix<double,ColMajor> temp = m2.realPart();
+        LapLUSolve<trans>(m1,P,temp.xView(),t1);
+        m2.realPart() = temp;
+        temp = m2.imagPart();
+        LapLUSolve<trans>(m1,P,temp.xView(),t1);
+        m2.imagPart() = temp;
+    }
+    template <bool trans, class M1> 
+    static inline void LapLUSolve(
+        const M1& m1, const Permutation& P, VectorView<double,Unit> v2, double t1)
+    { LapLUSolve<trans>(m1,P,ColVectorViewOf(v2).xView(),t1); }
+    template <bool trans, class M1> 
+    static inline void LapLUSolve(
+        const M1& m1, const Permutation& P, 
+        VectorView<std::complex<double>,Unit> v2, std::complex<double> t1)
+    { LapLUSolve<trans>(m1,P,ColVectorViewOf(v2).xView(),t1); }
+    template <bool trans, class M1> 
+    static inline void LapLUSolve(
+        const M1& m1, const Permutation& P, 
+        VectorView<std::complex<double>,Unit> v2, double t1)
+    { LapLUSolve<trans>(m1,P,ColVectorViewOf(v2).xView(),t1); }
+#endif
+#ifdef TMV_INST_FLOAT
+#ifndef MKL // TODO: Check if this is still required...
+    template <bool trans, class M1> 
+    static void LapLUSolve(
+        const M1& m1, const Permutation& P, MatrixView<float> m2, float)
+    {
+        TMVAssert(P.isInverse());
+        int n = m1.colsize();
+        int nrhs = m2.rowsize();
+        int lda = m1.stepj();
+        int ldb = m2.stepj();
 #ifdef CLAP
-        for(int i=0;i<n;++i) ipiv[i] = i;
+        const int* ipiv = P.getValues();
 #else
-        for(int i=0;i<n;++i) ipiv[i] = i+1;
+        AlignedArray<int> ipiv1(n);
+        for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i] LAPPLUS1;
+        const int* ipiv = ipiv1.get();
 #endif
         int Lap_info=0;
         LAPNAME(sgetrs) (
-            LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
-            LAPP(LUx.cptr()),LAPV(lda),
-            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+            LAPCM trans?LAPCH_T:LAPCH_NT,
+            LAPV(n),LAPV(nrhs),LAPP(m1.cptr()),LAPV(lda),
+            LAPP(ipiv),LAPP(m2.ptr()),LAPV(ldb) LAPINFO LAP1);
         LAP_Results(Lap_info,"sgetrs");
     }
-    template <> 
-    void LapLULDivEq(
-        const GenMatrix<std::complex<float> >& LUx,
-        MatrixView<std::complex<float> > m)
+    template <bool trans, class M1> 
+    static void LapLUSolve(
+        const M1& m1, const Permutation& P,
+        MatrixView<std::complex<float> > m2, std::complex<float> )
     {
-        TMVAssert(LUx.isSquare());
-        TMVAssert(LUx.rowsize() == m.colsize());
-        TMVAssert(LUx.iscm());
-        TMVAssert(m.iscm());
-        TMVAssert(LUx.ct()==NonConj);
-        TMVAssert(m.ct()==NonConj);
-
-        int n = LUx.colsize();
-        int nrhs = m.rowsize();
-        int lda = LUx.stepj();
-        int ldb = m.stepj();
-        AlignedArray<int> ipiv(n);
+        TMVAssert(P.isInverse());
+        int n = m1.colsize();
+        int nrhs = m2.rowsize();
+        int lda = m1.stepj();
+        int ldb = m2.stepj();
 #ifdef CLAP
-        for(int i=0;i<n;++i) ipiv[i] = i;
+        const int* ipiv = P.getValues();
 #else
-        for(int i=0;i<n;++i) ipiv[i] = i+1;
+        AlignedArray<int> ipiv1(n);
+        for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i] LAPPLUS1;
+        const int* ipiv = ipiv1.get();
 #endif
+        if (!trans && m1.isconj()) m2.conjugateSelf();
         int Lap_info=0;
         LAPNAME(cgetrs) (
-            LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
-            LAPP(LUx.cptr()),LAPV(lda),
-            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+            LAPCM trans?(m1.isconj()?LAPCH_CT:LAPCH_T):LAPCH_NT,
+            LAPV(n),LAPV(nrhs),LAPP(m1.cptr()),LAPV(lda),
+            LAPP(ipiv),LAPP(m2.ptr()),LAPV(ldb) LAPINFO LAP1);
+        if (!trans && m1.isconj()) m2.conjugateSelf();
         LAP_Results(Lap_info,"cgetrs");
     }
+    template <bool trans, class M1> 
+    static void LapLUSolve(
+        const M1& m1, const Permutation& P,
+        MatrixView<std::complex<float> > m2, float t1)
+    {
+        Matrix<float,ColMajor> temp = m2.realPart();
+        LapLUSolve<trans>(m1,P,temp.xView(),t1);
+        m2.realPart() = temp;
+        temp = m2.imagPart();
+        LapLUSolve<trans>(m1,P,temp.xView(),t1);
+        m2.imagPart() = temp;
+    }
+    template <bool trans, class M1> 
+    static inline void LapLUSolve(
+        const M1& m1, const Permutation& P, VectorView<float,Unit> v2, float t1)
+    { LapLUSolve<trans>(m1,P,ColVectorViewOf(v2).xView(),t1); }
+    template <bool trans, class M1> 
+    static inline void LapLUSolve(
+        const M1& m1, const Permutation& P, 
+        VectorView<std::complex<float>,Unit> v2, std::complex<float> t1)
+    { LapLUSolve<trans>(m1,P,ColVectorViewOf(v2).xView(),t1); }
+    template <bool trans, class M1> 
+    static inline void LapLUSolve(
+        const M1& m1, const Permutation& P,
+        VectorView<std::complex<float>,Unit> v2, float t1)
+    { LapLUSolve<trans>(m1,P,ColVectorViewOf(v2).xView(),t1); }
 #endif // MKL
 #endif // FLOAT
 #endif // ALAP
 
-    template <class T, class T1> 
-    void LU_LDivEq(
-        const GenMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m)
+    template <bool trans, class M1, class T2>
+    static void DoLUSolve(
+        const M1& m1, const Permutation& P, MatrixView<T2> m2)
     {
-        TMVAssert(m.colsize() == LUx.rowsize()); 
-        TMVAssert(LUx.rowsize() == LUx.colsize());
-
-#ifdef XDEBUG
-        Matrix<T> m0(m);
-        Matrix<T1> L = LUx.lowerTri(UnitDiag);
-        Matrix<T1> U = LUx.upperTri(NonUnitDiag);
-        Matrix<T1> LU = L*U;
-        LU.reversePermuteRows(P);
-        //cout<<"Start LU_LDivEq\n";
-        //cout<<"LU = "<<LU<<endl;
-        //cout<<"m0 = "<<m0<<endl;
-#endif
-
-        m.permuteRows(P); 
-
 #ifdef ALAP
-        if (m.iscm() && !m.isconj() && LUx.iscm() && !LUx.isconj())
-            LapLULDivEq(LUx,m);
-        else 
-#endif
-            NonLapLULDivEq(LUx,m); 
-
-#ifdef XDEBUG
-        //cout<<"m-> "<<m<<endl;
-        Matrix<T> mm = LU*m;
-        //cout<<"mm = "<<mm<<endl;
-        if (!(Norm(mm-m0) <= 0.001*Norm(L)*Norm(U)*Norm(m0))) {
-            cerr<<"LU_LDivEq: m = "<<TMV_Text(m)<<"  "<<m0<<endl;
-            cerr<<"L = "<<L<<endl;
-            cerr<<"U = "<<U<<endl;
-            cerr<<"LU = "<<LU<<endl;
-            cerr<<"-> m = "<<m<<endl;
-            cerr<<"LU*m = "<<mm<<endl;
-            abort();
+        if (m1.stepj()>0) {
+            const typename M1::value_type t1(0);
+            if ( (m2.iscm() && m2.stepj()>0) ) {
+                LapLUSolve<trans>(m1,P,m2,t1);
+            } else {
+                Matrix<T2,ColMajor|NoDivider> m2c(m2);
+                LapLUSolve<trans>(m1,P,m2c.xView(),t1);
+                InstCopy(m2c.constView().xView(),m2);
+            }
+        } else {
+            Matrix<typename M1::value_type,ColMajor|NoDivider> m1c(m1);
+            DoLUSolve<trans>(m1c.constView().xView(),P,m2);
         }
+#else
+        NonLapLUSolve<trans>::call(m1,P,m2);
 #endif
     }
 
-    //
-    // RDivEq Matrix
-    //
-
-    template <class T, class T1> 
-    static void NonLapLURDivEq(
-        const GenMatrix<T1>& LUx, MatrixView<T> m)
+    template <bool trans, class M1, class T2>
+    static void DoLUSolve(
+        const M1& m1, const Permutation& P, VectorView<T2> v2)
     {
-        TMVAssert(LUx.isSquare());
-        TMVAssert(LUx.rowsize() == m.rowsize());
-        // m = m (LU)^-1 
-        //   = m U^-1 L^-1
-        m %= LUx.upperTri(NonUnitDiag);
-        m %= LUx.lowerTri(UnitDiag);
-    }
-
 #ifdef ALAP
-    template <class T, class T1> 
-    static inline void LapLURDivEq(
-        const GenMatrix<T1>& LUx, MatrixView<T> m)
-    { NonLapLURDivEq(LUx,m); }
-#ifdef INST_DOUBLE
-    template <> 
-    void LapLURDivEq(
-        const GenMatrix<double>& LUx, MatrixView<double> m)
-    {
-        TMVAssert(LUx.isSquare());
-        TMVAssert(LUx.rowsize() == m.rowsize());
-        TMVAssert(LUx.iscm());
-        TMVAssert(m.isrm());
-        TMVAssert(m.ct()==NonConj);
-        TMVAssert(LUx.ct()==NonConj);
-
-        int n = LUx.colsize();
-        int nrhs = m.colsize();
-        int lda = LUx.stepj();
-        int ldb = m.stepi();
-        AlignedArray<int> ipiv(n);
-#ifdef CLAP
-        for(int i=0;i<n;++i) ipiv[i] = i;
-#else
-        for(int i=0;i<n;++i) ipiv[i] = i+1;
-#endif
-        int Lap_info=0;
-        LAPNAME(dgetrs) (
-            LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
-            LAPP(LUx.cptr()),LAPV(lda),
-            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results(Lap_info,"dgetrs");
-    }
-    template <> 
-    void LapLURDivEq(
-        const GenMatrix<std::complex<double> >& LUx,
-        MatrixView<std::complex<double> > m)
-    {
-        TMVAssert(LUx.isSquare());
-        TMVAssert(LUx.rowsize() == m.rowsize());
-        TMVAssert(LUx.iscm());
-        TMVAssert(m.isrm());
-        TMVAssert(LUx.ct()==NonConj);
-
-        int n = LUx.colsize();
-        int nrhs = m.colsize();
-        int lda = LUx.stepj();
-        int ldb = m.stepi();
-        AlignedArray<int> ipiv(n);
-#ifdef CLAP
-        for(int i=0;i<n;++i) ipiv[i] = i;
-#else
-        for(int i=0;i<n;++i) ipiv[i] = i+1;
-#endif
-        int Lap_info=0;
-        LAPNAME(zgetrs) (
-            LAPCM m.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
-            LAPP(LUx.cptr()),LAPV(lda),
-            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results(Lap_info,"zgetrs");
-    }
-#endif
-#ifdef INST_FLOAT
-#ifndef MKL
-    template <> 
-    void LapLURDivEq(
-        const GenMatrix<float>& LUx, MatrixView<float> m)
-    {
-        TMVAssert(LUx.isSquare());
-        TMVAssert(LUx.rowsize() == m.rowsize());
-        TMVAssert(LUx.iscm());
-        TMVAssert(m.isrm());
-        TMVAssert(m.ct()==NonConj);
-        TMVAssert(LUx.ct()==NonConj);
-
-        int n = LUx.colsize();
-        int nrhs = m.colsize();
-        int lda = LUx.stepj();
-        int ldb = m.stepi();
-        AlignedArray<int> ipiv(n);
-#ifdef CLAP
-        for(int i=0;i<n;++i) ipiv[i] = i;
-#else
-        for(int i=0;i<n;++i) ipiv[i] = i+1;
-#endif
-        int Lap_info=0;
-        LAPNAME(sgetrs) (
-            LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
-            LAPP(LUx.cptr()),LAPV(lda),
-            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results(Lap_info,"sgetrs");
-    }
-    template <> 
-    void LapLURDivEq(
-        const GenMatrix<std::complex<float> >& LUx,
-        MatrixView<std::complex<float> > m)
-    {
-        TMVAssert(LUx.isSquare());
-        TMVAssert(LUx.rowsize() == m.rowsize());
-        TMVAssert(LUx.iscm());
-        TMVAssert(m.isrm());
-        TMVAssert(LUx.ct()==NonConj);
-
-        int n = LUx.colsize();
-        int nrhs = m.colsize();
-        int lda = LUx.stepj();
-        int ldb = m.stepi();
-        AlignedArray<int> ipiv(n);
-#ifdef CLAP
-        for(int i=0;i<n;++i) ipiv[i] = i;
-#else
-        for(int i=0;i<n;++i) ipiv[i] = i+1;
-#endif
-        int Lap_info=0;
-        LAPNAME(cgetrs) (
-            LAPCM m.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
-            LAPP(LUx.cptr()),LAPV(lda),
-            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results(Lap_info,"cgetrs");
-    }
-#endif // MKL
-#endif // FLOAT
-#endif // ALAP
-
-    template <class T, class T1> 
-    void LU_RDivEq(
-        const GenMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m)
-        // Solve x P L U = m:
-    {
-#ifdef XDEBUG
-        Matrix<T> m0(m);
-        Matrix<T1> L = LUx.lowerTri(UnitDiag);
-        Matrix<T1> U = LUx.upperTri(NonUnitDiag);
-        Matrix<T1> LU = L*U;
-        LU.reversePermuteRows(P);
-        //cout<<"Start LU_RDivEq\n";
-        //cout<<"LU = "<<LU<<endl;
-        //cout<<"m0 = "<<m0<<endl;
-#endif
-
-        TMVAssert(m.rowsize() == LUx.rowsize()); 
-        TMVAssert(LUx.rowsize() == LUx.colsize());
-
-#ifdef ALAP
-        if (LUx.iscm() && !LUx.isconj() && m.isrm())
-            LapLURDivEq(LUx,m);
-        else 
-#endif
-            NonLapLURDivEq(LUx,m); 
-
-        m.reversePermuteCols(P); 
-
-#ifdef XDEBUG
-        //cout<<"m-> "<<m<<endl;
-        Matrix<T> mm = m*LU;
-        //cout<<"mm = "<<mm<<endl;
-        if (!(Norm(mm-m0) <= 0.001*Norm(L)*Norm(U)*Norm(m0))) {
-            cerr<<"LU_RDivEq: m = "<<TMV_Text(m)<<"  "<<m0<<endl;
-            cerr<<"L = "<<L<<endl;
-            cerr<<"U = "<<U<<endl;
-            cerr<<"LU = "<<LU<<endl;
-            cerr<<"-> m = "<<m<<endl;
-            cerr<<"m*LU = "<<mm<<endl;
-            abort();
+        if (m1.stepj()>0) {
+            const typename M1::value_type t1(0);
+            if ( v2.step() == 1 ) {
+                LapLUSolve<trans>(m1,P,v2.unitView(),t1);
+            } else  {
+                Vector<T2> v2c(v2);
+                LapLUSolve<trans>(m1,P,v2c.xView().unitView(),t1);
+                InstCopy(v2c.constView().xView(),v2);
+            }
+        } else {
+            Matrix<typename M1::value_type,ColMajor|NoDivider> m1c(m1);
+            DoLUSolve<trans>(m1c.constView().xView(),P,v2);
         }
+#else
+        NonLapLUSolve<trans>::call(m1,P,v2);
 #endif
     }
 
-#ifdef INST_INT
-#undef INST_INT
-#endif
+
+    template <class T1, int C1, class T2>
+    void InstLU_SolveInPlace(
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
+        MatrixView<T2> m2)
+    { DoLUSolve<false>(m1,P,m2); }
+    template <class T1, int C1, class T2>
+    void InstLU_SolveTransposeInPlace(
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
+        MatrixView<T2> m2)
+    { DoLUSolve<true>(m1,P,m2); }
+    template <class T1, int C1, class T2>
+    void InstLU_SolveInPlace(
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
+        VectorView<T2> v2)
+    { DoLUSolve<false>(m1,P,v2); }
+    template <class T1, int C1, class T2>
+    void InstLU_SolveTransposeInPlace(
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
+        VectorView<T2> v2)
+    { DoLUSolve<true>(m1,P,v2); }
 
 #define InstFile "TMV_LUDiv.inst"
 #include "TMV_Inst.h"

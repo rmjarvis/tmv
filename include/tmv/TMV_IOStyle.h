@@ -1,21 +1,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2016                                                 //
-// All rights reserved                                                       //
+// Copyright (C) 1998 - 2009                                                 //
 //                                                                           //
-// The project is hosted at https://code.google.com/p/tmv-cpp/               //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
 // where you can find the current version and current documention.           //
 //                                                                           //
 // For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis17 [at] gmail.                                                 //
+// mike_jarvis@users.sourceforge.net                                         //
 //                                                                           //
-// This software is licensed under a FreeBSD license.  The file              //
-// TMV_LICENSE should have bee included with this distribution.              //
-// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
 //                                                                           //
-// Essentially, you can use this software however you want provided that     //
-// you include the TMV_LICENSE file in any distribution that uses it.        //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -25,10 +35,10 @@
 
 namespace tmv {
 
-    class IOStyle
+    class IOStyle 
     {
     public:
-        IOStyle()
+        IOStyle() 
         { setToDefault(); }
 
         // Use default copy, destructor, op=
@@ -36,7 +46,7 @@ namespace tmv {
         // Handlers for setting features:
         IOStyle& noPrefix()
         { usecode = false; writesize = false; return *this; }
-
+        
         IOStyle& useCode()
         { usecode = true; return *this; }
 
@@ -56,10 +66,10 @@ namespace tmv {
             const std::string& s, const std::string& lp,
             const std::string& sp, const std::string& rp,
             const std::string& re, const std::string& f)
-        {
+        { 
             start = s; lparen = lp; space = sp;
             rparen = rp; rowend = re; final = f;
-            return *this;
+            return *this; 
         }
 
         IOStyle& fullMatrix()
@@ -89,7 +99,7 @@ namespace tmv {
         static void revertDefault()
         { getDefaultSingleton() = IOStyle(0); }
 
-
+        
     private :
 
         bool usecode;
@@ -107,42 +117,42 @@ namespace tmv {
 
         void write(std::ostream& os)
         {
-            os << usecode << " " << writesize << " "
+            os << usecode << " " << writesize << " " 
                 << simplesize << " " << usecompact << " '"
-                << start << "' '" << lparen << "' '" << space << "' '"
+                << start << "' '" << lparen << "' '" << space << "' '" 
                 << rparen << "' '" << rowend << "' '" << final << "' "
                 << thresh << " " << prec;
         }
 
         // Helper for dealing with threshold writing.
-        template <typename T>
+        template <class T>
         T outVal(const T& val) const
         { return (thresh > 0. && TMV_ABS(val) < thresh) ? T(0) : val; }
 
-        template <typename T>
+        template <class T>
         std::complex<T> outVal(const std::complex<T>& val) const
         {
             return thresh > 0. ?
-                std::complex<T>(outVal(real(val)),outVal(imag(val))) : val;
+                std::complex<T>(outVal(real(val)),outVal(imag(val))) : val; 
         }
 
         // Private constructor with initial default values.
         // (The int is just to make it easy to resolve on the signature.)
         IOStyle(int) :
-            usecode(false), writesize(true), simplesize(true),
+            usecode(false), writesize(true), simplesize(true), 
             usecompact(false),
             start("\n"), lparen("( "), space("  "),
             rparen(" )"), rowend("\n"), final("\n"),
             thresh(0.), prec(-1) {}
 
         // Use a singleton idiom for the default IOStyle:
-        static inline IOStyle& getDefaultSingleton()
+        static inline IOStyle& getDefaultSingleton() 
         {
             static IOStyle def(0);
             return def;
         }
 
-        // All actual usage of this class is mediated through a
+        // All actual usage of this class is mediated through a 
         // Writer or Reader.
         friend class TMV_Writer;
         friend class TMV_Reader;
@@ -152,19 +162,19 @@ namespace tmv {
     inline IOStyle NormalIO()
     {
         return IOStyle().noCode().simpleSize().fullMatrix().
-            markup("\n","( ","  "," )","\n","\n");
+            markup("\n","( ","  "," )","\n","\n"); 
     }
 
     inline IOStyle CompactIO()
-    {
+    { 
         return IOStyle().useCode().fullSize().compact().
-            markup("",""," ",""," ","");
+            markup("",""," ",""," ",""); 
     }
 
-    inline IOStyle ThreshIO(double thresh)
+    inline IOStyle ThreshIO(double thresh) 
     { return IOStyle().setThresh(thresh); }
 
-    inline IOStyle PrecIO(int prec)
+    inline IOStyle PrecIO(int prec) 
     { return IOStyle().setPrecision(prec); }
 
     inline IOStyle EigenIO()
@@ -176,20 +186,20 @@ namespace tmv {
         TMV_Writer(std::ostream& _os, const IOStyle& _s) : os(_os), s(_s) {}
         // Use default copy, op=, destr
 
-        void begin() const
+        void begin() const 
         {
             if (s.prec >= 0) {
                 oldprec = os.precision(s.prec);
             }
         }
-
-        void end() const
+        
+        void end() const 
         {
             if (s.prec >= 0) {
                 os.precision(oldprec);
             }
         }
-
+                
         void writeCode(const std::string& code) const
         { if (s.usecode) os << code << s.space; }
 
@@ -213,7 +223,7 @@ namespace tmv {
         void writeFinal() const
         { os << s.final; }
 
-        template <typename T>
+        template <class T>
         void writeValue(const T& x) const
         { os << Value(s.outVal(x)); }
 
@@ -230,12 +240,12 @@ namespace tmv {
         mutable std::streamsize oldprec;
 
         // This bit is to workaround a bug in pgCC that was fixed in version 7.
-        // I don't know if versions earlier than 6.1 had the bug, but
+        // I don't know if versions earlier than 6.1 had the bug, but 
         // I apply the workaround to all version before 7.
-        template <typename T>
+        template <class T>
         static inline T Value(const T& x) { return x; }
 #if defined(__PGI) && (!defined(__PGIC__) || __PGIC__ < 7)
-        static inline double Value(const long double& x)
+        static inline double Value(const long double& x) 
         { return double(x); }
         static inline std::complex<double> Value(
             const std::complex<long double>& x)
@@ -260,10 +270,10 @@ namespace tmv {
                 skipWhiteSpace();
                 std::string getstr(str.size(),' ');
                 for(size_t i=0;i<str.size();++i) is.get(getstr[i]);
-                if (getstr != str) {
+                if (getstr != str) { 
                     exp = str;
                     got = getstr;
-                    return false;
+                    return false; 
                 }
                 if (!is) return false;
                 else return true;
@@ -339,7 +349,7 @@ namespace tmv {
         bool readFullSize(ptrdiff_t& n, std::string& exp, std::string& got) const
         { return !s.simplesize ? readSize(n,exp,got) : true; }
 
-        template <typename T>
+        template <class T>
         bool readValue(T& x) const
         {
             skipWhiteSpace();
