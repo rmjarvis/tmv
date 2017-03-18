@@ -100,7 +100,6 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M2::const_col_sub_type M2c;
-            typedef typename M2::const_diag_type M2d;
             T1 Xj;
 
             const bool unit = M2::_unit;
@@ -249,7 +248,6 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M2::const_col_sub_type M2c;
-            typedef typename M2::const_diag_type M2d;
             T1 Xj;
 
             const bool unit = M2::_unit;

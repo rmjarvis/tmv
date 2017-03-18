@@ -29,32 +29,15 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            //std::cout<<"ColMajor GenericElemMultMM\n";
-            //std::cout<<"add = "<<add<<", x = "<<T(x)<<std::endl;
-            //std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
-            //std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
-            //std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3<<std::endl;
-            typedef typename M1::value_type T1;
-            typedef typename M2::value_type T2;
-            typedef typename TypeSelect<
-                Traits<T1>::isreal , typename M3::real_type, 
-                typename M3::complex_type>::type T1x;
-            typedef typename TypeSelect<
-                Traits<T2>::isreal , typename M3::real_type, 
-                typename M3::complex_type>::type T2x;
             const ptrdiff_t N = m3.rowsize();
             for(ptrdiff_t j=0;j<N;++j) {
                 const ptrdiff_t i1 = m3.colstart(j);
                 const ptrdiff_t i2 = m3.colend(j);
-                //std::cout<<"j = "<<j<<" i = "<<i1<<".."<<i2<<std::endl;
                 for(ptrdiff_t i=i1;i<i2;++i) {
-                    //std::cout<<m1.cref(i,j)<<" * "<<m2.cref(i,j);
                     Maybe<add>::add(
                         m3.ref(i,j) , x * m1.cref(i,j) * m2.cref(i,j));
-                    //std::cout<<" -> "<<m3.cref(i,j)<<std::endl;
                 }
             }
-            //std::cout<<"m3 => "<<m3<<std::endl;
         }
     };
 
@@ -65,32 +48,15 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            //std::cout<<"RowMajor GenericElemMultMM\n";
-            //std::cout<<"add = "<<add<<", x = "<<T(x)<<std::endl;
-            //std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
-            //std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
-            //std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3<<std::endl;
-            typedef typename M1::value_type T1;
-            typedef typename M2::value_type T2;
-            typedef typename TypeSelect<
-                Traits<T1>::isreal , typename M3::real_type, 
-                typename M3::complex_type>::type T1x;
-            typedef typename TypeSelect<
-                Traits<T2>::isreal , typename M3::real_type, 
-                typename M3::complex_type>::type T2x;
             const ptrdiff_t M = m3.colsize();
             for(ptrdiff_t i=0;i<M;++i) {
                 const ptrdiff_t j1 = m3.rowstart(i);
                 const ptrdiff_t j2 = m3.rowend(i);
-                //std::cout<<"i = "<<i<<" j = "<<j1<<".."<<j2<<std::endl;
                 for(ptrdiff_t j=j1;j<j2;++j) {
-                    //std::cout<<m1.cref(i,j)<<" * "<<m2.cref(i,j);
                     Maybe<add>::add(
                         m3.ref(i,j) , x * m1.cref(i,j) * m2.cref(i,j));
-                    //std::cout<<" -> "<<m3.cref(i,j)<<std::endl;
                 }
             }
-            //std::cout<<"m3 => "<<m3<<std::endl;
         }
     };
 

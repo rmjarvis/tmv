@@ -22,8 +22,6 @@ namespace tmv {
         // algo path to the ones that have vstep == 1.
 
         typedef typename Traits<T>::real_type RT;
-        typedef typename V1::value_type T1;
-        typedef typename V2::value_type T2;
         const Scaling<1,RT> one;
 
         const ptrdiff_t M = m3.colsize();

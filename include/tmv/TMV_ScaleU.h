@@ -233,7 +233,6 @@ namespace tmv {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
         {
             TMVStaticAssert(!M1::_unit || ix == 1);
-            typedef typename M1::value_type T1;
             const ptrdiff_t s2 = s > 20 ? Unknown : s;
             const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2

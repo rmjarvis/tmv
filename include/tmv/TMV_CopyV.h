@@ -259,8 +259,6 @@ namespace tmv {
     {
         static TMV_INLINE void call(const V1& v1, V2& v2)
         {
-            typedef typename V1::value_type T1;
-            typedef typename V2::value_type T2;
             const bool samestep = VStepHelper<V1,V2>::same;
             const bool noclobber = VStepHelper<V1,V2>::noclobber;
             const bool checkalias =
@@ -283,8 +281,6 @@ namespace tmv {
         typedef typename V2::cview_type V2v;
         TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
         TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
-        typedef typename V1::value_type T1;
-        typedef typename V2::value_type T2;
         CopyV_Helper<-1,s,V1v,V2v>::call(v1v,v2v); 
     }
 

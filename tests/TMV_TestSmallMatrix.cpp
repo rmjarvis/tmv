@@ -1,16 +1,14 @@
-#include "TMV.h"
-#include "TMV_Small.h"
+
 #include "TMV_Test.h"
 #include "TMV_Test_3.h"
+#include "TMV.h"
 #include <fstream>
 #include <cstdio>
-#include <vector>
-
-#define CT std::complex<T>
 
 template <class T, int M, int N, tmv::StorageType S> 
 inline void TestBasicSmallMatrix_1()
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestBasicSmallMatrix_1\n";
         std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
@@ -18,11 +16,15 @@ inline void TestBasicSmallMatrix_1()
         std::cout<<"M,N = "<<M<<','<<N<<std::endl;
     }
 
+    Assert(M >= N,"Matrix must not be short"); 
+    // The checks below implicitly assume this.
+    // So make it explicit here to avoid confusion.
+
     tmv::SmallMatrix<T,M,N,S> m;
     tmv::SmallMatrix<T,M,N,S|tmv::FortranStyle> mf;
-    Assert(m.colsize() == M && m.rowsize() == N,
+    Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
            "Creating SmallMatrix(M,N)");
-    Assert(m.colsize() == M && m.rowsize() == N,
+    Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
            "Creating SmallMatrixF(M,N)");
 
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
@@ -66,6 +68,7 @@ inline void TestBasicSmallMatrix_1()
     }
     Assert(m == mf,"CStyle SmallMatrix == FortranStyle SmallMatrix");
 
+
     // Test Basic Arithmetic 
     tmv::SmallMatrix<T,M,N,S> a;
     tmv::SmallMatrix<T,M,N,S> b;
@@ -88,7 +91,7 @@ inline void TestBasicSmallMatrix_1()
     tmv::SmallMatrix<CT,M,N,S> cm;
     tmv::SmallMatrix<CT,M,N,S> ca;
     tmv::SmallMatrix<CT,M,N,S> cb;
-    Assert(cm.colsize() == M && cm.rowsize() == N,
+    Assert(cm.colsize() == size_t(M) && cm.rowsize() == size_t(N),
            "Creating CSmallMatrix(M,N)");
 
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k)
@@ -101,17 +104,17 @@ inline void TestBasicSmallMatrix_1()
     }
 
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) {
-        ca(i,j) = CT(3+i+5*j,T(0)+i-j);
-        cb(i,j) = CT(3+2*i+4*j,4-10*i);
+        ca(i,j) = CT(T(3+i+5*j),T(0)+i-j);
+        cb(i,j) = CT(T(3+2*i+4*j),T(4-10*i));
     }
 
     cm = ca+cb;
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
-        Assert(cm(i,j) == CT(6+3*i+9*j,4-9*i-j),"Add CSmallMatrix");
+        Assert(cm(i,j) == CT(T(6+3*i+9*j),T(4-9*i-j)),"Add CSmallMatrix");
 
     cm = ca-cb;
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
-        Assert(cm(i,j) == CT(T(0)-i+j,-4+11*i-j),"Subtract CSmallMatrix");
+        Assert(cm(i,j) == CT(T(0)-i+j,T(-4+11*i-j)),"Subtract CSmallMatrix");
 
     cm = ca;
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
@@ -156,11 +159,12 @@ inline void TestBasicSmallMatrix_2()
     std::copy(qveccm.begin(), qveccm.end(), q4.colmajor_begin());
 
     tmv::SmallMatrix<T,30,40,S> q5x;
-    tmv::MatrixView<T> q5 = q5x.subMatrix(3,18,5,25,5,5);
+    typedef typename tmv::SmallMatrix<T,30,40,S>::submatrix_step_type step_type;
+    step_type q5 = q5x.subMatrix(3,18,5,25,5,5);
     std::copy(qvecrm.begin(), qvecrm.end(), q5.rowmajor_begin());
 
     tmv::SmallMatrix<T,30,40,S> q6x;
-    tmv::MatrixView<T> q6 = q6x.subMatrix(3,18,5,25,5,5);
+    step_type q6 = q6x.subMatrix(3,18,5,25,5,5);
     std::copy(qveccm.begin(), qveccm.end(), q6.colmajor_begin());
 
     // Assignment using op<< is always in rowmajor order.
@@ -203,7 +207,7 @@ inline void TestBasicSmallMatrix_2()
     typename tmv::SmallMatrix<T,3,4,S>::view_type q1_view = q1.view();
     typename tmv::SmallMatrix<T,3,4,S>::const_view_type q1_constview = 
         q1_const.view();
-    tmv::ConstMatrixView<T> q5_const = q5;
+    typename step_type::const_view_type q5_const = q5;
 
     typename tmv::SmallMatrix<T,3,4,S>::rowmajor_iterator rmit1 = 
         q1.rowmajor_begin();
@@ -213,9 +217,8 @@ inline void TestBasicSmallMatrix_2()
         q1_view.rowmajor_begin();
     typename tmv::SmallMatrix<T,3,4,S>::const_view_type::const_rowmajor_iterator
         rmit4 = q1_constview.rowmajor_begin();
-    typename tmv::MatrixView<T>::rowmajor_iterator rmit5 =
-        q5.rowmajor_begin();
-    typename tmv::ConstMatrixView<T>::const_rowmajor_iterator rmit6 =
+    typename step_type::rowmajor_iterator rmit5 = q5.rowmajor_begin();
+    typename step_type::const_view_type::const_rowmajor_iterator rmit6 = 
         q5_const.rowmajor_begin();
     int i = 0;
     while (rmit1 != q1.rowmajor_end()) {
@@ -242,9 +245,8 @@ inline void TestBasicSmallMatrix_2()
         q1_view.colmajor_begin();
     typename tmv::SmallMatrix<T,3,4,S>::const_view_type::const_colmajor_iterator
         cmit4 = q1_constview.colmajor_begin();
-    typename tmv::MatrixView<T>::colmajor_iterator cmit5 =
-        q5.colmajor_begin();
-    typename tmv::ConstMatrixView<T>::const_colmajor_iterator cmit6 =
+    typename step_type::colmajor_iterator cmit5 = q5.colmajor_begin();
+    typename step_type::const_view_type::const_colmajor_iterator cmit6 = 
         q5_const.colmajor_begin();
     i = 0;
     while (cmit1 != q1.colmajor_end()) {
@@ -267,6 +269,7 @@ inline void TestBasicSmallMatrix_2()
 template <class T, int M, int N, tmv::StorageType S> 
 inline void TestBasicSmallMatrix_IO()
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestBasicMatrix_IO\n";
         std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
@@ -279,15 +282,15 @@ inline void TestBasicSmallMatrix_IO()
 
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         m(i,j) = T(k);
-        cm(i,j) = CT(k,k+1000);
+        cm(i,j) = CT(T(k),T(k+1000));
     }
     m(3,1) = T(1.e-30);
     cm(3,1) = CT(T(1.e-30),T(1.e-30));
-    m(5,6) = T(9.e-3);
-    cm(5,6) = CT(T(9.e-3),T(9.e-3));
-    cm(6,6) = CT(T(9),T(9.e-3));
-    m(7,4) = T(0.123456789);
-    cm(7,4) = CT(T(3.123456789),T(6.987654321));
+    m(2,0) = T(9.e-3);
+    cm(2,0) = CT(T(9.e-3),T(9.e-3));
+    cm(2,1) = CT(T(9),T(9.e-3));
+    m(1,0) = T(0.123456789);
+    cm(1,0) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::SmallMatrix<T,M,N> m2 = m;
@@ -300,19 +303,19 @@ inline void TestBasicSmallMatrix_IO()
     tmv::SmallMatrix<CT,M,N> cm3 = cm;
     m3(3,1) = T(0);
     cm3(3,1) = T(0);
-    m3(5,6) = T(0); // Others, esp. cm3(5,6), shouldn't get clipped.
+    m3(2,0) = T(0); // Others, esp. cm3(2,0) and cm3(2,1), shouldn't get clipped.
     Assert(m2 == m3,"SmallMatrix clip");
     Assert(cm2 == cm3,"Complex SmallMatrix clip");
 
     // However, ThreshIO for complex works slightly differently than clip.
     // It clips _either_ the real or imag component, so now cm2(5,6) and 
     // cm2(6,6) need to be modified.
-    cm2(5,6) = cm3(5,6) = T(0);
-    cm2(6,6) = cm3(6,6) = T(9);
+    cm2(2,0) = cm3(2,0) = T(0);
+    cm2(2,1) = cm3(2,1) = T(9);
 
     // Write matrices with 4 different styles
     std::ofstream fout("tmvtest_smallmatrix_io.dat");
-    Assert(bool(fout),"Couldn't open tmvtest_smallmatrix_io.dat for output");
+    Assert(fout,"Couldn't open tmvtest_smallmatrix_io.dat for output");
     fout << m << std::endl;
     fout << cm << std::endl;
     fout << tmv::CompactIO() << m << std::endl;
@@ -330,52 +333,52 @@ inline void TestBasicSmallMatrix_IO()
     fout.close();
 
     // When using (the default) prec(6), these will be the values read in.
-    m(7,4) = T(0.123457);
-    cm(7,4) = CT(T(3.12346),T(6.98765));
+    m(1,0) = T(0.123457);
+    cm(1,0) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in. (m2,cm2)
 
     // When using prec(4), these will be the values read in.
-    m3(7,4) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,6);
-    else cm3(7,4) = CT(T(3.123),T(6.988));
+    m3(1,0) = T(0.1235);
+    if (std::numeric_limits<T>::is_integer) cm3(1,0) = CT(T(3),T(600));
+    else cm3(1,0) = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::SmallMatrix<T,M,N,tmv::RowMajor> xm1;
     tmv::SmallMatrix<CT,M,N,tmv::RowMajor> xcm1;
     std::ifstream fin("tmvtest_smallmatrix_io.dat");
-    Assert(bool(fin),"Couldn't open tmvtest_smallmatrix_io.dat for input");
+    Assert(fin,"Couldn't open tmvtest_smallmatrix_io.dat for input");
     fin >> xm1 >> xcm1;
-    Assert(EqualIO(m,xm1,EPS),"SmallMatrix I/O check normal");
-    Assert(EqualIO(cm,xcm1,EPS),"CSmallMatrix I/O check normal");
+    Assert(m == xm1,"SmallMatrix I/O check normal");
+    Assert(cm == xcm1,"CSmallMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm1 >> tmv::CompactIO() >> xcm1;
-    Assert(EqualIO(m,xm1,EPS),"SmallMatrix I/O check compact");
-    Assert(EqualIO(cm,xcm1,EPS),"CSmallMatrix I/O check compact");
+    Assert(m == xm1,"SmallMatrix I/O check compact");
+    Assert(cm == xcm1,"CSmallMatrix I/O check compact");
     fin >> xm1.view() >> xcm1.view();
-    Assert(EqualIO(m2,xm1,EPS),"SmallMatrix I/O check thresh");
-    Assert(EqualIO(cm2,xcm1,EPS),"CSmallMatrix I/O check thresh");
+    Assert(m2 == xm1,"SmallMatrix I/O check thresh");
+    Assert(cm2 == xcm1,"CSmallMatrix I/O check thresh");
     fin >> myStyle >> xm1.view() >> myStyle >> xcm1.view();
-    Assert(EqualIO(m3,xm1,EPS),"SmallMatrix I/O check compact thresh & prec(4)");
-    Assert(EqualIO(cm3,xcm1,EPS),"CSmallMatrix I/O check compact thresh & prec(4)");
+    Assert(m3 == xm1,"SmallMatrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm1,"CSmallMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for column major
     tmv::SmallMatrix<T,M,N,tmv::ColMajor> xm2;
     tmv::SmallMatrix<CT,M,N,tmv::ColMajor> xcm2;
     fin.open("tmvtest_smallmatrix_io.dat");
-    Assert(bool(fin),"Couldn't open tmvtest_smallmatrix_io.dat for input");
+    Assert(fin,"Couldn't open tmvtest_smallmatrix_io.dat for input");
     fin >> xm2.view() >> xcm2.view();
-    Assert(EqualIO(m,xm2,EPS),"SmallMatrix I/O check normal");
-    Assert(EqualIO(cm,xcm2,EPS),"CSmallMatrix I/O check normal");
+    Assert(m == xm2,"SmallMatrix I/O check normal");
+    Assert(cm == xcm2,"CSmallMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm2.view() >> tmv::CompactIO() >> xcm2.view();
-    Assert(EqualIO(m,xm2,EPS),"SmallMatrix I/O check compact");
-    Assert(EqualIO(cm,xcm2,EPS),"CSmallMatrix I/O check compact");
+    Assert(m == xm2,"SmallMatrix I/O check compact");
+    Assert(cm == xcm2,"CSmallMatrix I/O check compact");
     fin >> xm2 >> xcm2;
-    Assert(EqualIO(m2,xm2,EPS),"SmallMatrix I/O check thresh");
-    Assert(EqualIO(cm2,xcm2,EPS),"CSmallMatrix I/O check thresh");
+    Assert(m2 == xm2,"SmallMatrix I/O check thresh");
+    Assert(cm2 == xcm2,"CSmallMatrix I/O check thresh");
     fin >> myStyle >> xm2 >> myStyle >> xcm2;
-    Assert(EqualIO(m3,xm2,EPS),"SmallMatrix I/O check compact thresh & prec(4)");
-    Assert(EqualIO(cm3,xcm2,EPS),"CSmallMatrix I/O check compact thresh & prec(4)");
+    Assert(m3 == xm2,"SmallMatrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm2,"CSmallMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Read back into regular SmallMatrix
@@ -384,19 +387,19 @@ inline void TestBasicSmallMatrix_IO()
     tmv::Matrix<T> zm1,zm2,zm3,zm4;
     tmv::Matrix<CT> zcm1,zcm2,zcm3,zcm4;
     fin.open("tmvtest_smallmatrix_io.dat");
-    Assert(bool(fin),"Couldn't open tmvtest_smallmatrix_io.dat for input");
+    Assert(fin,"Couldn't open tmvtest_smallmatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
-    Assert(EqualIO(m,zm1,EPS),"SmallMatrix I/O check normal -> Matrix");
-    Assert(EqualIO(cm,zcm1,EPS),"CSmallMatrix I/O check normal -> Matrix");
+    Assert(m == zm1,"SmallMatrix I/O check normal -> Matrix");
+    Assert(cm == zcm1,"CSmallMatrix I/O check normal -> Matrix");
     fin >> zm2 >> zcm2;
-    Assert(EqualIO(m,zm2,EPS),"SmallMatrix I/O check compact -> Matrix");
-    Assert(EqualIO(cm,zcm2,EPS),"CSmallMatrix I/O check compact -> Matrix");
+    Assert(m == zm2,"SmallMatrix I/O check compact -> Matrix");
+    Assert(cm == zcm2,"CSmallMatrix I/O check compact -> Matrix");
     fin >> tmv::NormalIO() >> zm3 >> tmv::NormalIO() >> zcm3;
-    Assert(EqualIO(m2,zm3,EPS),"SmallMatrix I/O check thresh -> Matrix");
-    Assert(EqualIO(cm2,zcm3,EPS),"CSmallMatrix I/O check thresh -> Matrix");
+    Assert(m2 == zm3,"SmallMatrix I/O check thresh -> Matrix");
+    Assert(cm2 == zcm3,"CSmallMatrix I/O check thresh -> Matrix");
     fin >> myStyle >> zm4 >> myStyle >> zcm4;
-    Assert(EqualIO(m3,zm4,EPS),"SmallMatrix I/O check compact thresh -> Matrix");
-    Assert(EqualIO(cm3,zcm4,EPS),"CSmallMatrix I/O check compact thresh -> Matrix");
+    Assert(m3 == zm4,"SmallMatrix I/O check compact thresh -> Matrix");
+    Assert(cm3 == zcm4,"CSmallMatrix I/O check compact thresh -> Matrix");
     fin.close();
     // Switch it back.
     tmv::IOStyle::revertDefault();
@@ -407,17 +410,24 @@ inline void TestBasicSmallMatrix_IO()
 
 }
 
-template <class T> 
-void TestAllSmallMatrix()
+template <class T> void TestAllSmallMatrix()
 {
-    TestBasicSmallMatrix_1<T,15,10,tmv::RowMajor>();
-    TestBasicSmallMatrix_1<T,15,10,tmv::ColMajor>();
-    TestBasicSmallMatrix_2<T,15,10,tmv::RowMajor>();
-    TestBasicSmallMatrix_2<T,15,10,tmv::ColMajor>();
-    TestBasicSmallMatrix_IO<T,15,10,tmv::RowMajor>();
-    TestBasicSmallMatrix_IO<T,15,10,tmv::ColMajor>();
+    TestBasicSmallMatrix_1<T,6,4,tmv::RowMajor>();
+    TestBasicSmallMatrix_1<T,6,4,tmv::ColMajor>();
+    TestBasicSmallMatrix_2<T,6,4,tmv::RowMajor>();
+    TestBasicSmallMatrix_2<T,6,4,tmv::ColMajor>();
+    TestBasicSmallMatrix_IO<T,6,4,tmv::RowMajor>();
+    TestBasicSmallMatrix_IO<T,6,4,tmv::ColMajor>();
+#if (XTEST & 2)
+    TestBasicSmallMatrix_1<T,42,10,tmv::RowMajor>();
+    TestBasicSmallMatrix_1<T,42,10,tmv::ColMajor>();
+    TestBasicSmallMatrix_2<T,42,10,tmv::RowMajor>();
+    TestBasicSmallMatrix_2<T,42,10,tmv::ColMajor>();
+    TestBasicSmallMatrix_IO<T,42,10,tmv::RowMajor>();
+    TestBasicSmallMatrix_IO<T,42,10,tmv::ColMajor>();
+#endif
     TestSmallMatrix_Sub<T>();
-    std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
+    std::cout<<"SmallMatrix<"<<Text(T())<<"> passed all basic tests\n";
 }
 
 #ifdef TEST_DOUBLE

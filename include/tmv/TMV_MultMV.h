@@ -156,7 +156,6 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_row_type M1r;
-            typedef typename V2::value_type T2;
             Maybe<add>::add( 
                 v3.ref(0) , ZProd<false,false>::prod(
                     x , MultVV_Helper<-4,rs,M1r,V2>::call(m1.get_row(0),v2)) );
@@ -176,7 +175,6 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_row_type M1r;
-            typedef typename V2::value_type T2;
             Maybe<add>::add( 
                 v3.ref(0) , ZProd<false,false>::prod(
                     x , MultVV_Helper<-1,rs,M1r,V2>::call(m1.get_row(0),v2)) );
@@ -196,7 +194,6 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_row_type M1r;
-            typedef typename V2::value_type T2;
             Maybe<add>::add( 
                 v3.ref(0) , ZProd<false,false>::prod(
                     x , MultVV_Helper<-2,rs,M1r,V2>::call(m1.get_row(0),v2)) );
@@ -1063,10 +1060,10 @@ namespace tmv {
                 // add ix != 1:   y += x*(0+mv)
                 // !add ix == 1:  y =    (0+mv)
                 // !add ix != 1:  y =  x*(0+mv)
-                Y0 = Maybe<add && (ix==1)>::select( Y[0] , T3(0) );
-                Y1 = Maybe<add && (ix==1)>::select( Y[1] , T3(0) );
-                Y2 = Maybe<add && (ix==1)>::select( Y[2] , T3(0) );
-                Y3 = Maybe<add && (ix==1)>::select( Y[3] , T3(0) );
+                Y0 = Maybe<add && (ix==1)>::select( Y[0] , 0. );
+                Y1 = Maybe<add && (ix==1)>::select( Y[1] , 0. );
+                Y2 = Maybe<add && (ix==1)>::select( Y[2] , 0. );
+                Y3 = Maybe<add && (ix==1)>::select( Y[3] , 0. );
                 j=N_4; if (j) do {
                     X0 = X[0]; X1 = X[1]; X2 = X[2]; X3 = X[3]; X += 4;
                     A00 = A0[0]; A01 = A0[1]; A02 = A0[2]; A03 = A0[3]; 
@@ -1200,8 +1197,8 @@ namespace tmv {
                 ptrdiff_t N_4 = N>>2;
                 ptrdiff_t Nx = N-(N_4<<2);
 
-                Y0 = Maybe<add && (ix==1)>::select( v3.cref(0) , T3(0) );
-                Y1 = Maybe<add && (ix==1)>::select( v3.cref(1) , T3(0) );
+                Y0 = Maybe<add && (ix==1)>::select( v3.cref(0) , 0. );
+                Y1 = Maybe<add && (ix==1)>::select( v3.cref(1) , 0. );
                 if (N_4) do {
                     X0 = X[0]; X1 = X[1]; X2 = X[2]; X3 = X[3]; X += 4;
                     A00 = A0[0]; A01 = A0[1]; A02 = A0[2]; A03 = A0[3]; 
@@ -1261,9 +1258,9 @@ namespace tmv {
                 ptrdiff_t N_4 = N>>2;
                 ptrdiff_t Nx = N-(N_4<<2);
 
-                Y0 = Maybe<add && (ix==1)>::select( v3.cref(0) , T3(0) );
-                Y1 = Maybe<add && (ix==1)>::select( v3.cref(1) , T3(0) );
-                Y2 = Maybe<add && (ix==1)>::select( v3.cref(2) , T3(0) );
+                Y0 = Maybe<add && (ix==1)>::select( v3.cref(0) , 0. );
+                Y1 = Maybe<add && (ix==1)>::select( v3.cref(1) , 0. );
+                Y2 = Maybe<add && (ix==1)>::select( v3.cref(2) , 0. );
                 if (N_4) do {
                     X0 = X[0]; X1 = X[1]; X2 = X[2]; X3 = X[3]; X += 4;
                     A00 = A0[0]; A01 = A0[1]; A02 = A0[2]; A03 = A0[3]; 
@@ -1331,10 +1328,10 @@ namespace tmv {
                 ptrdiff_t N_4 = N>>2;
                 ptrdiff_t Nx = N-(N_4<<2);
 
-                Y0 = Maybe<add && (ix==1)>::select( v3.cref(0) , T3(0) );
-                Y1 = Maybe<add && (ix==1)>::select( v3.cref(1) , T3(0) );
-                Y2 = Maybe<add && (ix==1)>::select( v3.cref(2) , T3(0) );
-                Y3 = Maybe<add && (ix==1)>::select( v3.cref(3) , T3(0) );
+                Y0 = Maybe<add && (ix==1)>::select( v3.cref(0) , 0. );
+                Y1 = Maybe<add && (ix==1)>::select( v3.cref(1) , 0. );
+                Y2 = Maybe<add && (ix==1)>::select( v3.cref(2) , 0. );
+                Y3 = Maybe<add && (ix==1)>::select( v3.cref(3) , 0. );
                 if (N_4) do {
                     X0 = X[0]; X1 = X[1]; X2 = X[2]; X3 = X[3]; X += 4;
                     A00 = A0[0]; A01 = A0[1]; A02 = A0[2]; A03 = A0[3]; 
@@ -1552,8 +1549,12 @@ namespace tmv {
             TMVAssert(M_2 > 0);
             do {
                 X = X_begin;
-                Y0 = Maybe<add && (ix==1)>::select( Y[0] , T3(0) );
-                Y1 = Maybe<add && (ix==1)>::select( Y[1] , T3(0) );
+                // I can't figure out why, but if I use T3(0) here (which I would have thought
+                // would be the better thing to do), g++ complains about Y0,Y1
+                //    "may be used uninitialized in this function"
+                // It doesn't make any sense, but switching to 0. kills the warnings.
+                Y0 = Maybe<add && (ix==1)>::select( Y[0] , 0. );
+                Y1 = Maybe<add && (ix==1)>::select( Y[1] , 0. );
 
                 j=N; do {
                     X0 = *X++; A00 = *A0++; A10 = *A1++;
@@ -1635,8 +1636,8 @@ namespace tmv {
                 const bool c1 = M1::_conj;
                 const bool c2 = V2::_conj;
 
-                Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , T3(0));
-                Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , T3(0));
+                Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , 0.);
+                Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , 0.);
 
                 do {
                     X0 = *X++; A00 = *A0++; A10 = *A1++;
@@ -1688,9 +1689,9 @@ namespace tmv {
                 const bool c1 = M1::_conj;
                 const bool c2 = V2::_conj;
 
-                Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , T3(0));
-                Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , T3(0));
-                Y2 = Maybe<add && (ix==1)>::select(v3.cref(2) , T3(0));
+                Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , 0.);
+                Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , 0.);
+                Y2 = Maybe<add && (ix==1)>::select(v3.cref(2) , 0.);
 
                 do {
                     X0 = *X++; A00 = *A0++; A10 = *A1++; A20 = *A2++;
@@ -1746,10 +1747,10 @@ namespace tmv {
                 const bool c1 = M1::_conj;
                 const bool c2 = V2::_conj;
 
-                Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , T3(0));
-                Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , T3(0));
-                Y2 = Maybe<add && (ix==1)>::select(v3.cref(2) , T3(0));
-                Y3 = Maybe<add && (ix==1)>::select(v3.cref(3) , T3(0));
+                Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , 0.);
+                Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , 0.);
+                Y2 = Maybe<add && (ix==1)>::select(v3.cref(2) , 0.);
+                Y3 = Maybe<add && (ix==1)>::select(v3.cref(3) , 0.);
 
                 do {
                     X0 = *X++; 
@@ -2540,7 +2541,6 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,V2::_size>::same));
         TMVAssert(m1.colsize() == v3.size());
         TMVAssert(m1.rowsize() == v2.size());
-        typedef typename M1::value_type T1;
         const ptrdiff_t cs = Sizes<M1::_colsize,V3::_size>::size;
         const ptrdiff_t rs = Sizes<M1::_rowsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -2561,7 +2561,6 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,V2::_size>::same));
         TMVAssert(m1.colsize() == v3.size());
         TMVAssert(m1.rowsize() == v2.size());
-        typedef typename M1::value_type T1;
         const ptrdiff_t cs = Sizes<M1::_colsize,V3::_size>::size;
         const ptrdiff_t rs = Sizes<M1::_rowsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -2582,7 +2581,6 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,V2::_size>::same));
         TMVAssert(m1.colsize() == v3.size());
         TMVAssert(m1.rowsize() == v2.size());
-        typedef typename M1::value_type T1;
         const ptrdiff_t cs = Sizes<M1::_colsize,V3::_size>::size;
         const ptrdiff_t rs = Sizes<M1::_rowsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;

@@ -242,7 +242,6 @@ namespace tmv {
             //std::cout<<"beta = "<<beta<<std::endl;
             //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
-            typedef typename M1::real_type RT;
             typedef typename M1::value_type T1;
 
             typedef typename MCopyHelper<T1,Rec,cs,cs>::type M1f;
@@ -499,7 +498,6 @@ namespace tmv {
             std::cout<<"PackedQ_MultEq algo 32: div,cs,rs,xs = "<<
                 div<<','<<cs<<','<<rs<<','<<xs<<std::endl;
 #endif
-            typedef typename M1::value_type T;
             const int algo1 = 
                 2*cs*rs*(xs-cs) < rs*rs*(xs-2*cs+2*rs/3) + (
                     cs < 32 ? cs*cs*xs*3/4 : cs*cs*xs/2 ) ? 11 : 13;

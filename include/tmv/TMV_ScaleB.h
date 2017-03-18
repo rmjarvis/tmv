@@ -203,7 +203,6 @@ namespace tmv {
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
         {
-            typedef typename M1::value_type T1;
             const int algo = 
                 (cs == 0 || rs == 0) ? 0 :
                 (ix == 1) ? 1 :

@@ -2,12 +2,18 @@
     std::vector<tmv::BandMatrix<T,tmv::RowMajor> > B1; \
     std::vector<tmv::BandMatrix<T,tmv::ColMajor> > B2; \
     std::vector<tmv::BandMatrix<T,tmv::DiagMajor> > B3; \
-    std::vector<tmv::Matrix<T> > B4; \
+    std::vector<tmv::ThinBandMatrix<T,0,1,tmv::DiagMajor> > B4; \
+    std::vector<tmv::ThinBandMatrix<T,1,0,tmv::DiagMajor> > B5; \
+    std::vector<tmv::ThinBandMatrix<T,1,1,tmv::DiagMajor> > B6; \
+    std::vector<tmv::Matrix<T> > B7; \
     std::vector<tmv::BandMatrix<std::complex<T>,tmv::RowMajor> > CB1; \
     std::vector<tmv::BandMatrix<std::complex<T>,tmv::ColMajor> > CB2; \
     std::vector<tmv::BandMatrix<std::complex<T>,tmv::DiagMajor> > CB3; \
-    std::vector<tmv::Matrix<std::complex<T> > > CB4; \
-    DoMakeBandList(b,cb,B1,B2,B3,B4,CB1,CB2,CB3,CB4); 
+    std::vector<tmv::ThinBandMatrix<std::complex<T>,0,1,tmv::DiagMajor> > CB4; \
+    std::vector<tmv::ThinBandMatrix<std::complex<T>,1,0,tmv::DiagMajor> > CB5; \
+    std::vector<tmv::ThinBandMatrix<std::complex<T>,1,1,tmv::DiagMajor> > CB6; \
+    std::vector<tmv::Matrix<std::complex<T> > > CB7; \
+    DoMakeBandList(b,cb,B1,B2,B3,B4,B5,B6,B7,CB1,CB2,CB3,CB4,CB5,CB6,CB7); 
 
 template <class T> 
 inline void DoMakeBandList(
@@ -16,10 +22,16 @@ inline void DoMakeBandList(
     std::vector<tmv::BandMatrix<T,tmv::RowMajor> >& BR,
     std::vector<tmv::BandMatrix<T,tmv::ColMajor> >& BC,
     std::vector<tmv::BandMatrix<T,tmv::DiagMajor> >& BD,
+    std::vector<tmv::ThinBandMatrix<T,0,1,tmv::DiagMajor> >& TBD01,
+    std::vector<tmv::ThinBandMatrix<T,1,0,tmv::DiagMajor> >& TBD10,
+    std::vector<tmv::ThinBandMatrix<T,1,1,tmv::DiagMajor> >& TBD11,
     std::vector<tmv::Matrix<T> >& M,
     std::vector<tmv::BandMatrix<std::complex<T>,tmv::RowMajor> >& CBR,
     std::vector<tmv::BandMatrix<std::complex<T>,tmv::ColMajor> >& CBC,
     std::vector<tmv::BandMatrix<std::complex<T>,tmv::DiagMajor> >& CBD,
+    std::vector<tmv::ThinBandMatrix<std::complex<T>,0,1,tmv::DiagMajor> >& CTBD01,
+    std::vector<tmv::ThinBandMatrix<std::complex<T>,1,0,tmv::DiagMajor> >& CTBD10,
+    std::vector<tmv::ThinBandMatrix<std::complex<T>,1,1,tmv::DiagMajor> >& CTBD11,
     std::vector<tmv::Matrix<std::complex<T> > >& CM)
 {
     const int N = std::numeric_limits<T>::is_integer ? 6 : 10;
@@ -29,10 +41,16 @@ inline void DoMakeBandList(
     BR.reserve(RESERVE);
     BC.reserve(RESERVE);
     BD.reserve(RESERVE);
+    TBD01.reserve(RESERVE);
+    TBD10.reserve(RESERVE);
+    TBD11.reserve(RESERVE);
     M.reserve(RESERVE);
     CBR.reserve(RESERVE);
     CBC.reserve(RESERVE);
     CBD.reserve(RESERVE);
+    CTBD01.reserve(RESERVE);
+    CTBD10.reserve(RESERVE);
+    CTBD11.reserve(RESERVE);
     CM.reserve(RESERVE);
 
     tmv::Matrix<T> a1(N,N);
@@ -130,42 +148,49 @@ inline void DoMakeBandList(
     CBC.push_back(tmv::BandMatrix<std::complex<T>,tmv::ColMajor>(ca1,0,3));
     b.push_back(BC.back().view());
     cb.push_back(CBC.back().view());
-    BD.push_back(tmv::BandMatrix<T,tmv::DiagMajor>(tmv::UpperBiDiagMatrix(v1,v2))); 
-    CBD.push_back(tmv::BandMatrix<std::complex<T>,tmv::DiagMajor>(tmv::UpperBiDiagMatrix(cv1,cv2)));
-    b.push_back(BD.back().view());
-    cb.push_back(CBD.back().view());
-    BD.push_back(tmv::BandMatrix<T,tmv::DiagMajor>(tmv::LowerBiDiagMatrix(v2,v1)));
-    CBD.push_back(tmv::BandMatrix<std::complex<T>,tmv::DiagMajor>(tmv::LowerBiDiagMatrix(cv2,cv1)));
-    b.push_back(BD.back().view());
-    cb.push_back(CBD.back().view());
-    BD.push_back(tmv::BandMatrix<T,tmv::DiagMajor>(tmv::TriDiagMatrix(v2,v1,v2))); 
-    CBD.push_back(tmv::BandMatrix<std::complex<T>,tmv::DiagMajor>(tmv::TriDiagMatrix(cv2,cv1,cv2)));
-    b.push_back(BD.back().view());
-    cb.push_back(CBD.back().view());
-    BD.push_back(tmv::BandMatrix<T,tmv::DiagMajor>(tmv::UpperBiDiagMatrix(v1,v1)));
-    CBD.push_back(tmv::BandMatrix<std::complex<T>,tmv::DiagMajor>(tmv::UpperBiDiagMatrix(cv1,cv1)));
-    b.push_back(BD.back().view());
-    cb.push_back(CBD.back().view());
-    BD.push_back(tmv::BandMatrix<T,tmv::DiagMajor>(tmv::LowerBiDiagMatrix(v1,v1)));
-    CBD.push_back(tmv::BandMatrix<std::complex<T>,tmv::DiagMajor>(tmv::LowerBiDiagMatrix(cv1,cv1)));
-    b.push_back(BD.back().view());
-    cb.push_back(CBD.back().view());
-    BD.push_back(tmv::BandMatrix<T,tmv::DiagMajor>(tmv::TriDiagMatrix(v1,v1,v2)));
-    CBD.push_back(tmv::BandMatrix<std::complex<T>,tmv::DiagMajor>(tmv::TriDiagMatrix(cv1,cv1,cv2)));
-    b.push_back(BD.back().view());
-    cb.push_back(CBD.back().view());
-    BD.push_back(tmv::BandMatrix<T,tmv::DiagMajor>(tmv::TriDiagMatrix(v2,v1,v1)));
-    CBD.push_back(tmv::BandMatrix<std::complex<T>,tmv::DiagMajor>(tmv::TriDiagMatrix(cv2,cv1,cv1)));
-    b.push_back(BD.back().view());
-    cb.push_back(CBD.back().view());
+    TBD01.push_back(tmv::ThinBandMatrix<T,0,1,tmv::DiagMajor>(v1,v2)); 
+    CTBD01.push_back(
+        tmv::ThinBandMatrix<std::complex<T>,0,1,tmv::DiagMajor>(cv1,cv2));
+    b.push_back(TBD01.back().view());
+    cb.push_back(CTBD01.back().view());
+    TBD10.push_back(tmv::ThinBandMatrix<T,1,0,tmv::DiagMajor>(v2,v1));
+    CTBD10.push_back(
+        tmv::ThinBandMatrix<std::complex<T>,1,0,tmv::DiagMajor>(cv2,cv1));
+    b.push_back(TBD10.back().view());
+    cb.push_back(CTBD10.back().view());
+    TBD11.push_back(tmv::ThinBandMatrix<T,1,1,tmv::DiagMajor>(v2,v1,v2)); 
+    CTBD11.push_back(
+        tmv::ThinBandMatrix<std::complex<T>,1,1,tmv::DiagMajor>(cv2,cv1,cv2));
+    b.push_back(TBD11.back().view());
+    cb.push_back(CTBD11.back().view());
+    TBD01.push_back(tmv::ThinBandMatrix<T,0,1,tmv::DiagMajor>(v1,v1));
+    CTBD01.push_back(
+        tmv::ThinBandMatrix<std::complex<T>,0,1,tmv::DiagMajor>(cv1,cv1));
+    b.push_back(TBD01.back().view());
+    cb.push_back(CTBD01.back().view());
+    TBD10.push_back(tmv::ThinBandMatrix<T,1,0,tmv::DiagMajor>(v1,v1));
+    CTBD10.push_back(
+        tmv::ThinBandMatrix<std::complex<T>,1,0,tmv::DiagMajor>(cv1,cv1));
+    b.push_back(TBD10.back().view());
+    cb.push_back(CTBD10.back().view());
+    TBD11.push_back(tmv::ThinBandMatrix<T,1,1,tmv::DiagMajor>(v1,v1,v2));
+    CTBD11.push_back(
+        tmv::ThinBandMatrix<std::complex<T>,1,1,tmv::DiagMajor>(cv1,cv1,cv2));
+    b.push_back(TBD11.back().view());
+    cb.push_back(CTBD11.back().view());
+    TBD11.push_back(tmv::ThinBandMatrix<T,1,1,tmv::DiagMajor>(v2,v1,v1));
+    CTBD11.push_back(
+        tmv::ThinBandMatrix<std::complex<T>,1,1,tmv::DiagMajor>(cv2,cv1,cv1));
+    b.push_back(TBD11.back().view());
+    cb.push_back(CTBD11.back().view());
     BD.push_back(tmv::BandMatrix<T,tmv::DiagMajor>(a1,1,N-1));
     CBD.push_back(tmv::BandMatrix<std::complex<T>,tmv::DiagMajor>(ca1,1,N-1));
-    b.push_back(BD[10].view());
-    cb.push_back(CBD[10].view());
+    b.push_back(BD.back().view());
+    cb.push_back(CBD.back().view());
     BD.push_back(tmv::BandMatrix<T,tmv::DiagMajor>(a1,3,N-2));
     CBD.push_back(tmv::BandMatrix<std::complex<T>,tmv::DiagMajor>(ca1,3,N-2));
-    b.push_back(BD[11].view());
-    cb.push_back(CBD[11].view());
+    b.push_back(BD.back().view());
+    cb.push_back(CBD.back().view());
     BR.push_back(tmv::BandMatrix<T,tmv::RowMajor>(a1,0,0));
     CBR.push_back(tmv::BandMatrix<std::complex<T>,tmv::RowMajor>(ca1,0,0));
     b.push_back(BR.back().view());
@@ -181,9 +206,15 @@ inline void DoMakeBandList(
     TMVAssert(int(BR.size()) <= RESERVE);
     TMVAssert(int(BC.size()) <= RESERVE);
     TMVAssert(int(BD.size()) <= RESERVE);
+    TMVAssert(int(TBD01.size()) <= RESERVE);
+    TMVAssert(int(TBD10.size()) <= RESERVE);
+    TMVAssert(int(TBD11.size()) <= RESERVE);
     TMVAssert(int(M.size()) <= RESERVE);
     TMVAssert(int(CBR.size()) <= RESERVE);
     TMVAssert(int(CBC.size()) <= RESERVE);
     TMVAssert(int(CBD.size()) <= RESERVE);
+    TMVAssert(int(CTBD01.size()) <= RESERVE);
+    TMVAssert(int(CTBD10.size()) <= RESERVE);
+    TMVAssert(int(CTBD11.size()) <= RESERVE);
     TMVAssert(int(CM.size()) <= RESERVE);
 }

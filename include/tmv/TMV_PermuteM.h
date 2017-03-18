@@ -335,7 +335,6 @@ namespace tmv {
             std::cout<<"ReversePermuteRows algo 13: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            typedef typename M1::value_type T1;
             typedef typename M1::row_type M1r;
             typedef typename M1r::iterator IT;
 

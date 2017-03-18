@@ -363,8 +363,6 @@ namespace tmv {
     {
         static TMV_INLINE void call(V1& v1, V2& v2)
         {
-            typedef typename V1::value_type T1;
-            typedef typename V2::value_type T2;
             // This seems impossible at first glance, but it is if
             // the steps have opposite sign:
             const bool noclobber = 

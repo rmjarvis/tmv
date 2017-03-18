@@ -1119,7 +1119,7 @@ namespace tmv {
             return vec(); 
         }
 
-        ListAssigner<value_type,iterator> operator<<(value_type x)
+        ListAssigner<value_type,iterator> operator<<(const value_type& x)
         { return ListAssigner<value_type,iterator>(begin(),size(),x); }
 
 

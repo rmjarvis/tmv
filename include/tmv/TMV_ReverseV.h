@@ -37,7 +37,6 @@ namespace tmv {
     {
         static void call(V& v)
         {
-            typedef typename V::value_type T;
             typedef typename V::subvector_type V1;
             typedef typename V::subvector_type::reverse_type V2;
             const ptrdiff_t n = size == Unknown ? v.size() : size;

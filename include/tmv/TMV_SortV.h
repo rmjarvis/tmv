@@ -154,7 +154,6 @@ namespace tmv {
     {
         static void call(V& v, ptrdiff_t* P, ADType ad, CompType comp)
         {
-            typedef typename V::value_type T;
             typedef typename V::float_type FT;
             const ptrdiff_t n = v.size();
             std::vector<VTIndex<FT> > newindex(n);
@@ -224,7 +223,6 @@ namespace tmv {
     {
         static void call(V& v, ptrdiff_t* P, ADType ad, CompType comp)
         {
-            typedef typename V::value_type T;
             typedef typename V::float_type FT;
             const ptrdiff_t n = v.size();
             std::vector<VTIndex<FT> > newindex(n);

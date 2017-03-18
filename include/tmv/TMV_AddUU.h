@@ -489,7 +489,6 @@ namespace tmv {
             TMVAssert(!m1.isunit());
             TMVAssert(!m2.isunit());
             TMVAssert(!m3.isunit());
-            typedef typename M3::value_type T3;
             const ptrdiff_t s2 = s > 20 ? Unknown : s;
             const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)
@@ -530,7 +529,6 @@ namespace tmv {
         {
             TMVStaticAssert(!M3::_conj);
             TMVStaticAssert(M3::_upper);
-            typedef typename M3::value_type T3;
             const ptrdiff_t s2 = s > 20 ? Unknown : s;
             const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)

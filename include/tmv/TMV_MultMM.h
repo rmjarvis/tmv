@@ -646,11 +646,8 @@ namespace tmv {
                 const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
                 const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
                 const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
-                typedef typename M1::const_col_type M1c;
                 typedef typename M2::const_col_type M2c;
-                typedef typename M2::const_row_sub_type M2r;
                 typedef typename M3::col_type M3c;
-                typedef typename M3::colrange_type M3a;
 
                 if (M && N && K) {
                     const ptrdiff_t na = ((N>>1)<<1);

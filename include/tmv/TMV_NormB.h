@@ -683,7 +683,6 @@ namespace tmv {
 #endif
             const ptrdiff_t M = cs == Unknown ? m.colsize() : cs;
             const ptrdiff_t N = rs == Unknown ? m.rowsize() : rs;
-            typedef typename M1::const_col_sub_type M1c;
 
             const ptrdiff_t j1 = m.nhi();
             const ptrdiff_t j2 = TMV_MIN(N,M-m.nlo());

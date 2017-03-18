@@ -1,10 +1,10 @@
 
 #define START 0
 
-#include "TMV.h"
-#include "TMV_Band.h"
 #include "TMV_Test.h"
 #include "TMV_Test_2.h"
+#include "TMV.h"
+#include "TMV_Band.h"
 #include "TMV_TestBandArith.h"
 
 template <class T> 
@@ -67,7 +67,7 @@ void TestBandDiv(tmv::DivType dt)
         Assert(bi.checkDecomp(divout),"CheckDecomp");
         T eps = m.rowsize()*EPS*Norm(m)*Norm(m.inverse());
 
-        if (bi.colsize() == N) {
+        if (bi.colsize() == size_t(N)) {
             tmv::Vector<T> x1 = v1/bi;
             tmv::Vector<T> x2 = v1/m;
             if (showacc) {
@@ -77,7 +77,7 @@ void TestBandDiv(tmv::DivType dt)
             Assert(Norm(x1-x2) < eps*Norm(x1),"Band v/b");
         }
 
-        if (bi.rowsize() == N) {
+        if (bi.rowsize() == size_t(N)) {
             tmv::Vector<T> x1 = v1%bi;
             tmv::Vector<T> x2 = v1%m;
             if (showacc) {
@@ -153,7 +153,7 @@ void TestBandDiv(tmv::DivType dt)
         cv(1) += std::complex<T>(-1,5);
         cv(2) -= std::complex<T>(-1,5);
 
-        if (m.colsize() == N) {
+        if (m.colsize() == size_t(N)) {
             // test real / complex
             tmv::Vector<std::complex<T> > y1 = v1/cbi;
             tmv::Vector<std::complex<T> > y2 = v1/cm;
@@ -182,7 +182,7 @@ void TestBandDiv(tmv::DivType dt)
             Assert(Norm(y1-y2) < ceps*Norm(y1),"Band cv/cb");
         }
 
-        if (bi.rowsize() == N) {
+        if (bi.rowsize() == size_t(N)) {
             tmv::Vector<std::complex<T> > y1 = v1%cbi;
             tmv::Vector<std::complex<T> > y2 = v1%cm;
             if (showacc) {
@@ -229,8 +229,8 @@ template <class T> void TestAllBandDiv()
     std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<"> passed all ";
     std::cout<<"decomposition tests.\n";
     TestBandDiv<T>(tmv::LU);
-    TestBandDiv<T>(tmv::QR);
-    TestBandDiv<T>(tmv::SV);
+    //TestBandDiv<T>(tmv::QR);
+    //TestBandDiv<T>(tmv::SV);
 }
 
 #ifdef TEST_DOUBLE

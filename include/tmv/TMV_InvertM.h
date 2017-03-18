@@ -300,7 +300,6 @@ namespace tmv {
                 4<<','<<4<<std::endl;
 #endif
             typedef typename M1::value_type T1;
-            typedef typename M1::real_type RT;
             // This uses an alternate strategy for calculating the inverse.
             // ( P Q )^-1 = ( T U )
             // ( R S )      ( V W )

@@ -800,7 +800,6 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,V2::_size>::same));
         TMVAssert(m1.colsize() == v3.size());
         TMVAssert(m1.rowsize() == v2.size());
-        typedef typename M1::value_type T1;
         const ptrdiff_t cs = Sizes<M1::_colsize,V3::_size>::size;
         const ptrdiff_t rs = Sizes<M1::_rowsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -821,7 +820,6 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,V2::_size>::same));
         TMVAssert(m1.colsize() == v3.size());
         TMVAssert(m1.rowsize() == v2.size());
-        typedef typename M1::value_type T1;
         const ptrdiff_t cs = Sizes<M1::_colsize,V3::_size>::size;
         const ptrdiff_t rs = Sizes<M1::_rowsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -842,7 +840,6 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,V2::_size>::same));
         TMVAssert(m1.colsize() == v3.size());
         TMVAssert(m1.rowsize() == v2.size());
-        typedef typename M1::value_type T1;
         const ptrdiff_t cs = Sizes<M1::_colsize,V3::_size>::size;
         const ptrdiff_t rs = Sizes<M1::_rowsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;

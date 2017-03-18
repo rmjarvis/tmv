@@ -1,0 +1,171 @@
+# vim: set filetype=python et ts=4 sw=4:
+
+import os
+import SCons
+
+Import('env')
+
+ReadFileList=env['_ReadFileList']
+
+libs=['tmv'] 
+sblibs=['tmv_symband','tmv'] 
+
+test_basic_files = ReadFileList('test_basic.files')
+test_diag_files = ReadFileList('test_diag.files')
+test_tri_files = ReadFileList('test_tri.files')
+test_div_files = ReadFileList('test_div.files')
+test_div_lap_files = ReadFileList('test_div_lap.files')
+test_band_files = ReadFileList('test_band.files')
+test_band_lap_files = ReadFileList('test_band_lap.files')
+test_sym_files = ReadFileList('test_sym.files')
+test_sym_lap_files = ReadFileList('test_sym_lap.files')
+test_symband_files = ReadFileList('test_symband.files')
+test_symband_lap_files = ReadFileList('test_symband_lap.files')
+test_small_files = ReadFileList('test_small.files')
+test_small_sq_files = ReadFileList('test_small_sq.files')
+test_small_nonsq_files = ReadFileList('test_small_nonsq.files')
+test_small_sq_div_files = ReadFileList('test_small_sq_div.files')
+test_small_nonsq_div_files = ReadFileList('test_small_nonsq_div.files')
+
+env1 = env.Clone(CCFLAGS=env['TEST_FLAGS'],
+    CPPPATH=['#include'],CPPDEFINES=[],LIBS=libs+env['LIBS'])
+
+# Include the shared library location within the executable.
+lib_install_dir = os.path.join(env['FINAL_PREFIX'], 'lib')
+if env['SHARED']:
+    if 'install' in COMMAND_LINE_TARGETS:
+        env1.Append( RPATH = Dir(lib_install_dir).abspath )
+    else:
+        env1.Append( RPATH = Dir('#lib').abspath )
+
+    # Workaround for SCons bug: The above doesn't always work correctly.
+    # RPATH clashes with LINKFLAGS.  So if LINKFLAGS is already set, we need this workaround.
+    # See: http://scons.tigris.org/issues/show_bug.cgi?id=1644
+    # Fixed in version 2.1.
+    major , minor, junk = SCons.__version__.split('.',2)
+    if int(major) < 2 or (int(major) == 2 and int(minor) == 0):
+        env1.Append( LINKFLAGS = ["$__RPATH"] )
+    if env['PREFIX'] != '':
+        env1.AppendUnique(LIBPATH=os.path.join(env['FINAL_PREFIX'], 'lib'))
+
+# Clear all the BLAS/LAPACK defines and reset the others:
+if env['MEM_DEBUG']:
+    env1.Append(CPPDEFINES=['TMV_MEM_DEBUG'])
+if int(env['XTEST']) > 0:
+    env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
+if env['NAN_TEST']:
+    env1.Append(CPPDEFINES=['TMV_INITIALIZE_NAN'])
+if env['DEBUG'] or env['TEST_DEBUG']:
+    env1.Append(CPPDEFINES=['XXD'])
+else:
+    env1.Append(CPPDEFINES=['TMV_NDEBUG'])
+if env['DEBUG']:
+    env1.Append(CPPDEFINES=['TMV_EXTRA_DEBUG'])
+
+if not env['TEST_FLOAT'] or not env['INST_FLOAT']:
+    env1.Append(CPPDEFINES=['NO_TEST_FLOAT'])
+if not env['TEST_DOUBLE'] or not env['INST_DOUBLE']:
+    env1.Append(CPPDEFINES=['NO_TEST_DOUBLE'])
+if env['TEST_LONGDOUBLE']:
+    env1.Append(CPPDEFINES=['TEST_LONGDOUBLE'])
+if env['TEST_INT']:
+    env1.Append(CPPDEFINES=['TEST_INT'])
+
+env1b = env1.Clone()
+if env['LAP']:
+    env1b.Append(CPPDEFINES=['LAP'])
+    if not env['USE_GEQP3']:
+        env1b.Append(CPPDEFINES=['NOGEQP3'])
+
+env2 = env1.Clone(LIBS=sblibs+env['LIBS'])
+
+env2b = env2.Clone()
+if env['LAP']:
+    env2b.Append(CPPDEFINES=['LAP'])
+
+test_mix_files = ['TMV_TestMix.cpp']
+obj_mix = env1.Object(test_mix_files)
+progmix = env1.Program('tmvtestmix', obj_mix)
+
+env3 = env1.Clone()
+
+obj_basic = env1.Object(test_basic_files)
+obj_diag = env1.Object(test_diag_files)
+obj_tri = env1.Object(test_tri_files)
+obj_div = [ env1.Object(test_div_files), env1b.Object(test_div_lap_files) ]
+obj_band = [ env2.Object(test_band_files), env2b.Object(test_band_lap_files) ]
+obj_sym = [ env2.Object(test_sym_files), env2b.Object(test_sym_lap_files) ]
+obj_symband = [ env2.Object(test_symband_files),
+    env2b.Object(test_symband_lap_files) ]
+obj_small = env3.Object(test_small_files)
+obj_small_sq = env3.Object(test_small_sq_files)
+obj_small_nonsq = env3.Object(test_small_nonsq_files)
+obj_small_sq_div = env3.Object(test_small_sq_div_files)
+obj_small_nonsq_div = env3.Object(test_small_nonsq_div_files)
+
+test1files = [obj_basic, obj_diag, obj_tri, obj_div, 'TMV_Test1.cpp']
+test2files = [obj_band, obj_sym, obj_symband, 'TMV_Test2.cpp']
+test3files = [obj_small, obj_small_sq, obj_small_nonsq,
+              obj_small_sq_div, obj_small_nonsq_div, 'TMV_Test3.cpp']
+
+test1afiles = [obj_basic, 'TMV_Test1a.cpp']
+test1bfiles = [obj_diag, 'TMV_Test1b.cpp']
+test1cfiles = [obj_tri, 'TMV_Test1c.cpp']
+test1dfiles = [obj_div, 'TMV_Test1d.cpp']
+test2afiles = [obj_band, 'TMV_Test2a.cpp']
+test2bfiles = [obj_sym, 'TMV_Test2b.cpp']
+test2cfiles = [obj_symband, 'TMV_Test2c.cpp']
+test3afiles = [obj_small, 'TMV_Test3a.cpp']
+test3bfiles = [obj_small_sq, 'TMV_Test3b.cpp']
+test3cfiles = [obj_small_nonsq, 'TMV_Test3c.cpp']
+test3dfiles = [obj_small_sq_div, 'TMV_Test3d.cpp']
+test3efiles = [obj_small_nonsq_div, 'TMV_Test3e.cpp']
+
+prog1 = env1.Program('tmvtest1', test1files)
+prog2 = env2.Program('tmvtest2', test2files)
+prog3 = env1.Program('tmvtest3', test3files)
+
+prog1a = env1.Program('tmvtest1a', test1afiles)
+prog1b = env1.Program('tmvtest1b', test1bfiles)
+prog1c = env1.Program('tmvtest1c', test1cfiles)
+prog1d = env1.Program('tmvtest1d', test1dfiles)
+prog2a = env2.Program('tmvtest2a', test2afiles)
+prog2b = env2.Program('tmvtest2b', test2bfiles)
+prog2c = env2.Program('tmvtest2c', test2cfiles)
+prog3a = env1.Program('tmvtest3a', test3afiles)
+prog3b = env1.Program('tmvtest3b', test3bfiles)
+prog3c = env1.Program('tmvtest3c', test3cfiles)
+prog3d = env1.Program('tmvtest3d', test3dfiles)
+prog3e = env1.Program('tmvtest3e', test3efiles)
+
+env.Alias(target='test1', source=prog1)
+env.Alias(target='test2', source=prog2)
+env.Alias(target='test3', source=prog3)
+
+env.Alias(target='test1a', source=prog1a)
+env.Alias(target='test1b', source=prog1b)
+env.Alias(target='test1c', source=prog1c)
+env.Alias(target='test1d', source=prog1d)
+env.Alias(target='test2a', source=prog2a)
+env.Alias(target='test2b', source=prog2b)
+env.Alias(target='test2c', source=prog2c)
+env.Alias(target='test3a', source=prog3a)
+env.Alias(target='test3b', source=prog3b)
+env.Alias(target='test3c', source=prog3c)
+env.Alias(target='test3d', source=prog3d)
+env.Alias(target='test3e', source=prog3e)
+
+env.Alias(target='testmix', source=progmix)
+
+if env['SMALL_TESTS'] :
+
+    env.Alias(target='tests', source=[
+        'test1a','test1b','test1c','test1d','test2a','test2b','test2c',
+        'test3a','test3b','test3c','test3d','test3e'])
+
+else :
+
+    env.Alias(target='tests', source=[
+        'test1','test2','test3','testmix'])
+
+

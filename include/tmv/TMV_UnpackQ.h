@@ -47,7 +47,6 @@ namespace tmv {
             // algorithm where R is taken to be an identity matrix.
             
             typedef typename M1::value_type T;
-            typedef typename M1::real_type RT;
 
             const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
             const ptrdiff_t N = rs==Unknown ? beta.size() : rs;

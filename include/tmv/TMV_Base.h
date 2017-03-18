@@ -1191,8 +1191,6 @@ namespace tmv {
         template <class T1, class T2>
         static TMV_INLINE const T1& select(const T1& x, const T2& ) 
         { return x; }
-        template <class T1, class T2>
-        static TMV_INLINE T1& select_ref(T1& x, const T2& ) { return x; }
 
         // abs(x) or x
         template <class T>
@@ -1606,9 +1604,6 @@ namespace tmv {
 
         template <class T1, class T2>
         static TMV_INLINE const T2& select(const T1& , const T2& y) 
-        { return y; }
-        template <class T1, class T2>
-        static TMV_INLINE const T2& select_ref(T1& , const T2& y) 
         { return y; }
 
         template <class T>

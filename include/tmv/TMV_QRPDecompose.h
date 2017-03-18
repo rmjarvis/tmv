@@ -268,7 +268,6 @@ namespace tmv {
             typedef typename V::iterator IT;
             typedef typename M1::col_sub_type M1c;
             typedef typename M1::row_sub_type M1r;
-            typedef typename M1::submatrix_type M1s;
 
             const ptrdiff_t Nx = TMV_QR_BLOCKSIZE;
             const ptrdiff_t rs1 = IntTraits2<rs,Nx>::min;

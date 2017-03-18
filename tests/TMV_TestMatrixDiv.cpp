@@ -8,6 +8,7 @@
 template <class T, tmv::StorageType stor> 
 static void TestSquareDiv(tmv::DivType dt)
 {
+    typedef typename tmv::Traits<T>::float_type FT;
     tmv::Matrix<T,stor> m(4,4);
 
     for(int i=0;i<4;++i) for(int j=0;j<4;++j) m(i,j) = T(2+4*i-5*j);
@@ -23,13 +24,21 @@ static void TestSquareDiv(tmv::DivType dt)
     b(2) = 5;
     b(3) = -5;
 
+    if (showstartdone) {
+        std::cout<<"Start TestSquareDiv:\n";
+        std::cout<<"stor = "<<Text(stor)<<std::endl;
+        std::cout<<"dt = "<<Text(dt)<<std::endl;
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"b = "<<b<<std::endl;
+    }
+
     m.divideUsing(dt);
     m.saveDiv();
     m.setDiv();
     std::ostream* dbgout = showdiv ? &std::cout : 0;
-    Assert(m.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(m.getDiv(),m,dbgout),"CheckDecomp");
 
-    T eps = EPS * Norm(m) * Norm(m.inverse());
+    FT eps = EPS * Norm(m) * Norm(m.inverse());
 
     tmv::Vector<T> x = b/m;
     tmv::Vector<T> b2 = m*x;
@@ -96,9 +105,9 @@ static void TestSquareDiv(tmv::DivType dt)
     c.divideUsing(dt);
     c.saveDiv();
     c.setDiv();
-    Assert(c.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(c.getDiv(),c,dbgout),"CheckDecomp");
 
-    T ceps = EPS * Norm(m) * Norm(m.inverse());
+    FT ceps = EPS * Norm(m) * Norm(m.inverse());
 
     std::complex<T> cdet_true(-103604,101272);
     std::complex<T> cdet = c.det();
@@ -121,6 +130,13 @@ static void TestSquareDiv(tmv::DivType dt)
     tmv::Matrix<std::complex<T> > ctc = c.adjoint() * c;
     tmv::Matrix<std::complex<T> > cata(4,4);
     c.makeInverseATA(cata);
+    if (showacc) {
+        std::cout<<"ctc = "<<ctc<<std::endl;
+        std::cout<<"cata = "<<cata<<std::endl;
+        std::cout<<"ctc.inv = "<<ctc.inverse()<<std::endl;
+        std::cout<<"Norm(cata-ctc.inv) = "<<Norm(cata-ctc.inverse());
+        std::cout<<"  EPS*Norm(cata) = "<<ceps*Norm(cata)<<std::endl;
+    }
     Assert(Norm(cata-ctc.inverse()) < ceps*Norm(cata),"Square CinverseATA");
 
     tmv::Vector<std::complex<T> > e(4);
@@ -131,29 +147,66 @@ static void TestSquareDiv(tmv::DivType dt)
     // test real / complex
     tmv::Vector<std::complex<T> > y = b/c;
     tmv::Vector<std::complex<T> > b3 = c*y;
+    if (showacc) {
+        std::cout<<"b = "<<b<<std::endl;
+        std::cout<<"c = "<<c<<std::endl;
+        std::cout<<"y = b/c = "<<y<<std::endl;
+        std::cout<<"b3 = "<<b3<<std::endl;
+        std::cout<<"Norm(b-b3) = "<<Norm(b-b3)<<std::endl;
+    }
     Assert(Norm(b3-b) < ceps*Norm(b),"Square b/c");
     y = b%c;
     b3 = y*c;
+    if (showacc) {
+        std::cout<<"b = "<<b<<std::endl;
+        std::cout<<"y = b%c = "<<y<<std::endl;
+        std::cout<<"b3 = "<<b3<<std::endl;
+        std::cout<<"Norm(b-b3) = "<<Norm(b-b3)<<std::endl;
+    }
     Assert(Norm(b3-b) < ceps*Norm(b),"Square b%c");
 
     // test complex / real
     y = e/m;
     b3 = m*y;
+    if (showacc) {
+        std::cout<<"e = "<<b<<std::endl;
+        std::cout<<"y = e/m = "<<y<<std::endl;
+        std::cout<<"b3 = "<<b3<<std::endl;
+        std::cout<<"Norm(b-b3) = "<<Norm(b-b3)<<std::endl;
+    }
     Assert(Norm(b3-e) < eps*Norm(e),"Square e/m");
     y = e%m;
     b3 = y*m;
+    if (showacc) {
+        std::cout<<"e = "<<b<<std::endl;
+        std::cout<<"y = e%m = "<<y<<std::endl;
+        std::cout<<"b3 = "<<b3<<std::endl;
+        std::cout<<"Norm(b-b3) = "<<Norm(b-b3)<<std::endl;
+    }
     Assert(Norm(b3-e) < eps*Norm(e),"Square e%m");
 
     // test complex / complex
     y = e/c;
     b3 = c*y;
+    if (showacc) {
+        std::cout<<"e = "<<b<<std::endl;
+        std::cout<<"y = e/c = "<<y<<std::endl;
+        std::cout<<"b3 = "<<b3<<std::endl;
+        std::cout<<"Norm(b-b3) = "<<Norm(b-b3)<<std::endl;
+    }
     Assert(Norm(b3-e) < ceps*Norm(e),"Square e/c");
     y = e%c;
     b3 = y*c;
+    if (showacc) {
+        std::cout<<"e = "<<b<<std::endl;
+        std::cout<<"y = e%c = "<<y<<std::endl;
+        std::cout<<"b3 = "<<b3<<std::endl;
+        std::cout<<"Norm(b-b3) = "<<Norm(b-b3)<<std::endl;
+    }
     Assert(Norm(b3-e) < ceps*Norm(e),"Square e%c");
 
     // test really big one
-    const int BIGN=100;
+    const size_t BIGN=100;
     tmv::Vector<T> P(BIGN);
     tmv::Vector<T> Q(BIGN);
     tmv::Vector<T> R(BIGN);
@@ -172,23 +225,22 @@ static void TestSquareDiv(tmv::DivType dt)
         14,24,2,82,4,24,6,1,6,7, 2,42,1,2,35,7,3,5,32,13, 42,3,51,2,7,42,4,3,42,14,
         14,24,2,82,4,24,6,1,6,7, 2,42,1,2,35,7,3,5,32,13, 42,3,51,2,7,42,4,3,42,14,
         14,24,2,82,4,24,6,1,6,7, 2,42,1,2,35,7,3,5,32,13, 42,3,51,2,7,42,4,3,42,14;
-
     tmv::Matrix<T,stor> M = P ^ Q;
     tmv::Matrix<std::complex<T>,stor> CM = P ^ (std::complex<T>(-4,10)*Q);
     M.diag().addToAll(T(215));
     CM.diag().addToAll(std::complex<T>(103,-53));
-    M.row(int(floor(0.23*BIGN))) *= T(12);
-    M(int(floor(0.12*BIGN)),1) -= T(142);
-    CM(int(floor(0.06*BIGN)),2) += std::complex<T>(23,89);
-    CM.col(int(floor(0.15*BIGN))) *= std::complex<T>(61,12);
-    M.subVector(int(floor(0.65*BIGN)),int(floor(0.05*BIGN)),1,3,
-                int(floor(0.29*BIGN))) *= T(2);
-    M.subVector(int(floor(0.98*BIGN)),int(floor(0.12*BIGN)),-1,2,
-                int(floor(0.18*BIGN))).addToAll(T(197));
-    CM.subVector(int(floor(0.53*BIGN)),0,1,3,int(floor(0.31*BIGN))) *= 
+    M.row(size_t(floor(0.23*BIGN))) *= T(12);
+    M(size_t(floor(0.12*BIGN)),1) -= T(142);
+    CM(size_t(floor(0.06*BIGN)),2) += std::complex<T>(23,89);
+    CM.col(size_t(floor(0.15*BIGN))) *= std::complex<T>(61,12);
+    M.subVector(size_t(floor(0.65*BIGN)),size_t(floor(0.05*BIGN)),1,3,
+                size_t(floor(0.29*BIGN))) *= T(2);
+    M.subVector(size_t(floor(0.98*BIGN)),size_t(floor(0.12*BIGN)),-1,2,
+                size_t(floor(0.18*BIGN))).addToAll(T(197));
+    CM.subVector(size_t(floor(0.53*BIGN)),0,1,3,size_t(floor(0.31*BIGN))) *= 
         std::complex<T>(2,-1);
-    CM.subVector(int(floor(0.88*BIGN)),int(floor(0.18*BIGN)),-1,2,
-                 int(floor(0.23*BIGN))).addToAll(std::complex<T>(197,174));
+    CM.subVector(size_t(floor(0.88*BIGN)),size_t(floor(0.18*BIGN)),-1,2,
+                 size_t(floor(0.23*BIGN))).addToAll(std::complex<T>(197,174));
     M.divideUsing(dt);
     M.saveDiv();
     CM.divideUsing(dt);
@@ -199,8 +251,7 @@ static void TestSquareDiv(tmv::DivType dt)
 
     tmv::Vector<T> S = R/M;
     tmv::Vector<T> R2 = M*S;
-    Assert(M.checkDecomp(),"checkDecomp");
-    //Assert(M.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(M.getDiv(),M,dbgout),"CheckDecomp");
 
     if (showacc) {
         std::cout<<"R/M Norm(R2-R) = "<<Norm(R2-R)<<std::endl;
@@ -216,8 +267,7 @@ static void TestSquareDiv(tmv::DivType dt)
     Assert(Norm(R2-R) < eps*Norm(R),"Square R%M");
     tmv::Vector<std::complex<T> > CS = R/CM;
     tmv::Vector<std::complex<T> > CR2 = CM*CS;
-    Assert(CM.checkDecomp(),"checkDecomp");
-    //Assert(CM.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(CM.getDiv(),CM,dbgout),"CheckDecomp");
     if (showacc) {
         std::cout<<"R/CM Norm(CR2-R) = "<<Norm(CR2-R)<<std::endl;
         std::cout<<"EPS*Norm(R) = "<<ceps*Norm(R)<<std::endl;
@@ -272,10 +322,10 @@ static void TestSquareDiv(tmv::DivType dt)
     c1.row(3).addToAll(std::complex<T>(1,-6));
     c2.row(0).addToAll(std::complex<T>(-2,-11));
 
-    tmv::MatrixView<T> a1v = a1.view();
-    tmv::MatrixView<T> a2v = a2.view();
-    tmv::MatrixView<std::complex<T> > c1v = c1.view();
-    tmv::MatrixView<std::complex<T> > c2v = c2.view();
+    tmv::MatrixView<T,tmv::WithDivider> a1v = a1.view();
+    tmv::MatrixView<T,tmv::WithDivider> a2v = a2.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c1v = c1.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c2v = c2.view();
 
     a1v.divideUsing(dt);
     a1v.saveDiv();
@@ -287,15 +337,17 @@ static void TestSquareDiv(tmv::DivType dt)
     c2v.saveDiv();
 
     TestMatrixDivArith2(dt,a1v,a2v,c1v,c2v,"Square"); 
-#if (XTEST & 2)
+#if (XTEST & 32)
     tmv::Matrix<T,stor|tmv::FortranStyle> a1f = a1;
     tmv::Matrix<T,stor|tmv::FortranStyle> a2f = a2;
     tmv::Matrix<std::complex<T>,stor|tmv::FortranStyle> c1f = c1;
     tmv::Matrix<std::complex<T>,stor|tmv::FortranStyle> c2f = c2;
-    tmv::MatrixView<T,tmv::FortranStyle> a1fv = a1f.view();
-    tmv::MatrixView<T,tmv::FortranStyle> a2fv = a2f.view();
-    tmv::MatrixView<std::complex<T>,tmv::FortranStyle> c1fv = c1f.view();
-    tmv::MatrixView<std::complex<T>,tmv::FortranStyle> c2fv = c2f.view();
+    tmv::MatrixView<T,tmv::WithDivider|tmv::FortranStyle> a1fv = a1f.view();
+    tmv::MatrixView<T,tmv::WithDivider|tmv::FortranStyle> a2fv = a2f.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider|tmv::FortranStyle> c1fv = 
+        c1f.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider|tmv::FortranStyle> c2fv = 
+        c2f.view();
     a1fv.divideUsing(dt);
     a1fv.saveDiv();
     a2fv.divideUsing(dt);
@@ -325,10 +377,10 @@ static void TestSquareDiv(tmv::DivType dt)
     c4.col(3) *= std::complex<T>(-1,3);
     c4.row(0).addToAll(std::complex<T>(1,9));
 
-    tmv::MatrixView<T> a3v = a3.view();
-    tmv::MatrixView<T> a4v = a4.view();
-    tmv::MatrixView<std::complex<T> > c3v = c3.view();
-    tmv::MatrixView<std::complex<T> > c4v = c4.view();
+    tmv::MatrixView<T,tmv::WithDivider> a3v = a3.view();
+    tmv::MatrixView<T,tmv::WithDivider> a4v = a4.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c3v = c3.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c4v = c4.view();
     a3v.divideUsing(dt);
     a3v.saveDiv();
     a4v.divideUsing(dt);
@@ -347,10 +399,10 @@ static void TestSquareDiv(tmv::DivType dt)
     tmv::Matrix<std::complex<T>,stor> c5 = a5;
     tmv::Matrix<std::complex<T>,stor> c6 = a6;
 
-    tmv::MatrixView<T> a5v = a5.view();
-    tmv::MatrixView<T> a6v = a6.view();
-    tmv::MatrixView<std::complex<T> > c5v = c5.view();
-    tmv::MatrixView<std::complex<T> > c6v = c6.view();
+    tmv::MatrixView<T,tmv::WithDivider> a5v = a5.view();
+    tmv::MatrixView<T,tmv::WithDivider> a6v = a6.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c5v = c5.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c6v = c6.view();
     a5v.divideUsing(dt);
     a5v.saveDiv();
     a6v.divideUsing(dt);
@@ -369,14 +421,15 @@ static void TestSquareDiv(tmv::DivType dt)
         TestSquareDiv<T,tmv::RowMajor>(dt);
     } else {
 #endif
-        std::cout<<"Square Matrix<"<<tmv::TMV_Text(T())<<"> Division using ";
-        std::cout<<tmv::TMV_Text(dt)<<" passed all tests\n";
+        std::cout<<"Square Matrix<"<<Text(T())<<"> Division using ";
+        std::cout<<Text(dt)<<" passed all tests\n";
     }
 }
 
 template <class T, tmv::StorageType stor> 
 static void TestNonSquareDiv(tmv::DivType dt)
 {
+    typedef typename tmv::Traits<T>::float_type FT;
     tmv::Matrix<T,stor> m(6,4);
     for(int i=0;i<6;++i) for(int j=0;j<4;++j) m(i,j) = T(2+4*i-5*j);
     m(0,0) = 14;
@@ -391,14 +444,22 @@ static void TestNonSquareDiv(tmv::DivType dt)
     x(2) = 5;
     x(3) = -5;
 
+    if (showstartdone) {
+        std::cout<<"Start TestNonSquareDiv:\n";
+        std::cout<<"stor = "<<Text(stor)<<std::endl;
+        std::cout<<"dt = "<<Text(dt)<<std::endl;
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"x = "<<x<<std::endl;
+    }
+
     m.divideUsing(dt);
     m.saveDiv();
     m.setDiv();
 
     std::ostream* dbgout = showdiv ? &std::cout : 0;
-    Assert(m.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(m.getDiv(),m,dbgout),"CheckDecomp");
 
-    T eps = EPS * Norm(m) * Norm(m.inverse());
+    FT eps = EPS * Norm(m) * Norm(m.inverse());
     tmv::Vector<T> b = m * x;
     tmv::Vector<T> x2 = b/m;
     Assert(Norm(x2-x) < eps*Norm(x),"NonSquare exact b/m");
@@ -412,22 +473,22 @@ static void TestNonSquareDiv(tmv::DivType dt)
     b2 = m*x;
     T refnorm = Norm(b2-b);
     T dxval = T(sqrt(eps))*Norm(x);
-    tmv::Vector<T> dx = dxval*tmv::BasisVector<T>(4,0);
+    tmv::Vector<T> dx = tmv::BasisVector<T>(4,0,dxval);
     b2 = m*(x+dx);
     Assert(Norm(b2-b) >= refnorm,"NonSquare Least Squares b/m (1)");
     b2 = m*(x-dx);
     Assert(Norm(b2-b) >= refnorm,"NonSquare Least Squares b/m (2)");
-    dx = dxval*tmv::BasisVector<T>(4,1);
+    dx = tmv::BasisVector<T>(4,1,dxval);
     b2 = m*(x+dx);
     Assert(Norm(b2-b) >= refnorm,"NonSquare Least Squares b/m (3)");
     b2 = m*(x-dx);
     Assert(Norm(b2-b) >= refnorm,"NonSquare Least Squares b/m (4)");
-    dx = dxval*tmv::BasisVector<T>(4,2);
+    dx = tmv::BasisVector<T>(4,2,dxval);
     b2 = m*(x+dx);
     Assert(Norm(b2-b) >= refnorm,"NonSquare Least Squares b/m (5)");
     b2 = m*(x-dx);
     Assert(Norm(b2-b) >= refnorm,"NonSquare Least Squares b/m (6)");
-    dx = dxval*tmv::BasisVector<T>(4,3);
+    dx = tmv::BasisVector<T>(4,3,dxval);
     b2 = m*(x+dx);
     Assert(Norm(b2-b) >= refnorm,"NonSquare Least Squares b/m (7)");
     b2 = m*(x-dx);
@@ -467,11 +528,11 @@ static void TestNonSquareDiv(tmv::DivType dt)
     c.saveDiv();
     c.setDiv();
 
-    T ceps = EPS * Norm(c) * Norm(c.inverse());
+    FT ceps = EPS * Norm(c) * Norm(c.inverse());
     tmv::Vector<std::complex<T> > e = c * y;
     tmv::Vector<std::complex<T> > y2 = e/c;
 
-    Assert(c.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(c.getDiv(),c,dbgout),"CheckDecomp");
 
     Assert(Norm(y2-y) < ceps*Norm(y),"NonSquare exact e/c");
 
@@ -498,11 +559,24 @@ static void TestNonSquareDiv(tmv::DivType dt)
     eps = EPS * Norm(ms) * Norm(ms.inverse());
     b = x * ms;
     x2 = b%ms;
-    Assert(ms.checkDecomp(dbgout),"checkDecomp");
+    if (showacc) {
+        std::cout<<"ms = "<<ms<<std::endl;
+        std::cout<<"x = "<<x<<std::endl;
+        std::cout<<"b = "<<b<<std::endl;
+        std::cout<<"x2 = b%ms = "<<x2<<std::endl;
+        std::cout<<"Norm(x-x2) = "<<Norm(x-x2)<<std::endl;
+    }
+    Assert(CheckDecomp(ms.getDiv(),ms,dbgout),"CheckDecomp");
     Assert(Norm(x2-x) < eps*Norm(x),"NonSquare exact b%ms");
 
     b2 = x/ms;
     x2 = ms*b2;
+    if (showacc) {
+        std::cout<<"x = "<<x<<std::endl;
+        std::cout<<"b2 = x/ms "<<b2<<std::endl;
+        std::cout<<"x2 = "<<x2<<std::endl;
+        std::cout<<"Norm(x-x2) = "<<Norm(x-x2)<<std::endl;
+    }
     Assert(Norm(x2-x) < eps*Norm(x),"NonSquare x/ms");
 
     // Test really long matrix
@@ -532,62 +606,63 @@ static void TestNonSquareDiv(tmv::DivType dt)
     // Test QR Update/Downdate:
 
     tmv::Matrix<std::complex<T>,stor> q30 = a;
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r30(10,10);
+    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r30(10);
     QR_Decompose(q30.view(),r30.view());
     Assert(Norm(q30*r30-a) < eps*Norm(a),"QR_Decompose");
     Assert(Norm(r30.adjoint()*r30-a.adjoint()*a) < eps*r30.normSq(),
            "QR_Decompose (RtR)");
 
     tmv::Matrix<std::complex<T>,stor> q10 = a.rowRange(0,10);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r10(10,10);
+    tmv::UpperTriMatrix<std::complex<T>,stor> r10(10);
     QR_Decompose(q10.view(),r10.view());
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r = r10;
+    tmv::UpperTriMatrix<std::complex<T>,stor> rx = r10;
     tmv::Matrix<std::complex<T>,stor> a1030 = a.rowRange(10,30);
-    QR_Update(r.view(),a1030.view());
-    Assert(Norm(r.adjoint()*r-r30.adjoint()*r30) < eps*r.normSq(),
+    QR_Update(rx.view(),a1030.view());
+    Assert(Norm(rx.adjoint()*rx-r30.adjoint()*r30) < eps*rx.normSq(),
            "QR_Update");
-    r = r30;
+    rx = r30;
 
     a1030 = a.rowRange(10,30);
-    QR_Downdate(r.view(),a1030.view());
-    Assert(Norm(r.adjoint()*r-r10.adjoint()*r10) < eps*r.normSq(),
+    QR_Downdate(rx.view(),a1030.view());
+    Assert(Norm(rx.adjoint()*rx-r10.adjoint()*r10) < eps*rx.normSq(),
            "QR_Downdate");
-    r = r10;
+    rx = r10;
 
     tmv::Matrix<std::complex<T>,stor> a1020 = a.rowRange(10,20);
     tmv::Matrix<std::complex<T>,stor> a2030 = a.rowRange(20,30);
-    QR_Update(r.view(),a1020.view());
-    QR_Update(r.view(),a2030.view());
-    Assert(Norm(r.adjoint()*r-r30.adjoint()*r30) < eps*r.normSq(),
+    QR_Update(rx.view(),a1020.view());
+    QR_Update(rx.view(),a2030.view());
+    Assert(Norm(rx.adjoint()*rx-r30.adjoint()*r30) < eps*rx.normSq(),
            "QR_Update (double)");
-    r = r30;
+    rx = r30;
 
     a1020 = a.rowRange(10,20);
     a2030 = a.rowRange(20,30);
-    QR_Downdate(r.view(),a1020.view());
-    QR_Downdate(r.view(),a2030.view());
-    Assert(Norm(r.adjoint()*r-r10.adjoint()*r10) < eps*r.normSq(),
+    QR_Downdate(rx.view(),a1020.view());
+    QR_Downdate(rx.view(),a2030.view());
+    Assert(Norm(rx.adjoint()*rx-r10.adjoint()*r10) < eps*rx.normSq(),
            "QR_Downdate (double)");
-    r = r10;
+    rx = r10;
 
     tmv::Matrix<std::complex<T>,stor> q29 = a.rowRange(0,29);
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r29(10,10);
     QR_Decompose(q29.view(),r29.view());
-    r = r30;
     tmv::Vector<std::complex<T> > a29 = a.row(29);
-    QR_Downdate(r.view(),a29.view());
-    Assert(Norm(r.adjoint()*r-r29.adjoint()*r29) < eps*r.normSq(),
+    rx = r30;
+    QR_Downdate(rx.view(),a29.view());
+    Assert(Norm(rx.adjoint()*rx-r29.adjoint()*r29) < eps*rx.normSq(),
            "QR_Downdate (single row)");
-    r = r29;
+    rx = r29;
 
     a29 = a.row(29);
-    QR_Update(r.view(),a29.view());
-    Assert(Norm(r.adjoint()*r-r30.adjoint()*r30) < eps*r.normSq(),
-           "QR_Downdate (single row)");
+    QR_Update(rx.view(),a29.view());
+    Assert(Norm(rx.adjoint()*rx-r30.adjoint()*r30) < eps*rx.normSq(),
+           "QR_Update (single row)");
 
     // Test with some identical eigenvalues.
     // First make an arbitrary unitary matrix:
     tmv::Matrix<std::complex<T>,stor> q = a;
+    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r(10);
     q.divideUsing(dt);
     q.saveDiv();
     QR_Decompose(q.view(),r.view());
@@ -608,8 +683,7 @@ static void TestNonSquareDiv(tmv::DivType dt)
 
     t = q * s;
     s2 = t/q;
-    Assert(q.checkDecomp(),"checkDecomp");
-    //Assert(q.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(q.getDiv(),q,dbgout),"CheckDecomp");
     Assert(Norm(s2-s) < eps*Norm(s),"NonSquare t/q");
 
     t2 = s%q;
@@ -627,12 +701,12 @@ static void TestNonSquareDiv(tmv::DivType dt)
     tmv::Matrix<std::complex<T>,stor> c2 = a2 * std::complex<T>(-3,4);
     tmv::Matrix<std::complex<T>,stor> c3 = a3 * std::complex<T>(-4,8);
 
-    tmv::MatrixView<T> a1v = a1.view();
-    tmv::MatrixView<T> a2v = a2.view();
-    tmv::MatrixView<T> a3v = a3.view();
-    tmv::MatrixView<std::complex<T> > c1v = c1.view();
-    tmv::MatrixView<std::complex<T> > c2v = c2.view();
-    tmv::MatrixView<std::complex<T> > c3v = c3.view();
+    tmv::MatrixView<T,tmv::WithDivider> a1v = a1.view();
+    tmv::MatrixView<T,tmv::WithDivider> a2v = a2.view();
+    tmv::MatrixView<T,tmv::WithDivider> a3v = a3.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c1v = c1.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c2v = c2.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c3v = c3.view();
     a1v.divideUsing(dt);
     a1v.saveDiv();
     a2v.divideUsing(dt);
@@ -677,14 +751,14 @@ static void TestNonSquareDiv(tmv::DivType dt)
     c7.col(7) *= std::complex<T>(-1,3);
     c7.row(4).addToAll(std::complex<T>(1,9));
 
-    tmv::MatrixView<T> a4v = a4.view();
-    tmv::MatrixView<T> a5v = a5.view();
-    tmv::MatrixView<T> a6v = a6.view();
-    tmv::MatrixView<T> a7v = a7.view();
-    tmv::MatrixView<std::complex<T> > c4v = c4.view();
-    tmv::MatrixView<std::complex<T> > c5v = c5.view();
-    tmv::MatrixView<std::complex<T> > c6v = c6.view();
-    tmv::MatrixView<std::complex<T> > c7v = c7.view();
+    tmv::MatrixView<T,tmv::WithDivider> a4v = a4.view();
+    tmv::MatrixView<T,tmv::WithDivider> a5v = a5.view();
+    tmv::MatrixView<T,tmv::WithDivider> a6v = a6.view();
+    tmv::MatrixView<T,tmv::WithDivider> a7v = a7.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c4v = c4.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c5v = c5.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c6v = c6.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c7v = c7.view();
     a4v.divideUsing(dt);
     a4v.saveDiv();
     a5v.divideUsing(dt);
@@ -717,14 +791,14 @@ static void TestNonSquareDiv(tmv::DivType dt)
     tmv::Matrix<std::complex<T>,stor> c10 = a10;
     tmv::Matrix<std::complex<T>,stor> c11 = a11;
 
-    tmv::MatrixView<T> a8v = a8.view();
-    tmv::MatrixView<T> a9v = a9.view();
-    tmv::MatrixView<T> a10v = a10.view();
-    tmv::MatrixView<T> a11v = a11.view();
-    tmv::MatrixView<std::complex<T> > c8v = c8.view();
-    tmv::MatrixView<std::complex<T> > c9v = c9.view();
-    tmv::MatrixView<std::complex<T> > c10v = c10.view();
-    tmv::MatrixView<std::complex<T> > c11v = c11.view();
+    tmv::MatrixView<T,tmv::WithDivider> a8v = a8.view();
+    tmv::MatrixView<T,tmv::WithDivider> a9v = a9.view();
+    tmv::MatrixView<T,tmv::WithDivider> a10v = a10.view();
+    tmv::MatrixView<T,tmv::WithDivider> a11v = a11.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c8v = c8.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c9v = c9.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c10v = c10.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c11v = c11.view();
     a8v.divideUsing(dt);
     a8v.saveDiv();
     a9v.divideUsing(dt);
@@ -753,14 +827,15 @@ static void TestNonSquareDiv(tmv::DivType dt)
         TestNonSquareDiv<T,tmv::RowMajor>(dt);
     } else {
 #endif
-        std::cout<<"NonSquare Matrix<"<<tmv::TMV_Text(T())<<"> Division using ";
-        std::cout<<tmv::TMV_Text(dt)<<" passed all tests\n";
+        std::cout<<"NonSquare Matrix<"<<Text(T())<<"> Division using ";
+        std::cout<<Text(dt)<<" passed all tests\n";
     }
 }
 
 template <class T, tmv::StorageType stor> 
 static void TestSingularDiv(tmv::DivType dt)
 {
+    typedef typename tmv::Traits<T>::float_type FT;
     tmv::Matrix<T,stor> m(4,4);
     for(int i=0;i<4;++i) for(int j=0;j<4;++j) m(i,j) = T(2+4*i-5*j);
     m(2,2) = 30;
@@ -771,17 +846,33 @@ static void TestSingularDiv(tmv::DivType dt)
     x(2) = 5;
     x(3) = -5;
 
+    if (showstartdone) {
+        std::cout<<"Start TestSingularDiv:\n";
+        std::cout<<"stor = "<<Text(stor)<<std::endl;
+        std::cout<<"dt = "<<Text(dt)<<std::endl;
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"x = "<<x<<std::endl;
+    }
+
     m.divideUsing(dt);
     m.saveDiv();
     m.setDiv();
     std::ostream* dbgout = showdiv ? &std::cout : 0;
-    Assert(m.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(m.getDiv(),m,dbgout),"CheckDecomp");
 
-    T eps = EPS * Norm(m) * Norm(m.inverse());
+    FT eps = EPS * Norm(m) * Norm(m.inverse());
 
     tmv::Vector<T> b = m * x;
     tmv::Vector<T> x2 = b/m;
     tmv::Vector<T> b2 = m*x2;
+    if (showacc) {
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"x = "<<x<<std::endl;
+        std::cout<<"b = mx "<<b<<std::endl;
+        std::cout<<"x2 = b/m = "<<x2<<std::endl;
+        std::cout<<"b2 = m*x2 "<<b2<<std::endl;
+        std::cout<<"Norm(b-b2) = "<<Norm(b-b2)<<std::endl;
+    }
     Assert(Norm(b2-b) < eps*Norm(b),"Singular exact b/m");
 
     b = x * m;
@@ -794,22 +885,22 @@ static void TestSingularDiv(tmv::DivType dt)
     b2 = m*x;
     T refnorm = Norm(b2-b);
     T dxval = T(std::sqrt(eps))*Norm(x);
-    tmv::Vector<T> dx = dxval*tmv::BasisVector<T>(4,0);
+    tmv::Vector<T> dx = tmv::BasisVector<T>(4,0,dxval);
     b2 = m*(x+dx);
     Assert(Norm(b2-b) >= refnorm,"Singular Least Squares b/m (1)");
     b2 = m*(x-dx);
     Assert(Norm(b2-b) >= refnorm,"Singular Least Squares b/m (2)");
-    dx = dxval*tmv::BasisVector<T>(4,1);
+    dx = tmv::BasisVector<T>(4,1,dxval);
     b2 = m*(x+dx);
     Assert(Norm(b2-b) >= refnorm,"Singular Least Squares b/m (3)");
     b2 = m*(x-dx);
     Assert(Norm(b2-b) >= refnorm,"Singular Least Squares b/m (4)");
-    dx = dxval*tmv::BasisVector<T>(4,2);
+    dx = tmv::BasisVector<T>(4,2,dxval);
     b2 = m*(x+dx);
     Assert(Norm(b2-b) >= refnorm,"Singular Least Squares b/m (5)");
     b2 = m*(x-dx);
     Assert(Norm(b2-b) >= refnorm,"Singular Least Squares b/m (6)");
-    dx = dxval*tmv::BasisVector<T>(4,3);
+    dx = tmv::BasisVector<T>(4,3,dxval);
     b2 = m*(x+dx);
     Assert(Norm(b2-b) >= refnorm,"Singular Least Squares b/m (7)");
     b2 = m*(x-dx);
@@ -827,18 +918,18 @@ static void TestSingularDiv(tmv::DivType dt)
         std::cout<<"minv*m*minv = "<<minv*m*minv<<std::endl;
         std::cout<<"Norm(minv*m*minv-minv) = "<<Norm(minv*m*minv-minv)<<std::endl;
         std::cout<<"m*minv-(m*minv)T = "<<m*minv-Transpose(m*minv)<<std::endl;
-        std::cout<<"Norm(m*minv-(m*minv)T) = "<<Norm(m*minv-(m*minv).transpose())<<std::endl;
+        std::cout<<"Norm(m*minv-(m*minv)T) = "<<Norm(m*minv-Transpose(m*minv))<<std::endl;
         std::cout<<"minv*m-(minv*m)T = "<<minv*m-Transpose(minv*m)<<std::endl;
-        std::cout<<"Norm(minv*m-(minv*m)T) = "<<Norm(minv*m-(minv*m).transpose())<<std::endl;
+        std::cout<<"Norm(minv*m-(minv*m)T) = "<<Norm(minv*m-Transpose(minv*m))<<std::endl;
     }
 
     Assert(Norm(m*minv*m - m) < eps*Norm(m),"Singular inverse M*X*M != M");
     Assert(Norm(minv*m*minv - minv) < eps*Norm(minv),
            "Singular inverse X*M*X != X");
-    Assert(Norm((m*minv)-(m*minv).transpose()) < eps,
+    Assert(Norm((m*minv)-Transpose(m*minv)) < eps,
            "Singular inverse M*X != (M*X)T");
     if (dt != tmv::QRP) { // QRP doesn't get this right.
-        Assert(Norm((minv*m)-(minv*m).transpose()) < eps,
+        Assert(Norm((minv*m)-Transpose(minv*m)) < eps,
                "Singular inverse X*M != (X*M)T");
     }
 
@@ -860,8 +951,7 @@ static void TestSingularDiv(tmv::DivType dt)
     tmv::Vector<T> bb = mm*xx;
     tmv::Vector<T> xx2 = bb/mm;
     tmv::Vector<T> bb2 = mm*xx2;
-    //Assert(mm.checkDecomp(),"checkDecomp");
-    Assert(mm.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(mm.getDiv(),mm,dbgout),"CheckDecomp");
     if (showacc) {
         std::cout<<"Norm(bb2-bb) = "<<Norm(bb2-bb);
         std::cout<<", EPS*Norm(bb) = "<<eps*Norm(bb)<<std::endl;
@@ -895,9 +985,13 @@ static void TestSingularDiv(tmv::DivType dt)
     tmv::Vector<std::complex<T> > cbb = cc*cxx;
     tmv::Vector<std::complex<T> > cxx2 = cbb/cc;
     tmv::Vector<std::complex<T> > cbb2 = cc*cxx2;
-    //Assert(cc.checkDecomp(),"checkDecomp");
-    Assert(cc.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(cc.getDiv(),cc,dbgout),"CheckDecomp");
     if (showacc) {
+        std::cout<<"cxx = "<<cxx<<std::endl;
+        std::cout<<"cbb = "<<cbb<<std::endl;
+        std::cout<<"cxx2 = "<<cxx2<<std::endl;
+        std::cout<<"cbb2 = "<<cbb2<<std::endl;
+        std::cout<<"cbb2-cbb = "<<cbb2-cbb<<std::endl;
         std::cout<<"Norm(cbb2-cbb) = "<<Norm(cbb2-cbb);
         std::cout<<", EPS*Norm(cbb) = "<<eps*Norm(cbb)<<std::endl;
     }
@@ -917,8 +1011,8 @@ static void TestSingularDiv(tmv::DivType dt)
         TestSingularDiv<T,tmv::RowMajor>(dt);
     } else {
 #endif
-        std::cout<<"Singular Matrix<"<<tmv::TMV_Text(T())<<"> Division using ";
-        std::cout<<tmv::TMV_Text(dt)<<" passed all tests\n";
+        std::cout<<"Singular Matrix<"<<Text(T())<<"> Division using ";
+        std::cout<<Text(dt)<<" passed all tests\n";
     }
 }
 
@@ -926,8 +1020,9 @@ template <class T> void TestMatrixDiv()
 {
     TestMatrixDecomp<T,tmv::ColMajor>();
     TestMatrixDecomp<T,tmv::RowMajor>();
-    std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> passed all ";
+    std::cout<<"Matrix<"<<Text(T())<<"> passed all ";
     std::cout<<"decomposition tests.\n";
+
     TestSquareDiv<T,tmv::ColMajor>(tmv::LU);
     TestSquareDiv<T,tmv::ColMajor>(tmv::QR);
     TestSquareDiv<T,tmv::ColMajor>(tmv::QRP);

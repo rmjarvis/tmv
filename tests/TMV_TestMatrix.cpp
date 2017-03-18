@@ -7,27 +7,19 @@
 
 #define CT std::complex<T>
 
-template <class T, tmv::StorageType S> 
-static void TestBasicMatrix_1()
+template <class T, tmv::StorageType S> static void TestBasicMatrix_1()
 {
     const int M = 15;
     const int N = 10;
 
-    if (showstartdone) {
-        std::cout<<"Start TestBasicMatrix_1\n";
-        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
-        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
-        std::cout<<"M,N = "<<M<<','<<N<<std::endl;
-    }
-
     tmv::Matrix<T,S> m(M,N);
     tmv::Matrix<T,S|tmv::FortranStyle> mf(M,N);
-    Assert(m.colsize() == M && m.rowsize() == N,
+    Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
            "Creating Matrix(M,N)");
-    Assert(m.colsize() == M && m.rowsize() == N,
+    Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
            "Creating MatrixF(M,N)");
 
-    for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         m(i,j) = T(k);
         mf(i+1,j+1) = T(k);
     }
@@ -36,91 +28,85 @@ static void TestBasicMatrix_1()
     tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.view();
     tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.view();
 
-    tmv::VIt<T,1,tmv::NonConj> vit = m.linearView().begin();
-    tmv::CVIt<T,1,tmv::NonConj> cvit = m.linearView().begin();
-    for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
-        Assert(m(i,j) == k,"Read/Write Matrix");
-        Assert(mcv(i,j) == k,"Access Matrix CV");
-        Assert(mv(i,j) == k,"Access Matrix V");
-        Assert(mf(i+1,j+1) == k,"Read/Write MatrixF");
-        Assert(mfcv(i+1,j+1) == k,"Access MatrixF CV");
-        Assert(mfv(i+1,j+1) == k,"Access MatrixF V");
-        Assert(m[i][j] == k,"[] style access of Matrix");
-        Assert(mcv[i][j] == k,"[] style access of Matrix CV");
-        Assert(mv[i][j] == k,"[] style access of Matrix V");
-        Assert(mf[i+1][j+1] == k,"[] style access of MatrixF");
-        Assert(mfcv[i+1][j+1] == k,"[] style access of MatrixF CV");
-        Assert(mfv[i+1][j+1] == k,"[] style access of MatrixF V");
-        if (S == tmv::RowMajor) {
-            Assert(*vit++ == k,"Matrix.linearView");
-            Assert(*cvit++ == k,"Matrix.linearView with CVIt");
-        }
-        Assert(m.row(i)(j) == k,"Matrix.row");
-        Assert(mcv.row(i)(j) == k,"Matrix.row CV");
-        Assert(mv.row(i)(j) == k,"Matrix.row V");
-        Assert(mf.row(i+1)(j+1) == k,"MatrixF.row");
-        Assert(mfcv.row(i+1)(j+1) == k,"MatrixF.row CV");
-        Assert(mfv.row(i+1)(j+1) == k,"MatrixF.row V");
-        Assert(m.row(i,j,N)(0) == k,"Matrix.row2");
-        Assert(mcv.row(i,j,N)(0) == k,"Matrix.row2 CV");
-        Assert(mv.row(i,j,N)(0) == k,"Matrix.row2 V");
-        Assert(mf.row(i+1,j+1,N)(1) == k,"MatrixF.row2");
-        Assert(mfcv.row(i+1,j+1,N)(1) == k,"MatrixF.row2 CV");
-        Assert(mfv.row(i+1,j+1,N)(1) == k,"MatrixF.row2 V");
-        Assert(m.col(j)(i) == k,"Matrix.col");
-        Assert(mcv.col(j)(i) == k,"Matrix.col CV");
-        Assert(mv.col(j)(i) == k,"Matrix.col V");
-        Assert(mf.col(j+1)(i+1) == k,"MatrixF.col");
-        Assert(mfcv.col(j+1)(i+1) == k,"MatrixF.col CV");
-        Assert(mfv.col(j+1)(i+1) == k,"MatrixF.col V");
-        Assert(m.col(j,i,M)(0) == k,"Matrix.col2");
-        Assert(mcv.col(j,i,M)(0) == k,"Matrix.col2 CV");
-        Assert(mv.col(j,i,M)(0) == k,"Matrix.col2 V");
-        Assert(mf.col(j+1,i+1,M)(1) == k,"MatrixF.col2");
-        Assert(mfcv.col(j+1,i+1,M)(1) == k,"MatrixF.col2 CV");
-        Assert(mfv.col(j+1,i+1,M)(1) == k,"MatrixF.col2 V");
+    for (int i=0, k=1; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
+        Assert(m(i,j) == T(k),"Read/Write Matrix");
+        Assert(mcv(i,j) == T(k),"Access Matrix CV");
+        Assert(mv(i,j) == T(k),"Access Matrix V");
+        Assert(mf(i+1,j+1) == T(k),"Read/Write MatrixF");
+        Assert(mfcv(i+1,j+1) == T(k),"Access MatrixF CV");
+        Assert(mfv(i+1,j+1) == T(k),"Access MatrixF V");
+        Assert(m[i][j] == T(k),"[] style access of Matrix");
+        Assert(mcv[i][j] == T(k),"[] style access of Matrix CV");
+        Assert(mv[i][j] == T(k),"[] style access of Matrix V");
+        Assert(mf[i+1][j+1] == T(k),"[] style access of MatrixF");
+        Assert(mfcv[i+1][j+1] == T(k),"[] style access of MatrixF CV");
+        Assert(mfv[i+1][j+1] == T(k),"[] style access of MatrixF V");
+        Assert(m.row(i)(j) == T(k),"Matrix.row");
+        Assert(mcv.row(i)(j) == T(k),"Matrix.row CV");
+        Assert(mv.row(i)(j) == T(k),"Matrix.row V");
+        Assert(mf.row(i+1)(j+1) == T(k),"MatrixF.row");
+        Assert(mfcv.row(i+1)(j+1) == T(k),"MatrixF.row CV");
+        Assert(mfv.row(i+1)(j+1) == T(k),"MatrixF.row V");
+        Assert(m.row(i,j,N)(0) == T(k),"Matrix.row2");
+        Assert(mcv.row(i,j,N)(0) == T(k),"Matrix.row2 CV");
+        Assert(mv.row(i,j,N)(0) == T(k),"Matrix.row2 V");
+        Assert(mf.row(i+1,j+1,N)(1) == T(k),"MatrixF.row2");
+        Assert(mfcv.row(i+1,j+1,N)(1) == T(k),"MatrixF.row2 CV");
+        Assert(mfv.row(i+1,j+1,N)(1) == T(k),"MatrixF.row2 V");
+        Assert(m.col(j)(i) == T(k),"Matrix.col");
+        Assert(mcv.col(j)(i) == T(k),"Matrix.col CV");
+        Assert(mv.col(j)(i) == T(k),"Matrix.col V");
+        Assert(mf.col(j+1)(i+1) == T(k),"MatrixF.col");
+        Assert(mfcv.col(j+1)(i+1) == T(k),"MatrixF.col CV");
+        Assert(mfv.col(j+1)(i+1) == T(k),"MatrixF.col V");
+        Assert(m.col(j,i,M)(0) == T(k),"Matrix.col2");
+        Assert(mcv.col(j,i,M)(0) == T(k),"Matrix.col2 CV");
+        Assert(mv.col(j,i,M)(0) == T(k),"Matrix.col2 V");
+        Assert(mf.col(j+1,i+1,M)(1) == T(k),"MatrixF.col2");
+        Assert(mfcv.col(j+1,i+1,M)(1) == T(k),"MatrixF.col2 CV");
+        Assert(mfv.col(j+1,i+1,M)(1) == T(k),"MatrixF.col2 V");
         if (i<j) {
-            Assert(m.diag(j-i)(i) == k,"Matrix.diag");
-            Assert(mcv.diag(j-i)(i) == k,"Matrix.diag CV");
-            Assert(mv.diag(j-i)(i) == k,"Matrix.diag V");
-            Assert(mf.diag(j-i)(i+1) == k,"MatrixF.diag");
-            Assert(mfcv.diag(j-i)(i+1) == k,"MatrixF.diag CV");
-            Assert(mfv.diag(j-i)(i+1) == k,"MatrixF.diag V");
-            Assert(m.diag(j-i,i,N-j+i)(0) == k,"Matrix.diag2");
-            Assert(mcv.diag(j-i,i,N-j+i)(0) == k,"Matrix.diag2 CV");
-            Assert(mv.diag(j-i,i,N-j+i)(0) == k,"Matrix.diag2 V");
-            Assert(mf.diag(j-i,i+1,N-j+i)(1) == k,"Matrix.diag2");
-            Assert(mfcv.diag(j-i,i+1,N-j+i)(1) == k,"Matrix.diag2 CV");
-            Assert(mfv.diag(j-i,i+1,N-j+i)(1) == k,"Matrix.diag2 V");
+            Assert(m.diag(j-i)(i) == T(k),"Matrix.diag");
+            Assert(mcv.diag(j-i)(i) == T(k),"Matrix.diag CV");
+            Assert(mv.diag(j-i)(i) == T(k),"Matrix.diag V");
+            Assert(mf.diag(j-i)(i+1) == T(k),"MatrixF.diag");
+            Assert(mfcv.diag(j-i)(i+1) == T(k),"MatrixF.diag CV");
+            Assert(mfv.diag(j-i)(i+1) == T(k),"MatrixF.diag V");
+            Assert(m.diag(j-i,i,N-j+i)(0) == T(k),"Matrix.diag2");
+            Assert(mcv.diag(j-i,i,N-j+i)(0) == T(k),"Matrix.diag2 CV");
+            Assert(mv.diag(j-i,i,N-j+i)(0) == T(k),"Matrix.diag2 V");
+            Assert(mf.diag(j-i,i+1,N-j+i)(1) == T(k),"Matrix.diag2");
+            Assert(mfcv.diag(j-i,i+1,N-j+i)(1) == T(k),"Matrix.diag2 CV");
+            Assert(mfv.diag(j-i,i+1,N-j+i)(1) == T(k),"Matrix.diag2 V");
         } else {
             if (i==j) {
-                Assert(m.diag()(i) == k,"Matrix.diag");
-                Assert(mcv.diag()(i) == k,"Matrix.diag CV");
-                Assert(mv.diag()(i) == k,"Matrix.diag V");
-                Assert(mf.diag()(i+1) == k,"MatrixF.diag");
-                Assert(mfcv.diag()(i+1) == k,"MatrixF.diag CV");
-                Assert(mfv.diag()(i+1) == k,"MatrixF.diag V");
+                Assert(m.diag()(i) == T(k),"Matrix.diag");
+                Assert(mcv.diag()(i) == T(k),"Matrix.diag CV");
+                Assert(mv.diag()(i) == T(k),"Matrix.diag V");
+                Assert(mf.diag()(i+1) == T(k),"MatrixF.diag");
+                Assert(mfcv.diag()(i+1) == T(k),"MatrixF.diag CV");
+                Assert(mfv.diag()(i+1) == T(k),"MatrixF.diag V");
             }
-            Assert(m.diag(j-i)(j) == k,"Matrix.diag1");
-            Assert(mcv.diag(j-i)(j) == k,"Matrix.diag1 CV");
-            Assert(mv.diag(j-i)(j) == k,"Matrix.diag1 V");
-            Assert(mf.diag(j-i)(j+1) == k,"MatrixF.diag1");
-            Assert(mfcv.diag(j-i)(j+1) == k,"MatrixF.diag1 CV");
-            Assert(mfv.diag(j-i)(j+1) == k,"MatrixF.diag1 V");
+            Assert(m.diag(j-i)(j) == T(k),"Matrix.diag1");
+            Assert(mcv.diag(j-i)(j) == T(k),"Matrix.diag1 CV");
+            Assert(mv.diag(j-i)(j) == T(k),"Matrix.diag1 V");
+            Assert(mf.diag(j-i)(j+1) == T(k),"MatrixF.diag1");
+            Assert(mfcv.diag(j-i)(j+1) == T(k),"MatrixF.diag1 CV");
+            Assert(mfv.diag(j-i)(j+1) == T(k),"MatrixF.diag1 V");
             if (N+i-j > M) {
-                Assert(m.diag(j-i,j,M+j-i)(0) == k,"Matrix.diag2");
-                Assert(mcv.diag(j-i,j,M+j-i)(0) == k,"Matrix.diag2 CV");
-                Assert(mv.diag(j-i,j,M+j-i)(0) == k,"Matrix.diag2 V");
-                Assert(mf.diag(j-i,j+1,M+j-i)(1) == k,"Matrix.diag2");
-                Assert(mfcv.diag(j-i,j+1,M+j-i)(1) == k,"Matrix.diag2 CV");
-                Assert(mfv.diag(j-i,j+1,M+j-i)(1) == k,"Matrix.diag2 V");
+                Assert(m.diag(j-i,j,M+j-i)(0) == T(k),"Matrix.diag2");
+                Assert(mcv.diag(j-i,j,M+j-i)(0) == T(k),"Matrix.diag2 CV");
+                Assert(mv.diag(j-i,j,M+j-i)(0) == T(k),"Matrix.diag2 V");
+                Assert(mf.diag(j-i,j+1,M+j-i)(1) == T(k),"Matrix.diag2");
+                Assert(mfcv.diag(j-i,j+1,M+j-i)(1) == T(k),"Matrix.diag2 CV");
+                Assert(mfv.diag(j-i,j+1,M+j-i)(1) == T(k),"Matrix.diag2 V");
             } else {
-                Assert(m.diag(j-i,j,N)(0) == k,"Matrix.diag2");
-                Assert(mcv.diag(j-i,j,N)(0) == k,"Matrix.diag2 CV");
-                Assert(mv.diag(j-i,j,N)(0) == k,"Matrix.diag2 V");
-                Assert(mf.diag(j-i,j+1,N)(1) == k,"Matrix.diag2");
-                Assert(mfcv.diag(j-i,j+1,N)(1) == k,"Matrix.diag2 CV");
-                Assert(mfv.diag(j-i,j+1,N)(1) == k,"Matrix.diag2 V");
+                Assert(m.diag(j-i,j,N)(0) == T(k),"Matrix.diag2");
+                Assert(mcv.diag(j-i,j,N)(0) == T(k),"Matrix.diag2 CV");
+                Assert(mv.diag(j-i,j,N)(0) == T(k),"Matrix.diag2 V");
+                Assert(mf.diag(j-i,j+1,N)(1) == T(k),"Matrix.diag2");
+                Assert(mfcv.diag(j-i,j+1,N)(1) == T(k),"Matrix.diag2 CV");
+                Assert(mfv.diag(j-i,j+1,N)(1) == T(k),"Matrix.diag2 V");
             }
         }
     }
@@ -133,97 +119,33 @@ static void TestBasicMatrix_1()
 
     m.resize(2,3);
     Assert(m.colsize() == 2 && m.rowsize() == 3,"m.resize(2,3)");
-    for (int i=0, k=0; i<2; ++i) for (int j=0; j<3; ++j, ++k) 
+    for (int i=0, k=1; i<2; ++i) for (int j=0; j<3; ++j, ++k) {
         m(i,j) = T(k);
-    for (int i=0, k=0; i<2; ++i) for (int j=0; j<3; ++j, ++k) 
-        Assert(m(i,j) == k,"Read/Write resized Matrix");
+    }
+    for (int i=0, k=1; i<2; ++i) for (int j=0; j<3; ++j, ++k) {
+        Assert(m(i,j) == T(k),"Read/Write resized Matrix");
+    }
 
     m.resize(2*M,3*N);
     Assert(m.colsize() == 2*M && m.rowsize() == 3*N,"m.resize(2*M,3*N)");
-    for (int i=0, k=0; i<2*M; ++i) for (int j=0; j<3*N; ++j, ++k) 
+    for (int i=0, k=1; i<2*M; ++i) for (int j=0; j<3*N; ++j, ++k) {
         m(i,j) = T(k);
-    for (int i=0, k=0; i<2*M; ++i) for (int j=0; j<3*N; ++j, ++k) 
-        Assert(m(i,j) == k,"Read/Write resized Matrix");
-
-    // Test Basic Arithmetic
-    tmv::Matrix<T,S> a(M,N);
-    tmv::Matrix<T,S> b(M,N);
-    tmv::Matrix<T,S> c(M,N);
-    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) {
-        a(i,j) = T(3+i+5*j);
-        b(i,j) = T(5+2*i+4*j);
     }
-    mf = a;
-    Assert(a == mf,"Copy CStyle Matrix to FortranStyle");
-
-    c = a+b;
-    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
-        Assert(c(i,j) == T(8+3*i+9*j),"Add Matrices");
-
-    c = a-b;
-    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
-        Assert(c(i,j) == T(-2-i+j),"Subtract Matrices");
-
-    tmv::Matrix<CT,S> cm(M,N);
-    tmv::Matrix<CT,S> ca(M,N);
-    tmv::Matrix<CT,S> cb(M,N);
-    Assert(cm.colsize() == M && cm.rowsize() && N,
-           "Creating CMatrix(M,N)");
-
-    for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k)
-        cm(i,j) = CT(T(k),T(k+1000));
-
-    tmv::VIt<CT,1,tmv::NonConj> vit2 = cm.linearView().begin();
-    tmv::CVIt<CT,1,tmv::NonConj> cvit2 = cm.linearView().begin();
-    tmv::VIt<CT,1,tmv::Conj> vit3 = cm.conjugate().linearView().begin();
-    tmv::CVIt<CT,1,tmv::Conj> cvit3 = cm.conjugate().linearView().begin();
-    for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
-        Assert(cm(i,j) == CT(T(k),T(k+1000)),"Read/Write CMatrix");
-        Assert(cm.row(i)(j) == CT(T(k),T(k+1000)),"CMatrix.row");
-        Assert(cm.col(j)(i) == CT(T(k),T(k+1000)),"CMatrix.col");
-        if (S == tmv::RowMajor) {
-            Assert(*vit2++ == CT(T(k),T(k+1000)),"CMatrix.linearView");
-            Assert(*cvit2++ == CT(T(k),T(k+1000)),"CMatrix.linearView with CVIt");
-            Assert(*vit3++ == CT(T(k),-T(k+1000)),"CMatrix.linearView with conj");
-            Assert(*cvit3++ == CT(T(k),-T(k+1000)),"CMatrix.linearView with conj, CVIt");
-        }
+    for (int i=0, k=1; i<2*M; ++i) for (int j=0; j<3*N; ++j, ++k) {
+        Assert(m(i,j) == T(k),"Read/Write resized Matrix");
     }
 
-    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) {
-        ca(i,j) = CT(T(3+i+5*j),T(i-j));
-        cb(i,j) = CT(T(3+2*i+4*j),T(4-10*i));
-    }
-
-    cm = ca+cb;
-    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
-        Assert(cm(i,j) == CT(T(6+3*i+9*j),T(4-9*i-j)),"Add CMatrix");
-
-    cm = ca-cb;
-    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
-        Assert(cm(i,j) == CT(T(-i+j),T(-4+11*i-j)),"Subtract CMatrix");
-
-    cm = ca;
-    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
-        Assert(cm(i,j) == ca(i,j),"Copy CMatrix");
 }
 
-template <class T, tmv::StorageType S> 
-static void TestBasicMatrix_2()
+template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
 {
     const int M = 15;
     const int N = 10;
 
-    if (showstartdone) {
-        std::cout<<"Start TestBasicMatrix_2\n";
-        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
-        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
-        std::cout<<"M,N = "<<M<<','<<N<<std::endl;
-    }
-
     tmv::Matrix<T,S> m(M,N);
     tmv::Matrix<T,S|tmv::FortranStyle> mf(M,N);
 
-    for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         m(i,j) = T(k);
         mf(i+1,j+1) = T(k);
     }
@@ -319,7 +241,6 @@ static void TestBasicMatrix_2()
     Assert(mf.rowPair(3,1) == mfv.rowPair(3,1),"rowPairFV");
     Assert(mf.colRange(3,5) == mfv.colRange(3,5),"colRangeFV");
     Assert(mf.rowRange(4,7) == mfv.rowRange(4,7),"rowRangeFV");
-
 
     // Test assignments and constructors from arrays
     T qarrm[] = { 
@@ -464,10 +385,60 @@ static void TestBasicMatrix_2()
     Assert(cmit5 == q5.colmajor_end(), "cmit5 reaching end");
     Assert(cmit6 == q5_const.colmajor_end(), "cmit6 reaching end");
 
+
+    // Test Basic Arithmetic
+    tmv::Matrix<T,S> a(M,N);
+    tmv::Matrix<T,S> b(M,N);
+    tmv::Matrix<T,S> c(M,N);
+    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) {
+        a(i,j) = T(3+i+5*j);
+        b(i,j) = T(5+2*i+4*j);
+    }
+    mf = a;
+    Assert(a == mf,"Copy CStyle Matrix to FortranStyle");
+
+    c = a+b;
+    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
+        Assert(c(i,j) == T(8+3*i+9*j),"Add Matrices");
+
+    c = a-b;
+    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
+        Assert(c(i,j) == T(-2-i+j),"Subtract Matrices");
+
+    tmv::Matrix<CT,S> cm(M,N);
+    tmv::Matrix<CT,S> ca(M,N);
+    tmv::Matrix<CT,S> cb(M,N);
+    Assert(cm.colsize() == size_t(M) && cm.rowsize() && size_t(N),
+           "Creating CMatrix(M,N)");
+
+    for (int i=0, k=1; i<M; ++i) for (int j=0; j<N; ++j, ++k)
+        cm(i,j) = CT(T(k),T(k+1000));
+
+    for (int i=0, k=1; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
+        Assert(cm(i,j) == CT(T(k),T(k+1000)),"Read/Write CMatrix");
+        Assert(cm.row(i)(j) == CT(T(k),T(k+1000)),"CMatrix.row");
+        Assert(cm.col(j)(i) == CT(T(k),T(k+1000)),"CMatrix.col");
+    }
+
+    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) {
+        ca(i,j) = CT(T(3+i+5*j),T(i-j));
+        cb(i,j) = CT(T(3+2*i+4*j),T(4-10*i));
+    }
+
+    cm = ca+cb;
+    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
+        Assert(cm(i,j) == CT(T(6+3*i+9*j),T(4-9*i-j)),"Add CMatrix");
+
+    cm = ca-cb;
+    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
+        Assert(cm(i,j) == CT(T(-i+j),T(-4+11*i-j)),"Subtract CMatrix");
+
+    cm = ca;
+    for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
+        Assert(cm(i,j) == ca(i,j),"Copy CMatrix");
 }
 
-template <class T, tmv::StorageType S> 
-static void TestBasicMatrix_IO()
+template <class T, tmv::StorageType S> static void TestBasicMatrix_IO()
 {
     const int M = 15;
     const int N = 10;
@@ -482,7 +453,7 @@ static void TestBasicMatrix_IO()
     tmv::Matrix<T,S> m(M,N);
     tmv::Matrix<CT,S> cm(M,N);
 
-    for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         m(i,j) = T(k);
         cm(i,j) = CT(k,k+1000);
     }
@@ -492,7 +463,7 @@ static void TestBasicMatrix_IO()
     cm(5,6) = CT(T(9.e-3),T(9.e-3));
     cm(6,6) = CT(T(9),T(9.e-3));
     m(7,4) = T(0.123456789);
-    cm(7,4) = CT(T(3.123456789),T(6.987654321));
+    cm(7,4) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::Matrix<T> m2 = m;
@@ -518,7 +489,7 @@ static void TestBasicMatrix_IO()
 
     // Write matrices with 4 different styles
     std::ofstream fout("tmvtest_matrix_io.dat");
-    Assert(bool(fout),"Couldn't open tmvtest_matrix_io.dat for output");
+    Assert(fout,"Couldn't open tmvtest_matrix_io.dat for output");
     fout << m << std::endl;
     fout << cm << std::endl;
     fout << tmv::CompactIO() << m << std::endl;
@@ -537,51 +508,51 @@ static void TestBasicMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     m(7,4) = T(0.123457);
-    cm(7,4) = CT(T(3.12346),T(6.98765));
+    cm(7,4) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in. (m2,cm2)
 
     // When using prec(4), these will be the values read in.
     m3(7,4) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,6);
-    else cm3(7,4) = CT(T(3.123),T(6.988));
+    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,600);
+    else cm3(7,4) = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::Matrix<T,tmv::RowMajor> xm1(M,N);
     tmv::Matrix<CT,tmv::RowMajor> xcm1(M,N);
     std::ifstream fin("tmvtest_matrix_io.dat");
-    Assert(bool(fin),"Couldn't open tmvtest_matrix_io.dat for input");
+    Assert(fin,"Couldn't open tmvtest_matrix_io.dat for input");
     fin >> xm1 >> xcm1;
-    Assert(EqualIO(m,xm1,EPS),"Matrix I/O check normal");
-    Assert(EqualIO(cm,xcm1,EPS),"CMatrix I/O check normal");
+    Assert(m == xm1,"Matrix I/O check normal");
+    Assert(cm == xcm1,"CMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm1 >> tmv::CompactIO() >> xcm1;
-    Assert(EqualIO(m,xm1,EPS),"Matrix I/O check compact");
-    Assert(EqualIO(cm,xcm1,EPS),"CMatrix I/O check compact");
+    Assert(m == xm1,"Matrix I/O check compact");
+    Assert(cm == xcm1,"CMatrix I/O check compact");
     fin >> xm1.view() >> xcm1.view();
-    Assert(EqualIO(m2,xm1,EPS),"Matrix I/O check thresh");
-    Assert(EqualIO(cm2,xcm1,EPS),"CMatrix I/O check thresh");
+    Assert(m2 == xm1,"Matrix I/O check thresh");
+    Assert(cm2 == xcm1,"CMatrix I/O check thresh");
     fin >> myStyle >> xm1.view() >> myStyle >> xcm1.view();
-    Assert(EqualIO(m3,xm1,EPS),"Matrix I/O check compact thresh & prec(4)");
-    Assert(EqualIO(cm3,xcm1,EPS),"CMatrix I/O check compact thresh & prec(4)");
+    Assert(m3 == xm1,"Matrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm1,"CMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for column major
     tmv::Matrix<T,tmv::ColMajor> xm2(M,N);
     tmv::Matrix<CT,tmv::ColMajor> xcm2(M,N);
     fin.open("tmvtest_matrix_io.dat");
-    Assert(bool(fin),"Couldn't open tmvtest_matrix_io.dat for input");
+    Assert(fin,"Couldn't open tmvtest_matrix_io.dat for input");
     fin >> xm2.view() >> xcm2.view();
-    Assert(EqualIO(m,xm2,EPS),"Matrix I/O check normal");
-    Assert(EqualIO(cm,xcm2,EPS),"CMatrix I/O check normal");
+    Assert(m == xm2,"Matrix I/O check normal");
+    Assert(cm == xcm2,"CMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm2.view() >> tmv::CompactIO() >> xcm2.view();
-    Assert(EqualIO(m,xm2,EPS),"Matrix I/O check compact");
-    Assert(EqualIO(cm,xcm2,EPS),"CMatrix I/O check compact");
+    Assert(m == xm2,"Matrix I/O check compact");
+    Assert(cm == xcm2,"CMatrix I/O check compact");
     fin >> xm2 >> xcm2;
-    Assert(EqualIO(m2,xm2,EPS),"Matrix I/O check thresh");
-    Assert(EqualIO(cm2,xcm2,EPS),"CMatrix I/O check thresh");
+    Assert(m2 == xm2,"Matrix I/O check thresh");
+    Assert(cm2 == xcm2,"CMatrix I/O check thresh");
     fin >> myStyle >> xm2 >> myStyle >> xcm2;
-    Assert(EqualIO(m3,xm2,EPS),"Matrix I/O check compact thresh & prec(4)");
-    Assert(EqualIO(cm3,xcm2,EPS),"CMatrix I/O check compact thresh & prec(4)");
+    Assert(m3 == xm2,"Matrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm2,"CMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // And repeat for matrices that need to be resized.
@@ -590,19 +561,19 @@ static void TestBasicMatrix_IO()
     tmv::Matrix<T> zm1,zm2,zm3,zm4;
     tmv::Matrix<CT> zcm1,zcm2,zcm3,zcm4;
     fin.open("tmvtest_matrix_io.dat");
-    Assert(bool(fin),"Couldn't open tmvtest_matrix_io.dat for input");
+    Assert(fin,"Couldn't open tmvtest_matrix_io.dat for input");
     fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
-    Assert(EqualIO(m,zm1,EPS),"Matrix I/O check normal with resize");
-    Assert(EqualIO(cm,zcm1,EPS),"CMatrix I/O check normal with resize");
+    Assert(m == zm1,"Matrix I/O check normal with resize");
+    Assert(cm == zcm1,"CMatrix I/O check normal with resize");
     fin >> zm2 >> zcm2;
-    Assert(EqualIO(m,zm2,EPS),"Matrix I/O check compact with resize");
-    Assert(EqualIO(cm,zcm2,EPS),"CMatrix I/O check compact with resize");
+    Assert(m == zm2,"Matrix I/O check compact with resize");
+    Assert(cm == zcm2,"CMatrix I/O check compact with resize");
     fin >> tmv::NormalIO() >> zm3 >> tmv::NormalIO() >> zcm3;
-    Assert(EqualIO(m2,zm3,EPS),"Matrix I/O check thresh with resize");
-    Assert(EqualIO(cm2,zcm3,EPS),"CMatrix I/O check thresh with resize");
+    Assert(m2 == zm3,"Matrix I/O check thresh with resize");
+    Assert(cm2 == zcm3,"CMatrix I/O check thresh with resize");
     fin >> myStyle >> zm4 >> myStyle >> zcm4;
-    Assert(EqualIO(m3,zm4,EPS),"Matrix I/O check compact thresh with resize");
-    Assert(EqualIO(cm3,zcm4,EPS),"CMatrix I/O check compact thresh with resize");
+    Assert(m3 == zm4,"Matrix I/O check compact thresh with resize");
+    Assert(cm3 == zcm4,"CMatrix I/O check compact thresh with resize");
     fin.close();
     // Switch it back.
     tmv::IOStyle::revertDefault();
@@ -622,7 +593,7 @@ template <class T> void TestMatrix()
     TestBasicMatrix_2<T,tmv::ColMajor>();
     TestBasicMatrix_IO<T,tmv::RowMajor>();
     TestBasicMatrix_IO<T,tmv::ColMajor>();
-    std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
+    std::cout<<"Matrix<"<<Text(T())<<"> passed all basic tests\n";
 #endif
 
 #if 1
@@ -634,7 +605,7 @@ template <class T> void TestMatrix()
     TestMatrixArith_6<T>();
     TestMatrixArith_7<T>();
     TestMatrixArith_8<T>();
-    std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> Arithmetic passed all tests\n";
+    std::cout<<"Matrix<"<<Text(T())<<"> Arithmetic passed all tests\n";
 #endif
 }
 

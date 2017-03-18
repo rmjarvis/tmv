@@ -1,18 +1,38 @@
+
 #include "TMV_Test.h"
 #include "TMV_Test_1.h"
 #include "TMV.h"
 
-#define NOELEMMULT
+template <class M1, class M2>
+inline bool CanAddEq(
+    const tmv::BaseMatrix_Tri_Mutable<M1>& a, const tmv::BaseMatrix_Diag<M2>& b)
+{
+#ifdef XXD
+    if (showtests) {
+        std::cout<<"CanAddEq:\n";
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+    }
+#endif
+    return a.size() == b.size() && !a.isunit(); 
+}
 
-template <class T1, class T2>
-static inline bool CanAddEq(
-    const tmv::UpperTriMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b)
-{ return (a.size() == b.size()) && !a.isunit(); }
-
-template <class T1, class T2>
-static inline bool CanAddEq(
-    const tmv::LowerTriMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b)
-{ return (a.size() == b.size()) && !a.isunit(); }
+template <class M1, class M2, class M3>
+static inline bool CanElemMult(
+    const tmv::BaseMatrix_Tri<M1>& a, const tmv::BaseMatrix_Diag<M2>& b,
+    const tmv::BaseMatrix_Tri_Mutable<M3>& c)
+{
+#ifdef XXD
+    if (showtests) {
+        std::cout<<"Tri: CanElemMult:\n";
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
+    }
+#endif
+    return (a.size() == b.size()) && (a.size() == c.size()) &&
+        !c.isunit();
+}
 
 #include "TMV_TestMatrixArith.h"
 
@@ -42,7 +62,7 @@ template <class T> void TestTriMatrixArith_C4b()
     tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
     ca2x -= a2x;
     ca2x *= CT(1,-2);
-    ca2x(0,0) = CT(0,-5);
+    ca2x(0,0) = CT(7,12);
 
     tmv::UpperTriMatrixView<T> u1 = a1x.upperTri();
     tmv::UpperTriMatrixView<CT> cu1 = ca1x.upperTri();

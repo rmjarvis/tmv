@@ -102,7 +102,6 @@ namespace tmv {
             const ptrdiff_t NB = 4;
             typedef typename MCopyHelper<T,UpperTri,NB,NB>::type Ztype;
             typedef typename Ztype::subtrimatrix_type Zs;
-            typedef typename Ztype::col_sub_type Zc;
             Ztype BaseZ = MatrixSizer<T>(NB,NB);
             typename Ztype::view_type Z = BaseZ.view();
 
@@ -160,11 +159,9 @@ namespace tmv {
         typedef typename M1::subtrimatrix_type M1s;
         typedef typename M1::submatrix_type M1sm;
         typedef typename M2::col_sub_type M2c;
-        typedef typename M1::row_sub_type M1r;
         typedef typename M2::colrange_type M2cr;
         typedef typename M3::subtrimatrix_type M3s;
         typedef typename M3::submatrix_type M3sm;
-        typedef typename M3::col_sub_type M3c;
 
         if (N > 2) {
             ptrdiff_t j1 = N/2;
@@ -256,7 +253,6 @@ namespace tmv {
             const ptrdiff_t s1 = IntTraits2<NB,rs>::min;
             const ptrdiff_t N1 = TMV_MIN(NB,N);
             typedef typename MCopyHelper<T,UpperTri,s1,s1>::type Ztype;
-            typedef typename Ztype::subtrimatrix_type Zs;
             Ztype BaseZ = MatrixSizer<T>(N1,N1);
             typename Ztype::view_type Z = BaseZ.view();
 
@@ -266,7 +262,6 @@ namespace tmv {
             typedef typename MCopyHelper<T,Rec,s1,s3>::type M3;
             typedef typename M3::col_sub_type M3c;
             typedef typename M3::colrange_type M3cr;
-            typedef typename M3::submatrix_type M3s;
             M3 tempBase = MatrixSizer<T>(N1,N3);
 
             RT beta;

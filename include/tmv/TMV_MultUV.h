@@ -127,14 +127,12 @@ namespace tmv {
             typedef typename V3::value_type T3;
             typedef typename Traits2<T,typename V2::value_type>::type PT2;
             typedef typename M1::const_col_sub_type M1c;
-            typedef typename M1::const_diag_type M1d;
             PT2 Xj;
 
             const bool unit = M1::_unit;
             const bool c2 = V2::_conj;
 
             typedef typename M1c::const_nonconj_type::const_iterator IT1;
-            typedef typename M1d::const_nonconj_type::const_iterator IT1d;
             typedef typename V2::const_nonconj_type::const_iterator IT2;
             typedef typename V3::iterator IT3;
             IT1 A0j = m1.get_col(0,0,1).begin().nonConj();
@@ -300,14 +298,12 @@ namespace tmv {
             typedef typename V3::value_type T3;
             typedef typename Traits2<T,typename V2::value_type>::type PT2;
             typedef typename M1::const_col_sub_type M1c;
-            typedef typename M1::const_diag_type M1d;
             PT2 Xj;
 
             const bool unit = M1::_unit;
             const bool c2 = V2::_conj;
 
             typedef typename M1c::const_nonconj_type::const_iterator IT1;
-            typedef typename M1d::const_nonconj_type::const_iterator IT1d;
             typedef typename V2::const_nonconj_type::const_iterator IT2;
             typedef typename V3::iterator IT3;
 

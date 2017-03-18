@@ -1186,7 +1186,7 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { SipSj = IntTraits2<Si,Sj>::sum };
+        enum { SipSj = Attrib<A0>::diagmajor ? 1 : IntTraits2<Si,Sj>::sum };
         enum { A = (A0 & ~NoDivider & ~NoAlias) | (
                 ( Attrib<A0>::colmajor ? 0 :
                   Attrib<A0>::rowmajor ? 0 :
@@ -1568,7 +1568,7 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { SipSj = IntTraits2<Si,Sj>::sum };
+        enum { SipSj = Attrib<A0>::diagmajor ? 1 : IntTraits2<Si,Sj>::sum };
         enum { A = (A0 & ~NoDivider & ~NoAlias) | (
                 ( Attrib<A0>::colmajor ? 0 :
                   Attrib<A0>::rowmajor ? 0 :

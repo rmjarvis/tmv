@@ -850,10 +850,6 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            typedef typename M1::value_type T1;
-            typedef typename M2::value_type T2;
-            typedef typename M3::value_type T3;
-
             // Possible algorithms are:
             //
             // Trivial:

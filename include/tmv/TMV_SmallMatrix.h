@@ -344,7 +344,7 @@ namespace tmv {
 #endif
         }
 
-        explicit SmallMatrix(T x) 
+        explicit SmallMatrix(const T& x)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);

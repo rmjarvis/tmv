@@ -1,21 +1,18 @@
+
 #include "TMV_Test.h"
 #include "TMV_Test_1.h"
 #include "TMV.h"
 
-template <class T1, class T2> inline bool CanLDivEq(
-    const tmv::UpperTriMatrixView<T1>& a, const tmv::UpperTriMatrixView<T2>& b)
+template <class M1, class M2> 
+inline bool CanLDivEq(
+    const tmv::BaseMatrix_Tri_Mutable<M1>& a,
+    const tmv::BaseMatrix_Tri<M2>& b)
 { return a.size() == b.size() && !a.isunit(); }
 
-template <class T1, class T2> inline bool CanRDivEq(
-    const tmv::UpperTriMatrixView<T1>& a, const tmv::UpperTriMatrixView<T2>& b)
-{ return a.size() == b.size() && !a.isunit(); }
-
-template <class T1, class T2> inline bool CanLDivEq(
-    const tmv::LowerTriMatrixView<T1>& a, const tmv::LowerTriMatrixView<T2>& b)
-{ return a.size() == b.size() && !a.isunit(); }
-
-template <class T1, class T2> inline bool CanRDivEq(
-    const tmv::LowerTriMatrixView<T1>& a, const tmv::LowerTriMatrixView<T2>& b)
+template <class M1, class M2> 
+inline bool CanRDivEq(
+    const tmv::BaseMatrix_Tri_Mutable<M1>& a,
+    const tmv::BaseMatrix_Tri<M2>& b)
 { return a.size() == b.size() && !a.isunit(); }
 
 #include "TMV_TestMatrixDivArith.h"

@@ -397,7 +397,6 @@ namespace tmv {
         typedef typename V::float_type ret;
         static ret call(const V& v, ptrdiff_t* ibest)
         {
-            typedef typename V::value_type VT;
             typedef typename V::const_iterator IT;
             typedef typename V::zfloat_type ZT;
             ZT value;
@@ -432,7 +431,6 @@ namespace tmv {
         typedef typename V::float_type ret;
         static ret call(const V& v, ptrdiff_t* ibest)
         {
-            typedef typename V::value_type VT;
             typedef typename V::const_iterator IT;
             typedef typename V::zfloat_type ZT;
             ZT value;

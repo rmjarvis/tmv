@@ -415,7 +415,6 @@ namespace tmv {
             TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
             TMVAssert(m1.size() == m2.size());
             TMVAssert(!m1.isunit() && !m2.isunit());
-            typedef typename M2::value_type T2;
             const ptrdiff_t s2 = s > 20 ? Unknown : s;
             const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
@@ -442,7 +441,6 @@ namespace tmv {
             TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
             TMVAssert(m1.size() == m2.size());
             TMVAssert(m1.isunit() || !m2.isunit());
-            typedef typename M2::value_type T2;
             const int algo = 
                 s == 0 ? 0 : 
                 M2::_lower ? 1 :
@@ -494,8 +492,6 @@ namespace tmv {
             TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
             TMVAssert(m1.size() == m2.size());
             TMVAssert(m1.isunit() || !m2.isunit());
-            typedef typename M1::value_type T1;
-            typedef typename M2::value_type T2;
             const bool noclobber = MStepHelper<M1,M2>::opp;
             const bool checkalias = 
                 M2::_checkalias && !noclobber;

@@ -251,7 +251,6 @@ namespace tmv {
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
         {
-            typedef typename M2::value_type T2;
             const int algo = 
                 TMV_OPT == 0 ? 13 :
                 ( M1::_colmajor && M2::_colmajor ) ? 11 :

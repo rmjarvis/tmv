@@ -446,8 +446,6 @@ namespace tmv {
     {
         static TMV_INLINE void call(const M1& m1, M2& m2)
         {
-            typedef typename M1::value_type T1;
-            typedef typename M2::value_type T2;
             const int algo = 
                 rs == 1 ? 102 : 
                 cs == 1 ? 103 :

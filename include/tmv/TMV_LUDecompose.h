@@ -316,7 +316,6 @@ namespace tmv {
 #endif
 
             typedef typename M1::col_sub_type M1c;
-            typedef typename M1::row_type M1r;
             typedef typename M1::const_col_sub_type M1cc;
             typedef typename M1::colrange_type M1cr;
             typedef typename M1::const_submatrix_type M1s;

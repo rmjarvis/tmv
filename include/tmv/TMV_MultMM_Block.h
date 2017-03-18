@@ -2702,7 +2702,6 @@ namespace tmv {
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
-            typedef typename M3::value_type T3;
             typedef typename Traits2<T1,T2>::type PT3;
             typedef typename M3::real_type RT;
 
@@ -3397,7 +3396,6 @@ namespace tmv {
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
-            typedef typename M3::value_type T3;
             typedef typename Traits2<T1,T2>::type PT3;
             typedef typename M3::real_type RT;
             const bool x_z = Traits<T>::iscomplex;

@@ -426,7 +426,6 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             TMVStaticAssert(!M3::_conj);
-            typedef typename M3::value_type T3;
             const bool allrm = M1::_rowmajor && M2::_rowmajor && M3::_rowmajor;
             const bool allcm = M1::_colmajor && M2::_colmajor && M3::_colmajor;
             const int algo = 

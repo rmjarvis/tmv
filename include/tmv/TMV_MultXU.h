@@ -445,7 +445,6 @@ namespace tmv {
             TMVStaticAssert(!M2::_unit);
             TMVAssert(!m1.isunit());
             TMVAssert(!m2.isunit());
-            typedef typename M2::value_type T2;
             const ptrdiff_t s2 = s > 20 ? Unknown : s;
             const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2

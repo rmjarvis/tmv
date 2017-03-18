@@ -58,7 +58,6 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
         static ret call(const V& v, const Scaling<ix,RT>& x)
         {
-            typedef typename V::value_type VT;
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
@@ -78,7 +77,6 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
         static ret call(const V& v, const Scaling<ix,RT>& x)
         {
-            typedef typename V::value_type VT;
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
@@ -117,7 +115,6 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
         static ret call(const V& v, const Scaling<ix,RT>& x)
         {
-            typedef typename V::value_type VT;
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
@@ -164,7 +161,6 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
         static ret call(const V& v, const Scaling<ix,RT>& x)
         {
-            typedef typename V::value_type VT;
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
@@ -223,7 +219,6 @@ namespace tmv {
     struct SumElementsV_Helper<15,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        typedef typename V::value_type VT;
         typedef typename TypeSelect<
             V::isreal || Traits<ret>::iscomplex , ret ,
             std::complex<ret> >::type BT;
@@ -323,7 +318,6 @@ namespace tmv {
     struct SumElementsV_Helper<-3,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        typedef typename V::value_type VT;
         static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         {
             typedef typename V::real_type RT;

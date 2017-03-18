@@ -62,8 +62,6 @@ namespace tmv {
 #endif
             typedef typename V1::iterator IT1;
             typedef typename V2::iterator IT2;
-            typedef typename V3::iterator IT3;
-            typedef typename V4::iterator IT4;
             typedef typename M1::col_sub_type M1c;
             typedef typename M1::row_sub_type M1r;
             typedef typename M1::submatrix_type M1s;

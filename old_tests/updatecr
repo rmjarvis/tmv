@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+#
+#ls TMV* | updatecr
+
+# Count how many lines to remove
+open(A,"oldcr") || die "Cannot open oldcr: $!";
+$nlines = 0;
+while (<A>) {
+    $nlines = $nlines + 1
+}
+
+while ($file = <STDIN>) {
+    open(F,$file) || die "Cannot open $file: $!";
+    open(G,"newcr") || die "Cannot open newcr: $!";
+    open(J,">junk") || die "Cannot open junk: $!";
+
+    # Skip the first nlines
+    $count = $nlines;
+    while ($count > 0) { <F>; --$count; }
+
+    # Write the new cr file
+    while (<G>) {
+        print J $_;
+    }
+
+    # Write the rest of the source file
+    while (<F>) {
+        print J $_;
+    }
+
+    # Done first pass
+    close G;
+    close F;
+    close J;
+    open(F,">$file") || die "Cannot open $file: $!";
+    open(J,"junk") || die "Cannot open junk: $!";
+
+    # Copy back to original file name
+    while (<J>) {
+        print F $_;
+    }
+}
+

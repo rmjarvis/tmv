@@ -17,7 +17,6 @@ namespace tmv {
     template <class M2, class M3>
     static inline void DoMultEqUU(const M2& m2, M3& m3)
     {
-        typedef typename M2::value_type T2;
         typedef typename M3::real_type RT;
         Scaling<1,RT> one;
         if (m2.iscm()) 
@@ -32,7 +31,6 @@ namespace tmv {
     template <class M1, class M2, class M3>
     static inline void DoMultUU(const M1& m1, const M2& m2, M3& m3)
     {
-        typedef typename M2::value_type T2;
         typedef typename M3::real_type RT;
 
         // Can save some compiled code by copying m1 to m3.

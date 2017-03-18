@@ -401,12 +401,10 @@ namespace tmv {
             T1 X0;
 
             typedef typename V2::value_type T2;
-            typedef typename V2::const_iterator IT2;
             typedef typename Traits2<T,T2>::type PT2;
             const PT2 Y0 = x * v2.cref(0);
             const PT2 Y1 = x * v2.cref(1);
 
-            typedef typename M3::value_type T3;
             typedef typename M3::col_type::iterator IT3;
             const ptrdiff_t stepj = m3.stepj();
             IT3 A0 = m3.get_col(0).begin();
@@ -440,13 +438,11 @@ namespace tmv {
             T1 X0;
 
             typedef typename V2::value_type T2;
-            typedef typename V2::const_iterator IT2;
             typedef typename Traits2<T,T2>::type PT2;
             const PT2 Y0 = x * v2.cref(0);
             const PT2 Y1 = x * v2.cref(1);
             const PT2 Y2 = x * v2.cref(2);
 
-            typedef typename M3::value_type T3;
             typedef typename M3::col_type::iterator IT3;
             const ptrdiff_t stepj = m3.stepj();
             IT3 A0 = m3.get_col(0).begin();
@@ -482,14 +478,12 @@ namespace tmv {
             T1 X0;
 
             typedef typename V2::value_type T2;
-            typedef typename V2::const_iterator IT2;
             typedef typename Traits2<T,T2>::type PT2;
             const PT2 Y0 = x * v2.cref(0);
             const PT2 Y1 = x * v2.cref(1);
             const PT2 Y2 = x * v2.cref(2);
             const PT2 Y3 = x * v2.cref(3);
 
-            typedef typename M3::value_type T3;
             typedef typename M3::col_type::iterator IT3;
             const ptrdiff_t stepj = m3.stepj();
             IT3 A0 = m3.get_col(0).begin();
