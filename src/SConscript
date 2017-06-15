@@ -1,3 +1,4 @@
+from __future__ import print_function
 # vim: set filetype=python :
 
 import os
@@ -40,7 +41,7 @@ sblib_stegr_files= sym_stegr
 env1 = env.Clone()
 
 if env['MEM_DEBUG']:
-    print 'Using mmgr.cpp'
+    print('Using mmgr.cpp')
     lib_files += ['mmgr.cpp']
 
 if env['NAN_TEST']:
@@ -91,7 +92,7 @@ if env['SHARED']:
     # Some stuff to get it to set the right library name and compatibility version:
     version_text = os.popen(os.path.join('..','bin','tmv-version')).read()
     version = tuple(version_text.strip().split('.'))
-    print 'TMV Version ',version_text
+    print('TMV Version ',version_text)
     # Currently, I manually set the compatibility version when less than
     # the current version.  Any way to automate this?  Probably not.
     #compat_version = version 

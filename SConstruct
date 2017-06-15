@@ -1,3 +1,4 @@
+from __future__ import print_function
 # vim: set filetype=python et ts=4 sw=4:
 # 
 # Always run scons from the root directory of tmv
@@ -7,7 +8,7 @@ import sys
 import SCons
 import platform
 
-print 'SCons is version',SCons.__version__,'using python version',platform.python_version()
+print('SCons is version',SCons.__version__,'using python version',platform.python_version())
 
 
 # Subdirectories containing SConscript files.  We always process these, but 
@@ -256,7 +257,7 @@ def BasicCCFlags(env):
                 env['TEST_FLAGS'] += ['/W1','/WX']
 
         else:
-            print 'WARNING: Unknown compiler.  You should set FLAGS directly.'
+            print('WARNING: Unknown compiler.  You should set FLAGS directly.')
             env.Replace(CCFLAGS=[])
             env['TEST_FLAGS'] = []
 
@@ -288,7 +289,7 @@ def AddOpenMPFlag(env):
     version = env['CXXVERSION_NUMERICAL']
     if compiler == 'g++':
         if version < openmp_mingcc_vers: 
-            print 'No OpenMP support for g++ versions before ',openmp_mingcc_vers
+            print('No OpenMP support for g++ versions before ',openmp_mingcc_vers)
             env['WITH_OPENMP'] = False
             return
         flag = ['-fopenmp']
@@ -296,7 +297,7 @@ def AddOpenMPFlag(env):
         xlib = ['pthread']
     elif compiler == 'clang++':
         if version < openmp_minclang_vers: 
-            print 'No OpenMP support for clang++ versions before ',openmp_minclang_vers
+            print('No OpenMP support for clang++ versions before ',openmp_minclang_vers)
             env['WITH_OPENMP'] = False
             return
         flag = ['-fopenmp']
@@ -304,7 +305,7 @@ def AddOpenMPFlag(env):
         xlib = ['pthread']
     elif compiler == 'icpc':
         if version < openmp_minicpc_vers:
-            print 'No OpenMP support for icpc versions before ',openmp_minicpc_vers
+            print('No OpenMP support for icpc versions before ',openmp_minicpc_vers)
             env['WITH_OPENMP'] = False
             return
         flag = ['-openmp']
@@ -312,7 +313,7 @@ def AddOpenMPFlag(env):
         xlib = ['pthread']
     elif compiler == 'pgCC':
         if version < openmp_minpgcc_vers:
-            print 'No OpenMP support for pgCC versions before ',openmp_minpgcc_vers
+            print('No OpenMP support for pgCC versions before ',openmp_minpgcc_vers)
             env['WITH_OPENMP'] = False
             return
         flag = ['-mp','--exceptions']
@@ -320,7 +321,7 @@ def AddOpenMPFlag(env):
         xlib = ['pthread']
     elif compiler == 'CC':
         if version < openmp_mincc_vers:
-            print 'No OpenMP support for CC versions before ',openmp_mincc_vers
+            print('No OpenMP support for CC versions before ',openmp_mincc_vers)
             env['WITH_OPENMP'] = False
             return
         flag = ['-xopenmp']
@@ -336,11 +337,11 @@ def AddOpenMPFlag(env):
         # I believe the Professional edition has full OpenMP support,
         # so if you have that, the above lines might work for you.
         # Just uncomment those, and commend the below three lines.
-        print 'No OpenMP support for cl'
+        print('No OpenMP support for cl')
         env['WITH_OPENMP'] = False
         return
     else:
-        print 'No OpenMP support for compiler ',compiler
+        print('No OpenMP support for compiler ',compiler)
         env['WITH_OPENMP'] = False
         return
 
@@ -377,7 +378,7 @@ def GetCompilerVersion(env):
     """
     """
     compiler = which(env['CXX'])
-    print 'Using compiler:',compiler
+    print('Using compiler:',compiler)
 
     compiler_real = os.path.realpath(compiler)
     compiler_base = os.path.basename(compiler)
@@ -425,7 +426,7 @@ def GetCompilerVersion(env):
         # Check if g++ is a symlink for something else:
         if compilertype == 'g++':
             if 'clang' in lines[0] or 'clang' in lines[1]:
-                print 'Detected clang++ masquerading as g++'
+                print('Detected clang++ masquerading as g++')
                 compilertype = 'clang++'
                 # When it is masquerading, the line with the version is the second line.
                 linenum=1
@@ -433,13 +434,13 @@ def GetCompilerVersion(env):
         # Check if c++ is a symlink for something else:
         if compilertype == 'c++':
             if 'clang' in lines[0] or 'clang' in lines[1]:
-                print 'Detected that c++ is really clang++'
+                print('Detected that c++ is really clang++')
                 compilertype = 'clang++'
             elif 'g++' in lines[0] or 'gcc' in lines[0]:
-                print 'Detected that c++ is really g++'
+                print('Detected that c++ is really g++')
                 compilertype = 'g++'
             else:
-                print 'Cannot determine what kind of compiler c++ really is'
+                print('Cannot determine what kind of compiler c++ really is')
                 compilertype = 'unknown'
             # Any others I should look for?
 
@@ -465,7 +466,7 @@ def GetCompilerVersion(env):
             version = 0
             vnum = 0
 
-    print 'compiler version:',version
+    print('compiler version:',version)
 
     env['CXXTYPE'] = compilertype
     env['CXXVERSION'] = version
@@ -533,22 +534,22 @@ def AddExtraPaths(env):
     lib_paths2 += env['EXTRA_LIB_PATH'].split(':')
 
     # Paths found in environment paths
-    if env['IMPORT_PATHS'] and os.environ.has_key('PATH'):
+    if env['IMPORT_PATHS'] and 'PATH' in os.environ:
         paths=os.environ['PATH']
         paths=paths.split(os.pathsep)
         AddPath(bin_paths, paths)
 
-    if env['IMPORT_PATHS'] and os.environ.has_key('C_INCLUDE_PATH'):
+    if env['IMPORT_PATHS'] and 'C_INCLUDE_PATH' in os.environ:
         paths=os.environ['C_INCLUDE_PATH']
         paths=paths.split(os.pathsep)
         AddPath(cpp_paths, paths)
 
-    if env['IMPORT_PATHS'] and os.environ.has_key('LIBRARY_PATH'):
+    if env['IMPORT_PATHS'] and 'LIBRARY_PATH' in os.environ:
         paths=os.environ['LIBRARY_PATH']
         paths=paths.split(os.pathsep)
         AddPath(lib_paths2, paths)
 
-    if env['IMPORT_PATHS'] and os.environ.has_key('LD_LIBRARY_PATH'):
+    if env['IMPORT_PATHS'] and 'LD_LIBRARY_PATH' in os.environ:
         paths=os.environ['LD_LIBRARY_PATH']
         paths=paths.split(os.pathsep)
         AddPath(lib_paths2, paths)
@@ -574,7 +575,7 @@ def ReadFileList(fname):
     try:
         files=open(fname).read().split()
     except:
-        print 'Could not open file:',fname
+        print('Could not open file:',fname)
         sys.exit(45)
     files = [f.strip() for f in files]
     return files
@@ -621,14 +622,14 @@ int main()
             False)
         context.Result(result)
         if not result:
-            print 'Unable to determine correct OpenMP library.'
-            print 'To enable OpenMP, you may need to explicitly specify the correct library'
-            print 'with the LIBS flag.'
+            print('Unable to determine correct OpenMP library.')
+            print('To enable OpenMP, you may need to explicitly specify the correct library')
+            print('with the LIBS flag.')
 
     else:
         result = 0
         context.Result(result)
-        print 'Unable to compile code using OpenMP pragmas.'
+        print('Unable to compile code using OpenMP pragmas.')
 
     return result
 
@@ -688,20 +689,20 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_MKL']:
-            print 'WARNING: Forced use of MKL even though link test failed.'
-            print "         The compiled library will not have the correct linking commands"
-            print "         set up for your MKL version."
-            print "         You should figure out what libraries you need to link with here:"
-            print "         http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor"
-            print "         and add them explicitly with the LIBS option in SCons."
+            print('WARNING: Forced use of MKL even though link test failed.')
+            print("         The compiled library will not have the correct linking commands")
+            print("         set up for your MKL version.")
+            print("         You should figure out what libraries you need to link with here:")
+            print("         http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor")
+            print("         and add them explicitly with the LIBS option in SCons.")
             result = 1
 
     else:
         result = 0
         context.Result(result)
         if context.env['FORCE_MKL']:
-            print
-            print 'Error: FORCE_MKL, but failed to find or compile with mkl.h'
+            print()
+            print('Error: FORCE_MKL, but failed to find or compile with mkl.h')
             Exit(1)
             
     return result
@@ -732,19 +733,19 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_ACML']:
-            print 'WARNING: Forced use of ACML even though link test failed.'
-            print "         The compiled library will not have the correct linking commands"
-            print "         set up for your ACML version."
-            print "         You should figure out what libraries you need to link with"
-            print "         and add them explicitly with the LIBS option in SCons."
+            print('WARNING: Forced use of ACML even though link test failed.')
+            print("         The compiled library will not have the correct linking commands")
+            print("         set up for your ACML version.")
+            print("         You should figure out what libraries you need to link with")
+            print("         and add them explicitly with the LIBS option in SCons.")
             result = 1
 
     else:
         result = 0
         context.Result(result)
         if context.env['FORCE_ACML']:
-            print
-            print 'Error: FORCE_ACML, but failed to find or compile with acml.h'
+            print()
+            print('Error: FORCE_ACML, but failed to find or compile with acml.h')
             Exit(1)
             
     return result
@@ -774,19 +775,19 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_CLAMD']:
-            print 'WARNING: Forced use of clAmdBlas even though link test failed.'
-            print "         The compiled library will not have the correct linking commands"
-            print "         set up for your CLAMD version."
-            print "         You should figure out what libraries you need to link with"
-            print "         and add them explicitly with the LIBS option in SCons."
+            print('WARNING: Forced use of clAmdBlas even though link test failed.')
+            print("         The compiled library will not have the correct linking commands")
+            print("         set up for your CLAMD version.")
+            print("         You should figure out what libraries you need to link with")
+            print("         and add them explicitly with the LIBS option in SCons.")
             result = 1
 
     else:
         result = 0
         context.Result(result)
         if context.env['FORCE_CLAMD']:
-            print
-            print 'Error: FORCE_CLAMD, but failed to find or compile with clAmdBlas.h'
+            print()
+            print('Error: FORCE_CLAMD, but failed to find or compile with clAmdBlas.h')
             Exit(1)
     
     return result
@@ -831,19 +832,19 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_GOTO']:
-            print 'WARNING: Forced use of GOTO even though link test failed.'
-            print "         The compiled library will not have the correct linking commands"
-            print "         set up for your GOTOBLAS version."
-            print "         You should figure out what libraries you need to link with"
-            print "         and add them explicitly with the LIBS option in SCons."
+            print('WARNING: Forced use of GOTO even though link test failed.')
+            print("         The compiled library will not have the correct linking commands")
+            print("         set up for your GOTOBLAS version.")
+            print("         You should figure out what libraries you need to link with")
+            print("         and add them explicitly with the LIBS option in SCons.")
             result = 1
 
     else:
         result = 0
         context.Result(result)
         if context.env['FORCE_GOTO']:
-            print
-            print 'Error: FORCE_GOTO, but failed compile test'
+            print()
+            print('Error: FORCE_GOTO, but failed compile test')
             Exit(1)
 
     return result
@@ -877,19 +878,19 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_ATLAS']:
-            print 'WARNING: Forced use of ATLAS even though link test failed.'
-            print "         The compiled library will not have the correct linking commands"
-            print "         set up for your ATLAS version."
-            print "         You should figure out what libraries you need to link with"
-            print "         and add them explicitly with the LIBS option in SCons."
+            print('WARNING: Forced use of ATLAS even though link test failed.')
+            print("         The compiled library will not have the correct linking commands")
+            print("         set up for your ATLAS version.")
+            print("         You should figure out what libraries you need to link with")
+            print("         and add them explicitly with the LIBS option in SCons.")
             result = 1
 
     else:
         result = 0
         context.Result(result)
         if context.env['FORCE_ATLAS']:
-            print
-            print 'Error: FORCE_ATLAS, but failed to find or compile with cblas.h'
+            print()
+            print('Error: FORCE_ATLAS, but failed to find or compile with cblas.h')
             Exit(1)
             
     return result
@@ -927,19 +928,19 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_CBLAS']:
-            print 'WARNING: Forced use of CBLAS even though link test failed.'
-            print "         The compiled library will not have the correct linking commands"
-            print "         set up for your BLAS version."
-            print "         You should figure out what libraries you need to link with"
-            print "         and add them explicitly with the LIBS option in SCons."
+            print('WARNING: Forced use of CBLAS even though link test failed.')
+            print("         The compiled library will not have the correct linking commands")
+            print("         set up for your BLAS version.")
+            print("         You should figure out what libraries you need to link with")
+            print("         and add them explicitly with the LIBS option in SCons.")
             result = 1
 
     else:
         result = 0
         context.Result(result)
         if context.env['FORCE_CBLAS']:
-            print
-            print 'Error: FORCE_CBLAS, but failed to find or compile with cblas.h'
+            print()
+            print('Error: FORCE_CBLAS, but failed to find or compile with cblas.h')
             Exit(1)
             
     return result
@@ -974,19 +975,19 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_FBLAS']:
-            print 'WARNING: Forced use of FBLAS even though link test failed.'
-            print "         The compiled library will not have the correct linking commands"
-            print "         set up for your BLAS version."
-            print "         You should figure out what libraries you need to link with"
-            print "         and add them explicitly with the LIBS option in SCons."
+            print('WARNING: Forced use of FBLAS even though link test failed.')
+            print("         The compiled library will not have the correct linking commands")
+            print("         set up for your BLAS version.")
+            print("         You should figure out what libraries you need to link with")
+            print("         and add them explicitly with the LIBS option in SCons.")
             result = 1
 
     else:
         result = 0
         context.Result(result)
         if context.env['FORCE_FBLAS']:
-            print
-            print 'Error: FORCE_FBLAS, but failed compile test'
+            print()
+            print('Error: FORCE_FBLAS, but failed compile test')
             Exit(1)
             
     return result
@@ -1047,19 +1048,19 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_ATLAS_LAPACK']:
-            print 'WARNING: Forced use of ATLAS LAPACK even though link test failed.'
-            print "         The compiled library will not have the correct linking commands"
-            print "         set up for your ATLAS version."
-            print "         You should figure out what libraries you need to link with"
-            print "         and add them explicitly with the LIBS option in SCons."
+            print('WARNING: Forced use of ATLAS LAPACK even though link test failed.')
+            print("         The compiled library will not have the correct linking commands")
+            print("         set up for your ATLAS version.")
+            print("         You should figure out what libraries you need to link with")
+            print("         and add them explicitly with the LIBS option in SCons.")
             result = 1
 
     else:
         result = 0
         context.Result(result)
         if context.env['FORCE_ATLAS_LAPACK']:
-            print
-            print 'Error: FORCE_ATLAS_LAPACK, but failed to find or compile with clapack.h'
+            print()
+            print('Error: FORCE_ATLAS_LAPACK, but failed to find or compile with clapack.h')
             Exit(1)
             
     return result
@@ -1103,19 +1104,19 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_CLAPACK']:
-            print 'WARNING: Forced use of CLAPACK even though link test failed.'
-            print "         The compiled library will not have the correct linking commands"
-            print "         set up for your CLAPACK version."
-            print "         You should figure out what libraries you need to link with"
-            print "         and add them explicitly with the LIBS option in SCons."
+            print('WARNING: Forced use of CLAPACK even though link test failed.')
+            print("         The compiled library will not have the correct linking commands")
+            print("         set up for your CLAPACK version.")
+            print("         You should figure out what libraries you need to link with")
+            print("         and add them explicitly with the LIBS option in SCons.")
             result = 1
 
     else:
         result = 0
         context.Result(result)
         if context.env['FORCE_CLAPACK']:
-            print
-            print 'Error: FORCE_CLAPACK, but failed to find or compile with clapack.h and f2c.h'
+            print()
+            print('Error: FORCE_CLAPACK, but failed to find or compile with clapack.h and f2c.h')
             Exit(1)
             
     return result
@@ -1159,19 +1160,19 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_FLAPACK']:
-            print 'WARNING: Forced use of FLAPACK even though link test failed.'
-            print "         The compiled library will not have the correct linking commands"
-            print "         set up for your LAPACK version."
-            print "         You should figure out what libraries you need to link with"
-            print "         and add them explicitly with the LIBS option in SCons."
+            print('WARNING: Forced use of FLAPACK even though link test failed.')
+            print("         The compiled library will not have the correct linking commands")
+            print("         set up for your LAPACK version.")
+            print("         You should figure out what libraries you need to link with")
+            print("         and add them explicitly with the LIBS option in SCons.")
             result = 1
 
     else:
         result = 0
         context.Result(result)
         if context.env['FORCE_FLAPACK']:
-            print
-            print 'Error: FORCE_FLAPACK, but failed compile test'
+            print()
+            print('Error: FORCE_FLAPACK, but failed compile test')
             Exit(1)
             
     return result
@@ -1197,7 +1198,7 @@ def DoLibraryAndHeaderChecks(config):
     compiler = config.env['CXXTYPE']
     version = config.env['CXXVERSION_NUMERICAL']
 
-    if not (config.env.has_key('LIBS')) :
+    if not ('LIBS' in config.env) :
       config.env['LIBS'] = []
 
     if config.env['WITH_BLAS']:
@@ -1206,10 +1207,10 @@ def DoLibraryAndHeaderChecks(config):
         if config.env['FORCE_MKL']:
             config.CheckMKL()
             config.env.Append(CPPDEFINES=['MKL'])
-            print 'Using MKL BLAS'
+            print('Using MKL BLAS')
             if (config.env['WITH_LAPACK'] and config.CheckMKL_LAP()) :
                 foundlap = 1
-                print 'Using MKL LAPACK'
+                print('Using MKL LAPACK')
             if compiler == 'icpc' and version <= 9.0:
                 # TODO: A better way to do this would be to check
                 # for whether work queries work correctly.
@@ -1220,10 +1221,10 @@ def DoLibraryAndHeaderChecks(config):
         elif config.env['FORCE_ACML']:
             config.CheckACML()
             config.env.Append(CPPDEFINES=['ACML'])
-            print 'Using ACML BLAS'
+            print('Using ACML BLAS')
             if config.env['WITH_LAPACK']:
                 foundlap = 1
-                print 'Using ACML LAPACK'
+                print('Using ACML LAPACK')
  
         #elif config.env['FORCE_CLAMD']:
             #config.CheckCLAMD()
@@ -1233,42 +1234,42 @@ def DoLibraryAndHeaderChecks(config):
         elif config.env['FORCE_GOTO']:
             config.CheckGOTO()
             config.env.Append(CPPDEFINES=['FBLAS'])
-            print 'Using GotoBLAS'
+            print('Using GotoBLAS')
             if config.env['WITH_OPENMP']:
-                print 'Disabling OpenMP, since GotBLAS becomes very slow with it'
+                print('Disabling OpenMP, since GotBLAS becomes very slow with it')
                 config.env['WITH_OPENMP'] = False
 
         elif config.env['FORCE_ATLAS']:
             config.CheckATLAS()
             config.env.Append(CPPDEFINES=['ATLAS'])
             foundatlasblas = 1
-            print 'Using ATLAS BLAS'
+            print('Using ATLAS BLAS')
 
         elif config.env['FORCE_CBLAS']:
             config.CheckCBLAS()
             config.env.Append(CPPDEFINES=['CBLAS'])
-            print 'Using CBLAS'
+            print('Using CBLAS')
 
         elif config.env['FORCE_FBLAS']:
             config.CheckFBLAS()
             config.env.Append(CPPDEFINES=['FBLAS'])
-            print 'Using FBLAS'
+            print('Using FBLAS')
 
         # If no BLAS is forced, then look for MKL, ACML before more generic
         # (and probably less optimized) BLAS library.
         elif config.CheckMKL() :
             config.env.Append(CPPDEFINES=['MKL'])
-            print 'Using MKL BLAS'
+            print('Using MKL BLAS')
             if (config.env['WITH_LAPACK'] and config.CheckMKL_LAP()) :
                 foundlap = 1
-                print 'Using MKL LAPACK'
+                print('Using MKL LAPACK')
  
         elif config.CheckACML() :
             config.env.Append(CPPDEFINES=['ACML'])
-            print 'Using ACML BLAS'
+            print('Using ACML BLAS')
             if config.env['WITH_LAPACK']:
                 foundlap = 1
-                print 'Using ACML LAPACK'
+                print('Using ACML LAPACK')
 
         #elif config.CheckCLAMD() :
             #config.env.Append(CPPDEFINES=['CLAMD'])
@@ -1276,58 +1277,58 @@ def DoLibraryAndHeaderChecks(config):
 
         elif config.CheckGOTO() :
             config.env.Append(CPPDEFINES=['FBLAS'])
-            print 'Using GotoBLAS'
+            print('Using GotoBLAS')
             if config.env['WITH_OPENMP']:
-                print 'Disabling OpenMP, since GotBLAS becomes very slow with it'
+                print('Disabling OpenMP, since GotBLAS becomes very slow with it')
                 config.env['WITH_OPENMP'] = False
 
         elif config.CheckCBLAS() :
             config.env.Append(CPPDEFINES=['CBLAS'])
-            print 'Using CBLAS'
+            print('Using CBLAS')
 
         elif config.CheckATLAS() :
             foundatlasblas = 1
             config.env.Append(CPPDEFINES=['ATLAS'])
-            print 'Using ATLAS'
+            print('Using ATLAS')
 
         elif config.CheckFBLAS() :
             config.env.Append(CPPDEFINES=['FBLAS'])
-            print 'Using Fortran BLAS'
+            print('Using Fortran BLAS')
 
         else:
             foundblas = 0
-            print 'No BLAS libraries found'
+            print('No BLAS libraries found')
 
     if foundblas and not foundlap and config.env['WITH_LAPACK']:
         foundlap = 1   # Set back to 0 at end if not found.
         if config.env['FORCE_FLAPACK']:
             config.CheckFLAPACK()
             config.env.Append(CPPDEFINES=['FLAPACK'])
-            print 'Using FLAPACK'
+            print('Using FLAPACK')
 
         elif config.env['FORCE_CLAPACK']:
             config.CheckCLAPACK()
             config.env.Append(CPPDEFINES=['CLAPACK'])
-            print 'Using CLAPACK'
+            print('Using CLAPACK')
 
         elif foundatlasblas and config.env['FORCE_ATLAS_LAPACK']:
             config.CheckATLAS_LAP()
-            print 'Using ATLAS LAPACK'
+            print('Using ATLAS LAPACK')
 
         elif config.CheckFLAPACK() :
             config.env.Append(CPPDEFINES=['FLAPACK'])
-            print 'Using Fortran LAPACK'
+            print('Using Fortran LAPACK')
 
         elif config.CheckCLAPACK() :
             config.env.Append(CPPDEFINES=['CLAPACK'])
-            print 'Using CLAPACK'
+            print('Using CLAPACK')
 
         elif foundatlasblas and config.CheckATLAS_LAP():
-            print 'Using ATLAS LAPACK'
+            print('Using ATLAS LAPACK')
 
         else :
             foundlap = 0
-            print 'No LAPACK libraries found'
+            print('No LAPACK libraries found')
 
     config.env['LAP'] = 0
     if foundlap:
@@ -1343,7 +1344,7 @@ def GetNCPU():
     """
     # Linux, Unix and MacOS:
     if hasattr(os, 'sysconf'):
-        if os.sysconf_names.has_key('SC_NPROCESSORS_ONLN'):
+        if 'SC_NPROCESSORS_ONLN' in os.sysconf_names:
             # Linux & Unix:
             ncpus = os.sysconf('SC_NPROCESSORS_ONLN')
             if isinstance(ncpus, int) and ncpus > 0:
@@ -1351,7 +1352,7 @@ def GetNCPU():
         else: # OSX:
             return int(os.popen2('sysctl -n hw.ncpu')[1].read())
     # Windows:
-    if os.environ.has_key('NUMBER_OF_PROCESSORS'):
+    if 'NUMBER_OF_PROCESSORS' in os.environ:
         ncpus = int(os.environ['NUMBER_OF_PROCESSORS'])
         if ncpus > 0:
             return ncpus
@@ -1378,30 +1379,30 @@ def DoConfig(env):
             # Do this, because if using scons -jN, it doesn't get updated.
             if (env.GetOption('num_jobs') == int(env['N_BUILD_THREADS']) and
                     env.GetOption('num_jobs') != 1):
-                print 'Using specified number of jobs =',env.GetOption('num_jobs')
+                print('Using specified number of jobs =',env.GetOption('num_jobs'))
         elif int(env['N_BUILD_THREADS']) == 0:
             ncpu = GetNCPU()
             if ncpu > 4:
                 # Don't use more than 4 cpus for the automatic version.
                 env.SetOption('num_jobs', 4)
                 if env.GetOption('num_jobs') == 4:
-                    print 'Determined that there are',ncpu,
-                    print 'cpus, but only using 4 jobs to avoid overly high memory use.'
+                    print('Determined that there are',ncpu, end=' ')
+                    print('cpus, but only using 4 jobs to avoid overly high memory use.')
             elif ncpu > 1:
                 env.SetOption('num_jobs', ncpu)
                 # Importantly, the above line doesn't do anything if the user has run with
                 # scons -j1.  It only works if num_jobs was 1 by default, with no explicit -j1.
                 if env.GetOption('num_jobs') == ncpu:
-                    print 'Determined that there are',ncpu,'cpus, so use this many jobs.'
+                    print('Determined that there are',ncpu,'cpus, so use this many jobs.')
             if env.GetOption('num_jobs') > 1:
-                print 'You can override this behavior with scons -jN'
+                print('You can override this behavior with scons -jN')
 
     # The basic flags for this compiler if not explicitly specified
     BasicCCFlags(env)
 
     # Some extra flags depending on the options:
     if not env['DEBUG']:
-        print 'Debugging turned off'
+        print('Debugging turned off')
         env.Append(CPPDEFINES=['TMV_NDEBUG'])
     if env['MEM_DEBUG']:
         env.Append(CPPDEFINES=['TMV_MEM_DEBUG'])
@@ -1463,22 +1464,22 @@ if env['IMPORT_ENV']:
 # Check for unknown variables in case something is misspelled
 unknown = opts.UnknownVariables()
 if unknown and not env['USE_UNKNOWN_VARS']:
-    print
-    print "Error: Unknown variables:", unknown.keys()
-    print 'If you are sure these are right (e.g. you want to set some SCons parameters'
-    print 'that are not in the list of TMV parameters given by scons -h)'
-    print 'then you can override this check with USE_UNKNOWN_VARS=true'
+    print()
+    print("Error: Unknown variables:", unknown.keys())
+    print('If you are sure these are right (e.g. you want to set some SCons parameters')
+    print('that are not in the list of TMV parameters given by scons -h)')
+    print('then you can override this check with USE_UNKNOWN_VARS=true')
     Exit(1)
 
 if any(opt.default != env[opt.key] for opt in opts.options):
-    print 'Using the following (non-default) scons options:'
+    print('Using the following (non-default) scons options:')
     for opt in opts.options:
         if (opt.default != env[opt.key]):
-            print '   %s = %s'%(opt.key,env[opt.key])
-    print 'These can be edited directly in the file %s.'%config_file
-    print 'Type scons -h for a full list of available options.'
+            print('   %s = %s'%(opt.key,env[opt.key]))
+    print('These can be edited directly in the file %s.'%config_file)
+    print('Type scons -h for a full list of available options.')
 else:
-    print 'Using the default scons options'
+    print('Using the default scons options')
 
 opts.Save(config_file,env)
 Help(opts.GenerateHelpText(env))
@@ -1486,13 +1487,13 @@ Help(opts.GenerateHelpText(env))
 if not GetOption('help'):
 
     if Dir(env['PREFIX']).abspath == Dir('#').abspath:
-        print
-        print 'Error: PREFIX=%r is invalid.'%env['PREFIX']
+        print()
+        print('Error: PREFIX=%r is invalid.'%env['PREFIX'])
         if (env['PREFIX'] != Dir(env['PREFIX']).abspath and
             env['PREFIX'] != Dir(env['PREFIX']).abspath + '/'):
-            print '(expands to %r)'%Dir(env['PREFIX']).abspath
-        print 'You should install into some other location, not the root TMV directory.'
-        print "Typical choices are '/usr/local' or '~'"
+            print('(expands to %r)'%Dir(env['PREFIX']).abspath)
+        print('You should install into some other location, not the root TMV directory.')
+        print("Typical choices are '/usr/local' or '~'")
         Exit(1)
 
     # Set up the configuration
