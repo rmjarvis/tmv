@@ -27,6 +27,8 @@ if env['SHARED']:
     # See: http://scons.tigris.org/issues/show_bug.cgi?id=1644
     # Fixed in version 2.1.
     major , minor, junk = SCons.__version__.split('.',2)
+    major = int(major)
+    minor = int(minor)
     if major < 2 or (major == 2 and minor == 0):
         env1.Append( LINKFLAGS = ["$__RPATH"] )
 
