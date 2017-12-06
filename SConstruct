@@ -212,9 +212,6 @@ def BasicCCFlags(env):
             if env['WITH_SSE']:
                 env.Append(CCFLAGS=['-msse2'])
             env['TEST_FLAGS'] = ['-O0']
-            if version >= 10:
-                env.Append(CCFLAGS=['-vec-report0'])
-                env['TEST_FLAGS'] += ['-vec-report0']
             if env['PROFILE']:
                 env.Append(CCFLAGS=['-pg'])
                 env['TEST_FLAGS'] += ['-pg']
@@ -279,7 +276,7 @@ def AddOpenMPFlag(env):
 
     g++ uses -fopemnp
     clang++ uses -fopenmp starting with version 3.7
-    icpc uses -openmp
+    icpc uses -qopenmp for >= 17.0, -openmp before that
     pgCC uses -mp
     CC uses -xopenmp
     
@@ -308,8 +305,12 @@ def AddOpenMPFlag(env):
             print('No OpenMP support for icpc versions before ',openmp_minicpc_vers)
             env['WITH_OPENMP'] = False
             return
-        flag = ['-openmp']
-        ldflag = ['-openmp']
+        if version >= 17:
+            flag = ['-qopenmp']
+            ldflag = ['-qopenmp']
+        else:
+            flag = ['-openmp']
+            ldflag = ['-openmp']
         xlib = ['pthread']
     elif compiler == 'pgCC':
         if version < openmp_minpgcc_vers:
