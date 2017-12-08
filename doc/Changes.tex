@@ -3,14 +3,9 @@
 \section{Changes from version \prevtmvversion\ to \tmvversion}
 \label{Changes}
 
-This release just updates the code to be compatible with the new updates to
-the C++ standard, known as c++11, c++14, and the upcoming c++17 (technically
-maybe still c++1z, but gcc calls it c++17).  The code is now tested to compile
-and run properly using any of these standards, as well as continuing to work
-with both c++03 and c++98, using g++ 6.2.0.  (Other compilers such as clang++
-and icpc also continue to work.)
 
-Thanks to Dominique Orban (@dpo) for posting Issue \#22 alerting me to the
-compilation errors using g++-6 prompting this update.
+This release makes the build compatible with SCons 3.0. (Issue \#25) 
+It also fixes a minor bug in the signature of some \texttt{operator=} functions for
+\texttt{SmallVector} and \texttt{Vector}.  (Issue \#23)
 
 For the full history of changes prior to version \tmvversion\ see \S\ref{History}.

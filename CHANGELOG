@@ -1,13 +1,7 @@
-Changes from version 0.73 to 0.74:
+Changes from version 0.74 to 0.75:
 (See the History section in the full documentation for changes from previous
-versions to 0.73.)
+versions to 0.74.)
 
-This release just updates the code to be compatible with the new updates to
-the C++ standard, known as c++11, c++14, and the upcoming c++17 (technically
-maybe still c++1z, but gcc calls it c++17).  The code is now tested to compile
-and run properly using any of these standards, as well as continuing to work
-with both c++03 and c++98, using g++ 6.2.0.  (Other compilers such as clang++
-and icpc also continue to work.)
-
-Thanks to Dominique Orban (@dpo) for posting Issue #22 alerting me to the
-compilation errors using g++-6 prompting this update.
+This release makes the build compatible with SCons 3.0. (#25)
+It also fixes a minor bug in the signature of some operator= functions for
+SmallVector and Vector.  (#23)

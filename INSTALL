@@ -5,14 +5,14 @@ then it is probably true that the pdf is correct, rather than this file.
 
 1. Obtain the tarball from:
 
-https://github.com/rmjarvis/tmv/releases/tag/v0.74
+https://github.com/rmjarvis/tmv/releases/tag/v0.75
 
 2. Unpack the tarball with:
 
-gunzip tmv-0.74.tar.gz
-tar xf tmv-0.74.tar
+gunzip tmv-0.75.tar.gz
+tar xf tmv-0.75.tar
 
-This will make a directory called tmv0.74 with subdirectories:
+This will make a directory called tmv0.75 with subdirectories:
   doc
   examples
   include
