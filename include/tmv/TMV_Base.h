@@ -797,8 +797,16 @@ namespace tmv {
     {
         std::complex<double> temp =
             TMV_LOG(std::complex<double>(std::real(x),std::imag(x)));
-        return std::complex<int>(int(real(temp)),int(imag(temp)));
+        return std::complex<int>(int(std::real(temp)),int(std::imag(temp)));
     }
+
+    template <typename T1, typename T2>
+    inline void TMV_COPY(T1& x1, const T2& x2)
+    { x1 = x2; }
+
+    template <typename T1, typename T2>
+    inline void TMV_COPY(std::complex<T1>& x1, const std::complex<T2>& x2)
+    { x1 = std::complex<T1>(std::real(x2), std::imag(x2)); }
 
     inline bool TMV_Underflow(int )
     { return false; }

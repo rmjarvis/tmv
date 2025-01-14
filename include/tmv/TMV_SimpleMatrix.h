@@ -105,7 +105,7 @@ namespace tmv {
             itsm(linsize), itscs(m2.colsize()), itsrs(m2.rowsize())
         {
             for(ptrdiff_t i=0;i<itscs;++i) for(ptrdiff_t j=0;j<itsrs;++j)
-                ref(i,j) = m2.cref(i,j);
+                TMV_COPY(ref(i,j), m2.cref(i,j));
         }
 
         inline ~SimpleMatrix()

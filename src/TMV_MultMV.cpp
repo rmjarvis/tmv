@@ -105,7 +105,7 @@ namespace tmv {
 
             const Ta* Aij = Ai0;
             const Tx* xj = x0;
-            register T temp(0);
+            T temp(0);
             for(ptrdiff_t j=N; j>0; --j,++xj,(rm?++Aij:Aij+=sj))
                 temp += 
                     (cx ? TMV_CONJ(*xj) : *xj) *
