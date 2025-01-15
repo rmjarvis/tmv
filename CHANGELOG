@@ -1,7 +1,7 @@
-Changes from version 0.74 to 0.75:
+Changes from version 0.75 to 0.76:
 (See the History section in the full documentation for changes from previous
-versions to 0.74.)
+versions to 0.75.)
 
-This release makes the build compatible with SCons 3.0. (#25)
-It also fixes a minor bug in the signature of some operator= functions for
-SmallVector and Vector.  (#23)
+This release fixes some compiling issues with g++-14.  Specifically that it doesn't
+allow complex<int> to be copied to complex<long double> without explicit conversion.
+There is no change to any functionality.

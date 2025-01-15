@@ -132,9 +132,9 @@
 
 namespace tmv {
 
-    inline std::string TMV_Version() { return "0.75"; }
+    inline std::string TMV_Version() { return "0.76"; }
 #define TMV_MAJOR_VERSION 0
-#define TMV_MINOR_VERSION 75
+#define TMV_MINOR_VERSION 76
 #define TMV_VERSION_AT_LEAST(major,minor) \
     ( (TMV_MAJOR_VERSION > major) || \
       (TMV_MAJOR_VERSION == major && TMV_MINOR_VERSION >= minor) )

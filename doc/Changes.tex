@@ -3,9 +3,8 @@
 \section{Changes from version \prevtmvversion\ to \tmvversion}
 \label{Changes}
 
-
-This release makes the build compatible with SCons 3.0. (Issue \#25) 
-It also fixes a minor bug in the signature of some \texttt{operator=} functions for
-\texttt{SmallVector} and \texttt{Vector}.  (Issue \#23)
+This release fixes some compiling issues with g++-14.  Specifically that it doesn't
+allow \texttt{complex<int>} to be copied to \texttt{complex<long double>} without
+explicit conversion.  There is no change to any functionality.
 
 For the full history of changes prior to version \tmvversion\ see \S\ref{History}.
