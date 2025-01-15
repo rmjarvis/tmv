@@ -877,19 +877,19 @@ namespace tmv {
     struct DoCopym<M,N,S,S,T1,T2>
     {
         inline DoCopym(const T1* m1, T2* m2)
-        { for(ptrdiff_t i=0;i<M*N;++i) m2[i] = m1[i]; }
+        { for(ptrdiff_t i=0;i<M*N;++i) TMV_COPY(m2[i], m1[i]); }
     };
     template <ptrdiff_t M, ptrdiff_t N, typename T1, typename T2>
     struct DoCopym<M,N,ColMajor,RowMajor,T1,T2>
     {
         inline DoCopym(const T1* m1, T2* m2)
-        { for(ptrdiff_t i=0;i<M;++i) for(ptrdiff_t j=0;j<N;++j) m2[i*N+j] = m1[j*M+i]; }
+        { for(ptrdiff_t i=0;i<M;++i) for(ptrdiff_t j=0;j<N;++j) TMV_COPY(m2[i*N+j], m1[j*M+i]); }
     };
     template <ptrdiff_t M, ptrdiff_t N, typename T1, typename T2>
     struct DoCopym<M,N,RowMajor,ColMajor,T1,T2>
     {
         inline DoCopym(const T1* m1, T2* m2)
-        { for(ptrdiff_t i=0;i<M;++i) for(ptrdiff_t j=0;j<N;++j) m2[j*M+i] = m1[i*N+j]; }
+        { for(ptrdiff_t i=0;i<M;++i) for(ptrdiff_t j=0;j<N;++j) TMV_COPY(m2[j*M+i], m1[i*N+j]); }
     };
 
     template <ptrdiff_t M, ptrdiff_t N, StorageType S, typename T>

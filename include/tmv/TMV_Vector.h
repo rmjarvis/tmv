@@ -2019,7 +2019,7 @@ namespace tmv {
                 TMVAssert(v2ptr >= v2._first);
                 TMVAssert(v2ptr < v2._last);
 #endif
-                *v2ptr = *v1ptr;
+                TMV_COPY(*v2ptr, *v1ptr);
             }
         } else {
             for(ptrdiff_t i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) {
@@ -2027,7 +2027,7 @@ namespace tmv {
                 TMVAssert(v2ptr >= v2._first);
                 TMVAssert(v2ptr < v2._last);
 #endif
-                *v2ptr = *v1ptr;
+                TMV_COPY(*v2ptr, *v1ptr);
             }
         }
     }
