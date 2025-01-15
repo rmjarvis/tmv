@@ -188,7 +188,7 @@ def BasicCCFlags(env):
     if env['FLAGS'] == '':
         if compiler == 'g++':
             env.Replace(CCFLAGS=['-O2'])
-            env.Append(CCFLAGS=['-fno-strict-aliasing'])
+            env.Append(CCFLAGS=['-fno-strict-aliasing','-fno-stack-protector'])
             env['TEST_FLAGS'] = ['-O0']
             if env['PROFILE']:
                 env.Append(CCFLAGS=['-pg'])
